@@ -60,7 +60,7 @@ export default function Admin2FASetupPage() {
         setIsSubmitting(false);
         return;
       }
-      if (data?.totpURI) {
+      if (data?.method === "totp" && data.totpURI) {
         setTotpUri(data.totpURI);
         setBackupCodes(data.backupCodes ?? []);
         setStep("scan");
