@@ -32,6 +32,7 @@ import { PartnerCreditsPanel } from "@/components/participant/PartnerCreditsPane
 import { Button, NoiseOverlay, SpotlightCard } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/lib/LanguageContext";
+import { pickLocale } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const DASHBOARD_COPY = {
@@ -387,7 +388,7 @@ function formatRole(user: SessionUser | null, team: TeamData | null, copy: Dashb
 
 export default function DashboardPage() {
   const { language } = useLanguage();
-  const copy = DASHBOARD_COPY[language];
+  const copy = pickLocale(DASHBOARD_COPY, language);
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const [team, setTeam] = useState<TeamData | null>(null);

@@ -5,112 +5,83 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import { Language, translations, TranslationKey } from './i18n';
+import {
+  DEFAULT_LANGUAGE,
+  isLanguage,
+  t as translate,
+  type Language,
+  type TranslationKey,
+} from './i18n';
 
-export const LANGUAGE_STORAGE_KEY = 'cursor48h-language';
+export const LANGUAGE_STORAGE_KEY = 'grok-hackathon-language';
+const CHANGE_EVENT = 'grok-hackathon-language-change';
 
-function detectBrowserLanguage(): Language {
-  if (typeof navigator === 'undefined') return 'en';
-  const nav = navigator.language.toLowerCase();
-  if (nav.startsWith('de')) return 'de';
-  if (nav.startsWith('es')) return 'es';
-  if (nav.startsWith('en')) return 'en';
-  return 'en';
+/**
+ * Italian by default. `?lang=en|it` in the URL wins, then the visitor's
+ * explicit choice from the switcher (localStorage).
+ */
+function readLanguage(): Language {
+  try {
+    const fromQuery = new URLSearchParams(window.location.search).get('lang');
+    if (isLanguage(fromQuery)) return fromQuery;
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (isLanguage(stored)) return stored;
+  } catch {
+    /* private mode: keep default */
+  }
+  return DEFAULT_LANGUAGE;
 }
 
-function documentLangFor(language: Language): string {
-  switch (language) {
-    case 'de':
-      return 'de';
-    case 'es':
-      return 'es';
-    case 'en':
-      return 'en';
-    default: {
-      const _exhaustive: never = language;
-      return _exhaustive;
-    }
-  }
+function subscribe(onChange: () => void) {
+  window.addEventListener(CHANGE_EVENT, onChange);
+  window.addEventListener('storage', onChange);
+  window.addEventListener('popstate', onChange);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, onChange);
+    window.removeEventListener('storage', onChange);
+    window.removeEventListener('popstate', onChange);
+  };
 }
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (section: TranslationKey, key: string) => string;
-  tArray: (section: TranslationKey, key: string) => string[];
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en');
+  const language = useSyncExternalStore(subscribe, readLanguage, () => DEFAULT_LANGUAGE);
 
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-      if (raw === 'en' || raw === 'de' || raw === 'es') {
-        setLanguageState(raw);
-        return;
-      }
-      // Legacy keys from older builds → default to English
-      if (raw === 'ru' || raw === 'uz') {
-        setLanguageState('en');
-        window.localStorage.setItem(LANGUAGE_STORAGE_KEY, 'en');
-        return;
-      }
-      const detected = detectBrowserLanguage();
-      setLanguageState(detected);
-      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, detected);
-    } catch {
-      setLanguageState(detectBrowserLanguage());
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    document.documentElement.lang = documentLangFor(language);
+    document.documentElement.lang = language;
   }, [language]);
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
     try {
       window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('lang')) {
+        url.searchParams.set('lang', lang);
+        window.history.replaceState(window.history.state, '', url);
+      }
     } catch {
       /* ignore quota / private mode */
     }
+    window.dispatchEvent(new Event(CHANGE_EVENT));
   }, []);
 
-  const t = (section: TranslationKey, key: string): string => {
-    const sectionData = translations[section] as Record<
-      string,
-      | { en: string; de: string; es: string }
-      | { en: string[]; de: string[]; es: string[] }
-    >;
-    const item = sectionData[key];
-
-    if (!item) return key;
-
-    if (Array.isArray((item as { en: string[]; de: string[]; es: string[] }).en)) {
-      return (item as { en: string[]; de: string[]; es: string[] })[language].join(', ');
-    }
-
-    return (item as { en: string; de: string; es: string })[language];
-  };
-
-  const tArray = (section: TranslationKey, key: string): string[] => {
-    const sectionData = translations[section] as Record<string, unknown>;
-    const item = sectionData[key] as { en: string[]; de: string[]; es: string[] } | undefined;
-
-    if (!item) return [];
-
-    return item[language] || [];
-  };
+  const t = useCallback(
+    (section: TranslationKey, key: string) => translate(section, key, language),
+    [language],
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, tArray }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

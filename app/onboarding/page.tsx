@@ -29,7 +29,7 @@ const STEPS: Record<OnboardingLanguage, StepContent[]> = {
   en: [
     {
       icon: Compass,
-      title: "Welcome to Cursor 48H",
+      title: "Welcome to Grok Hackathon",
       text: "This is a hackathon for AI product development. Complete this short onboarding to learn how the participation process works.",
     },
     {
@@ -51,7 +51,7 @@ const STEPS: Record<OnboardingLanguage, StepContent[]> = {
   de: [
     {
       icon: Compass,
-      title: "Willkommen bei Cursor 48H",
+      title: "Willkommen beim Grok Hackathon",
       text: "Dies ist ein Hackathon zur Entwicklung von KI-Produkten. Schließen Sie dieses kurze Onboarding ab, um den Ablauf kennenzulernen.",
     },
     {
@@ -73,7 +73,7 @@ const STEPS: Record<OnboardingLanguage, StepContent[]> = {
   es: [
     {
       icon: Compass,
-      title: "Bienvenido a Cursor 48H",
+      title: "Bienvenido al Grok Hackathon",
       text: "Este es un hackathon de desarrollo de productos de IA. Completa este onboarding breve para conocer el proceso.",
     },
     {

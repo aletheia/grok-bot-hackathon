@@ -1,3 +1,5 @@
+import { EVENT, EVENT_DESCRIPTION } from "@/lib/event";
+
 /**
  * Canonical site URL for metadata, sitemap, and JSON-LD.
  * Set NEXT_PUBLIC_SITE_URL in production (e.g. https://your-domain.example).
@@ -13,15 +15,15 @@ export function getSiteUrl(): string {
   return "http://localhost:3000";
 }
 
+/** Site-level branding, derived from the event config (lib/event.ts). */
 export const siteConfig = {
-  name: "CURSOR 48H",
-  shortName: "CURSOR 48H",
-  tagline: "AI Hackathon | Tashkent",
-  /** Primary description for metadata (English). */
-  description:
-    "48-hour AI hackathon in Tashkent. Intensive marathon of AI product development with mentorship and expert support.",
-  descriptionEn:
-    "48-hour AI hackathon in Tashkent. Intensive marathon of AI product development with mentorship and expert support.",
-  locale: "en_US",
+  name: EVENT.name,
+  shortName: EVENT.shortName,
+  tagline: `${EVENT.venue.name}, ${EVENT.venue.address.locality}`,
+  /** Primary description for metadata (Italian, default locale). */
+  description: EVENT_DESCRIPTION.it,
+  descriptionEn: EVENT_DESCRIPTION.en,
+  locale: "it_IT",
+  alternateLocales: ["en_US"],
   twitterHandle: undefined as string | undefined,
 } as const;

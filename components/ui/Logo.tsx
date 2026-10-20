@@ -1,92 +1,35 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { siteConfig } from '@/lib/site';
 
 interface LogoProps {
   size?: number;
+  /** Kept for API compatibility with older call sites; the mark is static. */
   animated?: boolean;
   className?: string;
 }
 
-export function Logo({ size = 40, animated = true, className = '' }: LogoProps) {
-  const logoVariants = {
-    initial: { rotate: 0 },
-    hover: { 
-      rotate: [0, -5, 5, 0],
-      transition: { duration: 0.5 }
-    },
-  };
-
-  const glowVariants = {
-    initial: { opacity: 0, scale: 0.8 },
-    hover: { 
-      opacity: 0.6, 
-      scale: 1.2,
-      transition: { duration: 0.3 }
-    },
-  };
-
-  if (!animated) {
-    return (
-      <div className={`relative ${className}`} style={{ width: size, height: size }}>
-        <Image
-          src="/logo-dark.png"
-          alt="Cursor 48H Logo"
-          width={size}
-          height={size}
-          className="rounded-lg"
-        />
-      </div>
-    );
-  }
-
+/** Event mark: a white blob with two eyes, after the flyer. */
+export function Logo({ size = 40, className = '' }: LogoProps) {
   return (
-    <motion.div
-      className={`relative ${className}`}
-      style={{ width: size, height: size }}
-      initial="initial"
-      whileHover="hover"
+    <svg
+      viewBox="0 0 100 100"
+      width={size}
+      height={size}
+      className={className}
+      role="img"
+      aria-label={`${siteConfig.shortName} logo`}
     >
-      {/* Glow effect */}
-      <motion.div
-        className="absolute inset-0 bg-[var(--accent-purple)] rounded-lg blur-xl"
-        variants={glowVariants}
-      />
-      
-      {/* Logo */}
-      <motion.div
-        variants={logoVariants}
-        className="relative"
-      >
-        <Image
-          src="/logo-dark.png"
-          alt="Cursor 48H Logo"
-          width={size}
-          height={size}
-          className="rounded-lg relative z-10"
-        />
-      </motion.div>
-    </motion.div>
+      <circle cx="50" cy="50" r="46" fill="#ffffff" />
+      <ellipse cx="40" cy="44" rx="6" ry="11" fill="#0a0a0a" transform="rotate(-12 40 44)" />
+      <ellipse cx="62" cy="40" rx="6" ry="11" fill="#0a0a0a" transform="rotate(-12 62 40)" />
+    </svg>
   );
 }
 
 export function LogoWithText({ size = 40 }: { size?: number }) {
   return (
-    <motion.div 
-      className="flex items-center gap-3"
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
-    >
+    <span className="flex items-center gap-3">
       <Logo size={size} />
-      <motion.span 
-        className="font-bold text-lg text-white"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        CURSOR 48H
-      </motion.span>
-    </motion.div>
+      <span className="font-bold text-lg text-white">{siteConfig.shortName}</span>
+    </span>
   );
 }

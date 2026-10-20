@@ -29,6 +29,7 @@ import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { Button, Card, NoiseOverlay, SpotlightCard } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { useLanguage } from "@/lib/LanguageContext";
+import { pickLocale } from "@/lib/i18n";
 
 const DASHBOARD_COPY = {
   en: {
@@ -443,7 +444,7 @@ function formatRole(user: SessionUser | null, team: TeamData | null, copy: Dashb
 
 export default function ProfilePage() {
   const { language } = useLanguage();
-  const copy = DASHBOARD_COPY[language];
+  const copy = pickLocale(DASHBOARD_COPY, language);
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const [team, setTeam] = useState<TeamData | null>(null);

@@ -1,30 +1,34 @@
 "use client";
 
 import { useLanguage } from "@/lib/LanguageContext";
+import { LANGUAGES, type Language } from "@/lib/i18n";
 
-const LANGS = ["en", "de", "es"] as const;
+const LABELS: Record<Language, string> = { it: "Italiano", en: "English" };
 
 type LanguageSwitcherProps = {
   className?: string;
 };
 
 export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <div
       className={`flex items-center rounded-full border border-[var(--border-color)] bg-[var(--bg-secondary)] p-1 ${className}`}
       role="group"
-      aria-label="Language"
+      aria-label={t("nav", "language")}
     >
-      {LANGS.map((lang) => (
+      {LANGUAGES.map((lang) => (
         <button
           key={lang}
           type="button"
+          lang={lang}
+          aria-pressed={language === lang}
+          aria-label={LABELS[lang]}
           onClick={() => setLanguage(lang)}
-          className={`rounded-full px-2 py-1 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
+          className={`min-h-[44px] min-w-[44px] rounded-full px-3 text-sm font-semibold transition-colors ${
             language === lang
-              ? "bg-[var(--accent-purple)] text-white"
+              ? "bg-white text-black"
               : "text-[var(--text-secondary)] hover:text-white"
           }`}
         >

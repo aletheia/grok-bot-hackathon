@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button, SpotlightCard } from "@/components/ui";
 import { useLanguage } from "@/lib/LanguageContext";
+import { pickLocale } from "@/lib/i18n";
 
 const PROJECT_COPY = {
   en: {
@@ -155,7 +156,7 @@ function projectToForm(p: ProjectData): FormFields {
 
 export function ProjectSection({ isTeamLead, teamApproved }: Props) {
   const { language } = useLanguage();
-  const copy = PROJECT_COPY[language];
+  const copy = pickLocale(PROJECT_COPY, language);
   const [project, setProject] = useState<ProjectData | null>(null);
   const [deadline, setDeadline] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

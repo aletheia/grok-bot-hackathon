@@ -7,6 +7,7 @@ import { Check, Video, Send, AlertCircle, Loader2, Users, ExternalLink, Link as 
 import { authClient } from "@/lib/auth-client";
 import { NoiseOverlay } from "@/components/ui";
 import { useLanguage } from "@/lib/LanguageContext";
+import { pickLocale } from "@/lib/i18n";
 
 type Question = {
   id: number;
@@ -155,7 +156,7 @@ const SCREENING_COPY = {
 export default function ScreeningPage() {
   const router = useRouter();
   const { language } = useLanguage();
-  const copy = SCREENING_COPY[language];
+  const copy = pickLocale(SCREENING_COPY, language);
   const { data: session, isPending } = authClient.useSession();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});

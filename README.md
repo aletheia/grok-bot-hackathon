@@ -1,4 +1,10 @@
-# CURSOR 48H
+# Grok Hackathon at the Museum
+
+Landing site and participant platform for **Grok Hackathon at the Museum**. Registration for the event happens on [Luma](https://luma.com/spacexai-z1ys).
+
+**Event facts live in one place: [`lib/event.ts`](lib/event.ts).** Landing sections, metadata, Open Graph image, JSON-LD (`lib/event-jsonld.ts`), sitemap and footer all read from it. UI copy is in `lib/i18n.ts` (Italian default, English second).
+
+The platform underneath (forked from CURSOR 48H):
 
 Open-source platform for running **48-hour AI hackathons**: landing site, registration, teams, screening, scoring, admin tools, and partner credits — built with **Next.js** and **PostgreSQL**.
 
