@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { EVENT, formatAddress, formatDateRange, formatDayLabel, getMapsUrl } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
-import { LANGUAGES, DEFAULT_LANGUAGE, pickLocale, t, translations } from "@/lib/i18n";
+import { t, translations } from "@/lib/i18n";
 
 describe("event config", () => {
   it("uses Europe/Rome winter offsets (+01:00) for November", () => {
     expect(EVENT.timezone).toBe("Europe/Rome");
-    expect(EVENT.startDate).toMatch(/^2026-11-04T09:00:00\+01:00$/);
-    expect(EVENT.endDate).toMatch(/^2026-11-05T22:30:00\+01:00$/);
+    expect(EVENT.startDate).toBe("2026-11-04T09:00:00+01:00");
+    expect(EVENT.endDate).toBe("2026-11-05T22:30:00+01:00");
     expect(new Date(EVENT.startDate).getTime()).toBeLessThan(new Date(EVENT.endDate).getTime());
   });
 
@@ -15,12 +15,21 @@ describe("event config", () => {
     expect(EVENT.schedule.map((d) => d.date)).toEqual(["2026-11-04", "2026-11-05"]);
   });
 
-  it("formats dates and address", () => {
-    expect(formatDateRange("it")).toBe("4–5 novembre 2026");
-    expect(formatDateRange("en")).toBe("4–5 November 2026");
-    expect(formatDayLabel("2026-11-04", "it")).toBe("mercoledì 4 novembre");
-    expect(formatAddress("en")).toBe("Via Riviera, 39, 27100 Pavia PV, Italy");
+  it("formats dates and address in English", () => {
+    expect(formatDateRange()).toBe("4–5 November 2026");
+    expect(formatDayLabel("2026-11-04")).toBe("Wednesday 4 November");
+    expect(formatAddress()).toBe("Via Riviera, 39, 27100 Pavia PV, Italy");
     expect(getMapsUrl()).toContain("Via%20Riviera");
+  });
+
+  it("keeps placeholders explicit (null) instead of invented assets", () => {
+    expect(Object.values(EVENT.assets.logos).every((v) => v === null || typeof v === "string")).toBe(true);
+    expect(EVENT.hosts.every((h) => h.photo === null || typeof h.photo === "string")).toBe(true);
+  });
+
+  it("portal settings: 4–6 per team, lock on 31 Oct 23:59 Rome", () => {
+    expect(EVENT.portal.team).toEqual({ minMembers: 4, maxMembers: 6 });
+    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-10-31T22:59:00.000Z");
   });
 });
 
@@ -35,27 +44,18 @@ describe("event JSON-LD", () => {
     expect(ld.location.address.addressLocality).toBe("Pavia");
     expect(ld.offers.url).toBe(EVENT.registration.url);
     expect(ld.offers.url).toMatch(/^https:\/\/luma\.com\//);
+    expect(ld.inLanguage).toBe("en");
   });
 });
 
-describe("i18n", () => {
-  it("defaults to Italian with English second", () => {
-    expect(DEFAULT_LANGUAGE).toBe("it");
-    expect([...LANGUAGES]).toEqual(["it", "en"]);
-  });
-
-  it("every entry has it and en", () => {
+describe("copy (English only)", () => {
+  it("every entry is a non-empty string", () => {
     for (const section of Object.values(translations)) {
       for (const entry of Object.values(section)) {
-        expect(entry.it.length).toBeGreaterThan(0);
-        expect(entry.en.length).toBeGreaterThan(0);
+        expect(typeof entry).toBe("string");
+        expect((entry as string).length).toBeGreaterThan(0);
       }
     }
-    expect(t("nav", "schedule", "it")).toBe("Programma");
-  });
-
-  it("pickLocale falls back to English", () => {
-    const copy = { en: { a: "x" }, de: { a: "y" } } as const;
-    expect(pickLocale(copy, "it")).toEqual({ a: "x" });
+    expect(t("nav", "schedule")).toBe("Schedule");
   });
 });

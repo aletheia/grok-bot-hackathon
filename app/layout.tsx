@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
-import { LanguageProvider } from "@/lib/LanguageContext";
 import { ScrollRestoration } from "@/components/ScrollRestoration";
 import { SiteStructuredData } from "@/components/seo/SiteStructuredData";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 import { EVENT } from "@/lib/event";
-import { DEFAULT_LANGUAGE } from "@/lib/i18n";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,7 +51,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: siteConfig.locale,
-    alternateLocale: [...siteConfig.alternateLocales],
     url: siteUrl,
     siteName: siteConfig.name,
     title: `${siteConfig.name} — ${siteConfig.tagline}`,
@@ -93,15 +90,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={DEFAULT_LANGUAGE} className="scroll-smooth">
+    <html lang="en" className="scroll-smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${display.variable} antialiased`}
       >
         <SiteStructuredData />
-        <LanguageProvider>
-          <ScrollRestoration />
-          {children}
-        </LanguageProvider>
+        <ScrollRestoration />
+        {children}
       </body>
     </html>
   );

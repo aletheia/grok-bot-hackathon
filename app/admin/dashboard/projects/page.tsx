@@ -1,5 +1,6 @@
 "use client";
 
+import { formatRome, romeLocalToUtc, utcToRomeLocal } from "@/lib/time/rome";
 import { useCallback, useEffect, useState } from "react";
 import {
   Calendar,
@@ -99,26 +100,19 @@ export default function AdminProjectsPage() {
     return () => clearTimeout(t);
   }, [deadlineNotice]);
 
-  // Converts an ISO string to a datetime-local value displayed in Tashkent time (UTC+5).
+  // datetime-local values are Europe/Rome wall-clock time (DST-correct), see lib/time/rome.ts.
   function toDatetimeLocal(iso: string) {
-    const d = new Date(iso);
-    const tashkent = new Date(d.getTime() + 5 * 60 * 60 * 1000);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${tashkent.getUTCFullYear()}-${pad(tashkent.getUTCMonth() + 1)}-${pad(tashkent.getUTCDate())}T${pad(tashkent.getUTCHours())}:${pad(tashkent.getUTCMinutes())}`;
+    return utcToRomeLocal(iso);
   }
 
-  // Interprets a datetime-local string as Tashkent time (UTC+5) and converts to ISO UTC.
-  function fromTashkentToISO(datetimeLocal: string): string {
-    const [datePart, timePart] = datetimeLocal.split("T");
-    const [year, month, day] = datePart.split("-").map(Number);
-    const [hours, minutes] = timePart.split(":").map(Number);
-    return new Date(Date.UTC(year, month - 1, day, hours - 5, minutes)).toISOString();
+  function fromRomeToISO(datetimeLocal: string): string {
+    return romeLocalToUtc(datetimeLocal).toISOString();
   }
 
   async function handleSaveDeadline() {
     setDeadlineSaving(true);
     try {
-      const value = deadline ? fromTashkentToISO(deadline) : null;
+      const value = deadline ? fromRomeToISO(deadline) : null;
       const res = await fetch("/api/admin/settings/project-deadline", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -207,7 +201,7 @@ export default function AdminProjectsPage() {
           <div className="flex flex-wrap items-end gap-3">
             <div>
               <label className="mb-1 block text-sm text-[var(--text-secondary)]">
-                Deadline (Tashkent time, GMT+5)
+                Deadline (Rome time, Europe/Rome)
               </label>
               <input
                 type="datetime-local"
@@ -381,11 +375,11 @@ export default function AdminProjectsPage() {
                         </td>
                         <td className="px-4 py-3 text-xs text-[var(--text-secondary)] whitespace-nowrap">
                           <div>
-                            {new Date(p.createdAt).toLocaleString(undefined, { timeZone: "Asia/Tashkent" })}
+                            {formatRome(p.createdAt)}
                           </div>
                           {p.updatedAt !== p.createdAt && (
                             <div className="mt-0.5 text-[var(--text-muted)]">
-                              upd: {new Date(p.updatedAt).toLocaleString(undefined, { timeZone: "Asia/Tashkent" })}
+                              upd: {formatRome(p.updatedAt)}
                             </div>
                           )}
                         </td>

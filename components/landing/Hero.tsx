@@ -1,15 +1,11 @@
-'use client';
-
+import Link from 'next/link';
 import { CalendarDays, MapPin } from 'lucide-react';
 import { EVENT, formatDateRange } from '@/lib/event';
-import { useLanguage } from '@/lib/LanguageContext';
+import { t } from '@/lib/i18n';
 import { Blob } from './Blob';
-import { LumaCta, useL } from './shared';
+import { LumaCta } from './shared';
 
 export function Hero() {
-  const { t, language } = useLanguage();
-  const l = useL();
-
   return (
     <section aria-labelledby="hero-title" className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28">
       {/* Decorative mascots (large screens: around the right column) */}
@@ -28,10 +24,11 @@ export function Hero() {
           <Blob variant="teal" size={50} delay={1.1} />
           <Blob variant="blue" size={68} delay={0.3} />
         </div>
+
         <p className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] sm:text-base">
           <span className="inline-flex items-center gap-2">
             <CalendarDays aria-hidden="true" className="h-4 w-4 text-[var(--blob-orange)]" />
-            <time dateTime={EVENT.startDate}>{formatDateRange(language)}</time>
+            <time dateTime={EVENT.startDate}>{formatDateRange()}</time>
           </span>
           <span className="inline-flex items-center gap-2">
             <MapPin aria-hidden="true" className="h-4 w-4 text-[var(--blob-pink)]" />
@@ -48,18 +45,18 @@ export function Hero() {
         </h1>
 
         <blockquote className="mt-10 max-w-2xl border-l-4 border-[var(--blob-pink)] pl-5">
-          <p className="text-lg leading-relaxed text-white sm:text-xl">“{l(EVENT.intro.text)}”</p>
+          <p className="text-lg leading-relaxed text-white sm:text-xl">“{EVENT.intro.text}”</p>
           <footer className="mt-2 text-sm text-[var(--text-secondary)]">— {EVENT.intro.author}</footer>
         </blockquote>
 
         <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <LumaCta />
-          <a
-            href="#programma"
+          <Link
+            href="#schedule"
             className="inline-flex min-h-[52px] items-center rounded-full border border-white/25 px-6 text-base font-semibold text-white hover:border-white/60"
           >
             {t('landing', 'seeSchedule')}
-          </a>
+          </Link>
         </div>
         {EVENT.registration.status === 'waitlist' && (
           <p className="mt-4 text-sm text-[var(--text-secondary)]">{t('landing', 'statusWaitlist')}</p>

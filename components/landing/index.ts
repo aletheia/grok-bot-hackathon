@@ -3,6 +3,8 @@ export { Brief } from './Brief';
 export { Hardware } from './Hardware';
 export { Schedule } from './Schedule';
 export { Speaker } from './Speaker';
+export { Teams } from './Teams';
+export { Awards } from './Awards';
 export { Practical } from './Practical';
 export { Venue } from './Venue';
 export { AfterEvent } from './AfterEvent';

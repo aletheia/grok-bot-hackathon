@@ -1,15 +1,8 @@
-'use client';
-
 import type { ReactNode } from 'react';
+import Image from 'next/image';
 import { ExternalLink } from 'lucide-react';
-import { EVENT, type Localized } from '@/lib/event';
-import { useLanguage } from '@/lib/LanguageContext';
-
-/** Pick the active language from a Localized value. */
-export function useL() {
-  const { language } = useLanguage();
-  return (value: Localized) => value[language];
-}
+import { EVENT, type AssetSrc } from '@/lib/event';
+import { t } from '@/lib/i18n';
 
 type Accent = 'pink' | 'orange' | 'teal' | 'blue';
 
@@ -57,7 +50,6 @@ export function Section({
 
 /** Primary CTA: always points at the Luma page, labelled by registration status. */
 export function LumaCta({ className = '', size = 'lg' }: { className?: string; size?: 'md' | 'lg' }) {
-  const { t } = useLanguage();
   const status = EVENT.registration.status;
   const label =
     status === 'open' ? t('landing', 'ctaOpen') : status === 'waitlist' ? t('landing', 'ctaWaitlist') : t('landing', 'ctaClosed');
@@ -80,5 +72,66 @@ export function LumaCta({ className = '', size = 'lg' }: { className?: string; s
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div className={`rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:p-8 ${className}`}>{children}</div>
+  );
+}
+
+/**
+ * Logo or photo slot. With a src it renders the image; with `null` it renders a
+ * clearly labelled placeholder so missing assets are obvious (set them in lib/event.ts).
+ */
+export function AssetSlot({
+  src,
+  kind,
+  label,
+  width,
+  height,
+  className = '',
+}: {
+  src: AssetSrc;
+  kind: 'logo' | 'photo';
+  label: string;
+  width: number;
+  height: number;
+  className?: string;
+}) {
+  const alt = kind === 'logo' ? `${label} logo` : `Photo of ${label}`;
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        unoptimized
+        className={`${kind === 'photo' ? 'rounded-full object-cover' : 'object-contain'} ${className}`}
+        style={{ width, height }}
+      />
+    );
+  }
+  return (
+    <div
+      role="img"
+      aria-label={`${kind === 'logo' ? 'Logo' : 'Photo'} placeholder: ${label}`}
+      className={`flex shrink-0 items-center justify-center border-2 border-dashed border-white/25 bg-white/[0.03] p-1 text-center text-[11px] font-semibold uppercase leading-tight tracking-wide text-[var(--text-secondary)] ${
+        kind === 'photo' ? 'rounded-full' : 'rounded-xl'
+      } ${className}`}
+      style={{ width, height }}
+      data-placeholder={kind}
+    >
+      {kind === 'logo' ? `${label} logo` : 'Photo'}
+    </div>
+  );
+}
+
+/** "To be announced" card for sections driven by empty config arrays. */
+export function Announcement({ title }: { title: string }) {
+  return (
+    <div className="rounded-3xl border-2 border-dashed border-white/15 p-6 md:p-8">
+      <h3 className="font-display text-xl font-bold text-white">{title}</h3>
+      <p className="mt-3 inline-flex rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white">
+        {t('landing', 'tba')}
+      </p>
+      <p className="mt-3 text-[var(--text-secondary)]">{t('landing', 'tbaNote')}</p>
+    </div>
   );
 }

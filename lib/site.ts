@@ -20,10 +20,10 @@ export const siteConfig = {
   name: EVENT.name,
   shortName: EVENT.shortName,
   tagline: `${EVENT.venue.name}, ${EVENT.venue.address.locality}`,
-  /** Primary description for metadata (Italian, default locale). */
-  description: EVENT_DESCRIPTION.it,
-  descriptionEn: EVENT_DESCRIPTION.en,
-  locale: "it_IT",
-  alternateLocales: ["en_US"],
+  /** Primary description for metadata. */
+  description: EVENT_DESCRIPTION,
+  descriptionEn: EVENT_DESCRIPTION,
+  locale: "en_US",
+  alternateLocales: [] as string[],
   twitterHandle: undefined as string | undefined,
 } as const;

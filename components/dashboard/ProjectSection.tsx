@@ -1,5 +1,6 @@
 "use client";
 
+import { formatRome } from "@/lib/time/rome";
 import { useCallback, useEffect, useState } from "react";
 import {
   ExternalLink,
@@ -13,67 +14,9 @@ import {
   Save,
 } from "lucide-react";
 import { Button, SpotlightCard } from "@/components/ui";
-import { useLanguage } from "@/lib/LanguageContext";
-import { pickLocale } from "@/lib/i18n";
 
 const PROJECT_COPY = {
   en: {
-    eyebrow: "PROJECT",
-    title: "Hackathon Project",
-    edit: "Edit",
-    deadlineLabel: "Submission deadline",
-    deadlinePassed: "Submission deadline passed",
-    nameLabel: "Project name *",
-    namePlaceholder: "My Awesome AI Tool",
-    descriptionLabel: "Description",
-    descriptionPlaceholder: "What does your project do?",
-    githubLabel: "GitHub URL *",
-    demoLabel: "Demo URL",
-    techStackLabel: "Tech Stack",
-    techStackPlaceholder: "Next.js, Python, OpenAI",
-    slidesLabel: "Slides URL",
-    videoLabel: "Video URL",
-    saving: "Saving…",
-    update: "Update project",
-    submit: "Submit project",
-    cancel: "Cancel",
-    submitted: "Project submitted!",
-    updated: "Project updated!",
-    loadError: "Failed to load project.",
-    saveError: "Failed to save project.",
-    deadlinePassedMsg: "The submission deadline has passed.",
-    noSubmission: "No project submitted yet.",
-    leadOnly: "Only the team lead can submit the project.",
-  },
-  de: {
-    eyebrow: "PROJECT",
-    title: "Hackathon Project",
-    edit: "Edit",
-    deadlineLabel: "Submission deadline",
-    deadlinePassed: "Submission deadline passed",
-    nameLabel: "Project name *",
-    namePlaceholder: "My Awesome AI Tool",
-    descriptionLabel: "Description",
-    descriptionPlaceholder: "What does your project do?",
-    githubLabel: "GitHub URL *",
-    demoLabel: "Demo URL",
-    techStackLabel: "Tech Stack",
-    techStackPlaceholder: "Next.js, Python, OpenAI",
-    slidesLabel: "Slides URL",
-    videoLabel: "Video URL",
-    saving: "Saving…",
-    update: "Update project",
-    submit: "Submit project",
-    cancel: "Cancel",
-    submitted: "Project submitted!",
-    updated: "Project updated!",
-    loadError: "Failed to load project.",
-    saveError: "Failed to save project.",
-    deadlinePassedMsg: "The submission deadline has passed.",
-    noSubmission: "No project submitted yet.",
-    leadOnly: "Only the team lead can submit the project.",
-  },
-  es: {
     eyebrow: "PROJECT",
     title: "Hackathon Project",
     edit: "Edit",
@@ -154,9 +97,9 @@ function projectToForm(p: ProjectData): FormFields {
   };
 }
 
+const copy = PROJECT_COPY.en;
+
 export function ProjectSection({ isTeamLead, teamApproved }: Props) {
-  const { language } = useLanguage();
-  const copy = pickLocale(PROJECT_COPY, language);
   const [project, setProject] = useState<ProjectData | null>(null);
   const [deadline, setDeadline] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -290,8 +233,8 @@ export function ProjectSection({ isTeamLead, teamApproved }: Props) {
       {deadline && (
         <p className={`mb-4 text-sm ${deadlinePassed ? "text-red-300" : "text-[var(--text-secondary)]"}`}>
           {deadlinePassed ? copy.deadlinePassed : copy.deadlineLabel}:{" "}
-          {new Date(deadline).toLocaleString(undefined, { timeZone: "Asia/Tashkent" })}
-          {" "}(GMT+5)
+          {formatRome(deadline)}
+          {" "}(Rome time)
         </p>
       )}
 

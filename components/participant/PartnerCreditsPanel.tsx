@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ExternalLink, Gift, Loader2 } from "lucide-react";
-import { useLanguage } from "@/lib/LanguageContext";
+import { t } from "@/lib/i18n";
 import { Button } from "@/components/ui";
 
 export type TeamScreeningStatus = "draft" | "submitted" | "approved" | "rejected";
@@ -51,7 +51,6 @@ function emptyMessageKey(ctx: PartnerCreditsContext | undefined): PartnerCredits
 }
 
 export function PartnerCreditsPanel({ creditsContext }: PartnerCreditsPanelProps) {
-  const { t } = useLanguage();
   const [credits, setCredits] = useState<CreditItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

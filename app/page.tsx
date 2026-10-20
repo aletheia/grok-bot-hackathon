@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { AfterEvent, Brief, Hardware, Hero, Hosts, Practical, Schedule, Speaker, Venue } from "@/components/landing";
+import { AfterEvent, Awards, Brief, Hardware, Hero, Hosts, Practical, Schedule, Speaker, Teams, Venue } from "@/components/landing";
 import { formatDateRange } from "@/lib/event";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}, ${formatDateRange("it")}` },
+  title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}, ${formatDateRange()}` },
   description: siteConfig.description,
   alternates: { canonical: getSiteUrl() + "/" },
   openGraph: {
@@ -22,12 +22,14 @@ export default function Home() {
     <>
       <StructuredData />
       <Navigation />
-      <main id="contenuto" className="bg-[#0a0a0a]">
+      <main id="content" className="bg-[#0a0a0a]">
         <Hero />
         <Brief />
         <Hardware />
         <Schedule />
         <Speaker />
+        <Teams />
+        <Awards />
         <Practical />
         <Venue />
         <AfterEvent />

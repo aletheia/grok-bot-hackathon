@@ -48,7 +48,7 @@ export default function OpenGraphImage() {
         <Blob color="#2f80ff" w={220} h={170} radius="55% 45% 40% 50%" style={{ bottom: 40, right: 80 }} />
 
         <div style={{ display: "flex", fontSize: 30, color: "#ff8c1a", fontWeight: 700, letterSpacing: 2 }}>
-          {formatDateRange("it").toUpperCase()}
+          {formatDateRange().toUpperCase()}
         </div>
         <div style={{ display: "flex", flexDirection: "column", marginTop: 18, fontSize: 104, fontWeight: 900, color: "#ffffff", lineHeight: 0.95 }}>
           <span>GROK</span>

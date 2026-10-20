@@ -1,27 +1,25 @@
-'use client';
-
 import { EVENT } from '@/lib/event';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Blob, type BlobVariant } from './Blob';
-import { LumaCta, Section } from './shared';
-
-const VARIANTS: BlobVariant[] = ['pink', 'orange', 'teal'];
+import { t } from '@/lib/i18n';
+import { Blob } from './Blob';
+import { AssetSlot, LumaCta, Section } from './shared';
 
 export function Hosts() {
-  const { t } = useLanguage();
   return (
-    <Section id="host" tag={t('landing', 'hostsTag')} title={t('landing', 'hostsTitle')} accent="blue">
+    <Section id="hosts" tag={t('landing', 'hostsTag')} title={t('landing', 'hostsTitle')} accent="blue">
       <ul className="grid gap-4 sm:grid-cols-3">
-        {EVENT.hosts.map((name, i) => (
-          <li key={name} className="flex items-center gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-            <Blob variant={VARIANTS[i % VARIANTS.length]} size={56} float={false} className="shrink-0" />
-            <span className="text-lg font-semibold text-white">{name}</span>
+        {EVENT.hosts.map((host) => (
+          <li key={host.name} className="flex items-center gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+            <AssetSlot src={host.photo} kind="photo" label={host.name} width={64} height={64} />
+            <span className="text-lg font-semibold text-white">{host.name}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-6 text-[var(--text-secondary)]">
-        {t('landing', 'hostedBy')} <span className="font-semibold text-white">{EVENT.organizer.name}</span>
-      </p>
+      <div className="mt-8 flex flex-wrap items-center gap-4">
+        <span className="text-[var(--text-secondary)]">
+          {t('landing', 'hostedBy')} <span className="font-semibold text-white">{EVENT.organizer.name}</span>
+        </span>
+        <AssetSlot src={EVENT.assets.logos.spacexai} kind="logo" label={EVENT.organizer.shortName} width={120} height={56} />
+      </div>
 
       <div className="relative mt-20 overflow-hidden rounded-[2rem] bg-white/[0.04] px-6 py-14 text-center md:px-12">
         <Blob variant="pink" size={64} className="absolute left-6 top-6 hidden sm:block" />
