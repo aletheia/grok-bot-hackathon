@@ -18,6 +18,8 @@ import {
   FolderGit2,
   Trophy,
   BarChart3,
+  FileUp,
+  Ticket,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -220,6 +222,8 @@ export default function AdminDashboardLayout({
   const navItems = [
     { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
     { href: "/admin/dashboard/teams", label: "Teams", icon: Users },
+    { href: "/admin/dashboard/luma", label: "Luma guest list", icon: FileUp },
+    { href: "/admin/dashboard/admission", label: "Admission", icon: Ticket },
     { href: "/admin/dashboard/users", label: "Users", icon: UserCog },
     { href: "/admin/dashboard/staff", label: "Judges & Mentors", icon: Gavel },
     { href: "/admin/dashboard/projects", label: "Projects", icon: FolderGit2 },

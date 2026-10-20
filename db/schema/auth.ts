@@ -43,7 +43,7 @@ export const team = pgTable(
     status: teamStatusEnum("status").notNull().default("active"),
     joinCode: text("join_code").notNull(),
     memberCount: integer("member_count").notNull().default(0),
-    maxMembers: integer("max_members").notNull().default(5),
+    maxMembers: integer("max_members").notNull().default(6),
     createdByUserId: text("created_by_user_id").references((): AnyPgColumn => user.id, {
       onDelete: "set null",
     }),
@@ -81,7 +81,7 @@ export const team = pgTable(
     ),
     check(
       "team_max_members_limit_check",
-      sql`${table.maxMembers} > 0 and ${table.maxMembers} <= 5`,
+      sql`${table.maxMembers} > 0 and ${table.maxMembers} <= 6`,
     ),
     check(
       "team_judge_count_override_check",
@@ -120,10 +120,15 @@ export const user = pgTable(
     }),
     isTeamLead: boolean("is_team_lead").notNull().default(false),
     onboardingCompletedAt: timestamp("onboarding_completed_at", { withTimezone: true }),
+    /** Set when the participant marks themselves "available to join a team"; null = not available. */
+    availableForTeamAt: timestamp("available_for_team_at", { withTimezone: true }),
+    /** Self-written note shown in the "available" list (skills, how to reach them). */
+    availableNote: text("available_note"),
   },
   (table) => [
     index("user_team_id_idx").on(table.teamId),
     index("user_role_idx").on(table.role),
+    index("user_available_for_team_idx").on(table.availableForTeamAt),
   ],
 );
 
@@ -195,6 +200,10 @@ export const twoFactor = pgTable(
       .$defaultFn(() => randomUUID()),
     secret: text("secret").notNull(),
     backupCodes: text("backup_codes").notNull(),
+    // Columns required by the Better Auth 1.7 two-factor plugin (schema check fails without them).
+    verified: boolean("verified").default(true),
+    failedVerificationCount: integer("failed_verification_count").default(0),
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

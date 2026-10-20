@@ -2,17 +2,29 @@ import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { emailOTP } from "better-auth/plugins/email-otp";
 import { twoFactor } from "better-auth/plugins/two-factor";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import * as authSchema from "@/db/schema/auth";
+import { lumaRegistrant } from "@/db/schema/luma";
+import { sendEmail } from "@/lib/email/send";
+import { EVENT } from "@/lib/event";
+import { normalizeEmail } from "@/lib/luma/email";
+import { checkPortalSignIn, getSuperAdminEmails } from "@/lib/luma/service";
 
-function getSuperAdminEmails(): Set<string> {
-  return new Set(
-    (process.env.SUPER_ADMIN_EMAILS ?? "")
-      .split(",")
-      .map((value) => value.trim().toLowerCase())
-      .filter(Boolean),
-  );
+/** Endpoints that start or finish a passwordless sign-in; gated by the Luma guest list. */
+const OTP_GATED_PATHS = new Set(["/email-otp/send-verification-otp", "/sign-in/email-otp"]);
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+}
+
+async function assertGuestListAccess(email: string) {
+  const decision = await checkPortalSignIn(email);
+  if (!decision.allowed) {
+    throw new APIError("FORBIDDEN", { message: decision.message, code: "NOT_ON_GUEST_LIST" });
+  }
 }
 
 function isAdminCallbackUrl(value: unknown): boolean {
@@ -28,7 +40,6 @@ const trustedOrigins = Array.from(
     [
       process.env.BETTER_AUTH_URL,
       process.env.NEXT_PUBLIC_APP_URL,
-      "https://app.cursorcommunity.uz",
       "http://localhost:3000",
       "http://localhost:3001",
       "http://127.0.0.1:3000",
@@ -48,6 +59,13 @@ const trustedOrigins = Array.from(
 export const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      if (OTP_GATED_PATHS.has(ctx.path)) {
+        const email = typeof ctx.body?.email === "string" ? ctx.body.email : "";
+        // Fail early (before any code is emailed) when the address is not on the guest list.
+        await assertGuestListAccess(email);
+        return;
+      }
+
       if (ctx.path !== "/sign-up/email" || !isAdminCallbackUrl(ctx.body?.callbackURL)) {
         return;
       }
@@ -76,10 +94,33 @@ export const auth = betterAuth({
     }),
   },
   plugins: [
-    nextCookies(),
     twoFactor({
+      // Kept unchanged on purpose: renaming the issuer would confuse existing admin authenticator entries.
       issuer: "CURSOR 48H",
     }),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 10 * 60,
+      allowedAttempts: 5,
+      storeOTP: "hashed",
+      async sendVerificationOTP({ email, otp, type }) {
+        if (type !== "sign-in") return;
+        const result = await sendEmail({
+          to: email,
+          subject: `${otp} is your ${EVENT.name} sign-in code`,
+          html:
+            `<p>Your sign-in code is <strong>${escapeHtml(otp)}</strong>. It expires in 10 minutes.</p>` +
+            `<p>If you did not try to sign in to the ${escapeHtml(EVENT.name)} portal, ignore this email.</p>`,
+        });
+        if (!result.ok) {
+          throw new APIError("INTERNAL_SERVER_ERROR", {
+            message: "We could not send the sign-in code. Please try again later or contact the organisers.",
+          });
+        }
+      },
+    }),
+    // Must stay last so Set-Cookie headers from other plugins reach Next.js.
+    nextCookies(),
   ],
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -103,14 +144,50 @@ export const auth = betterAuth({
     disableSignUp: false,
   },
   databaseHooks: {
+    session: {
+      create: {
+        /**
+         * Last line of defence for every sign-in method (email OTP, Google, GitHub, password):
+         * no session is created for an email that is not on the Luma guest list,
+         * unless it belongs to a super admin or staff member.
+         */
+        async before(nextSession) {
+          const [owner] = await db
+            .select({ email: authSchema.user.email })
+            .from(authSchema.user)
+            .where(eq(authSchema.user.id, nextSession.userId))
+            .limit(1);
+          if (!owner) return;
+          await assertGuestListAccess(owner.email);
+        },
+      },
+    },
     user: {
       create: {
         async before(nextUser) {
           const normalizedEmail =
-            typeof nextUser.email === "string" ? nextUser.email.toLowerCase() : "";
+            typeof nextUser.email === "string" ? normalizeEmail(nextUser.email) : "";
           const superAdminEmails = getSuperAdminEmails();
 
           if (!superAdminEmails.has(normalizedEmail)) {
+            // Email-OTP sign-ups arrive without a name: take it from the Luma guest list.
+            if (!nextUser.name) {
+              const [guest] = await db
+                .select({ name: lumaRegistrant.name })
+                .from(lumaRegistrant)
+                .where(eq(lumaRegistrant.email, normalizedEmail))
+                .limit(1);
+              const name = guest?.name?.trim() || normalizedEmail.split("@")[0];
+              const [firstName, ...rest] = name.split(/\s+/);
+              return {
+                data: {
+                  ...nextUser,
+                  name,
+                  firstName: firstName ?? null,
+                  lastName: rest.join(" ") || null,
+                },
+              };
+            }
             return;
           }
 

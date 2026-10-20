@@ -9,6 +9,7 @@ import * as scoringSchema from "./schema/scoring";
 import * as projectsSchema from "./schema/projects";
 import * as settingsSchema from "./schema/settings";
 import * as mentorSchema from "./schema/mentor";
+import * as lumaSchema from "./schema/luma";
 
 const connectionString =
   process.env.DATABASE_URL ?? "postgresql://localhost:5432/cursor48";
@@ -23,6 +24,7 @@ export const db = drizzle(client, {
     ...projectsSchema,
     ...settingsSchema,
     ...mentorSchema,
+    ...lumaSchema,
     ...relationsSchema,
   },
 });
