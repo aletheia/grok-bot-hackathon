@@ -97,3 +97,11 @@ Code generation (length, alphabet, uniqueness retry); size limits and close at 6
 - No automatic emails about admission.
 - `/profile` (a legacy duplicate of the dashboard team UI) redirects to `/dashboard`.
 - Screening, scoring and credits flows are unchanged.
+
+## Implementation notes (after building it)
+
+- Migration `0012_luma_allowlist_teams` also adds `two_factor.verified`, `failed_verification_count` and `locked_until`. Better Auth 1.7 (already on `main`) refuses to start its two-factor plugin without them, so every authenticated API call returned 500 on a fresh database. The change only adds columns.
+- `nextCookies()` is now the last Better Auth plugin, as Better Auth recommends.
+- `https://app.cursorcommunity.uz` (the template's production origin) was removed from `trustedOrigins`.
+- Sending a sign-in code tells the person whether their email is on the guest list. That small enumeration risk was accepted so the "not on the list → go to Luma" message is clear. Better Auth's built-in rate limit applies (about 3 requests per minute per IP on that endpoint).
+- If Resend fails, Better Auth runs the sender in the background: the person sees the code step but no email arrives, and the error is logged server-side. Configure `RESEND_API_KEY` and `EMAIL_FROM` before going live.
