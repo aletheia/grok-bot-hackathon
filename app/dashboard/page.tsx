@@ -28,12 +28,10 @@ import Link from "next/link";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { ProjectSection } from "@/components/dashboard/ProjectSection";
+import { AvailabilityCard, AvailablePeople, TeamLockNotice, useTeamsLocked } from "@/components/dashboard/TeamExtras";
 import { PartnerCreditsPanel } from "@/components/participant/PartnerCreditsPanel";
 import { Button, NoiseOverlay, SpotlightCard } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
-import { useLanguage } from "@/lib/LanguageContext";
-import { pickLocale } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const DASHBOARD_COPY = {
   en: {
@@ -51,7 +49,7 @@ const DASHBOARD_COPY = {
     collapseSidebar: "Collapse",
     expandSidebar: "Expand",
     roleParticipant: "Participant",
-    roleLead: "Captain",
+    roleLead: "Team lead",
     roleSuperAdmin: "Super admin",
     roleModerator: "Moderator",
     roleReviewer: "Reviewer",
@@ -68,15 +66,15 @@ const DASHBOARD_COPY = {
     inviteActive: "Active",
     inviteExpired: "Expired",
     inviteMissing: "Missing",
-    teamPanelTitle: "Team block",
+    teamPanelTitle: "Your team",
     membersTitle: "Team members",
     createTeamTitle: "Create a team",
     joinTeamTitle: "Join with a code",
-    createTeamDesc: "Create the team core and get an invite code for the rest of the members.",
-    joinTeamDesc: "If your captain already created the team, enter the invite code and take an open slot.",
+    createTeamDesc: "Start a team and get its secret code. Share the code with the people you want on your team.",
+    joinTeamDesc: "Got a code from a teammate? Enter it here to join their team (if it still has room).",
     teamNameLabel: "Team name",
     teamDescriptionLabel: "Short description",
-    teamCodeLabel: "Invite code",
+    teamCodeLabel: "Secret team code",
     createTeamAction: "Create team",
     creatingTeamAction: "Creating...",
     joinTeamAction: "Join team",
@@ -87,11 +85,11 @@ const DASHBOARD_COPY = {
     rotatingCode: "Rotating...",
     leaveTeam: "Leave team",
     leavingTeam: "Leaving team...",
-    captainBadge: "Captain",
+    captainBadge: "Lead",
     memberBadge: "Member",
     noTeamState:
-      "You are not in a team yet. To move through the main selection flow, create a team or join an existing one.",
-    inviteNote: "The invite block reflects the team's current working join code.",
+      "You are not in a team yet. Create one, join with a code, or mark yourself as available below.",
+    inviteNote: "Share this code only with people you want in your team. Anyone with it can join while the team has room.",
     teamDescriptionFallback: "No team description yet.",
     accountTitle: "Account",
     accountName: "Name",
@@ -106,8 +104,8 @@ const DASHBOARD_COPY = {
     createSuccess: "Team created and ready for invites.",
     joinSuccess: "You joined the team successfully.",
     rotateSuccess: "A fresh invite code is now active.",
-    leaveSuccess: "You left the team.",
-    bannerRegistration: "Registration and team formation are in progress. Screening has not started yet.",
+    leaveSuccess: "You left the team. If you were the lead, the earliest-joined member is now lead.",
+    bannerRegistration: "Team formation is open until 31 October 2026 at 23:59 (Rome time).",
     bannerScreeningActive: "Screening is active! Complete the tasks to confirm your team's participation.",
     bannerScreeningCompleted: "Screening is complete. Results are published below.",
     bannerGoToScreening: "Go to screening",
@@ -116,177 +114,8 @@ const DASHBOARD_COPY = {
     resultRejected: "Unfortunately, your team did not pass the screening.",
     resultPending: "Screening results have not been announced yet.",
     resultNoTeam: "Create a team to participate in the screening.",
-    createTeamNamePlaceholder: "Cursor Core",
-    createTeamDescriptionPlaceholder: "Focus: AI product, workflow, or infra",
-    joinCodePlaceholder: "7AB4K9XZ",
-  },
-  // Dashboard uses English strings for de/es until dedicated translations are added.
-  de: {
-    loading: "Loading your dashboard...",
-    welcomeGreeting: "Hi,",
-    home: "Back home",
-    ranking: "Ranking",
-    sectionOverview: "Overview",
-    sectionTeam: "Team",
-    sectionCredits: "Credits",
-    sectionProject: "Project",
-    sectionAccount: "Account",
-    signOut: "Sign out",
-    signingOut: "Signing out...",
-    collapseSidebar: "Collapse",
-    expandSidebar: "Expand",
-    roleParticipant: "Participant",
-    roleLead: "Captain",
-    roleSuperAdmin: "Super admin",
-    roleModerator: "Moderator",
-    roleReviewer: "Reviewer",
-    noTeam: "No team yet",
-    teamLabel: "Team",
-    screeningLabel: "Screening",
-    readinessLabel: "Readiness",
-    screeningDraft: "Draft",
-    screeningSubmitted: "Under review",
-    screeningApproved: "Approved",
-    screeningRejected: "Rejected",
-    teamSeats: "Team seats",
-    teamInvite: "Invite",
-    inviteActive: "Active",
-    inviteExpired: "Expired",
-    inviteMissing: "Missing",
-    teamPanelTitle: "Team block",
-    membersTitle: "Team members",
-    createTeamTitle: "Create a team",
-    joinTeamTitle: "Join with a code",
-    createTeamDesc: "Create the team core and get an invite code for the rest of the members.",
-    joinTeamDesc: "If your captain already created the team, enter the invite code and take an open slot.",
-    teamNameLabel: "Team name",
-    teamDescriptionLabel: "Short description",
-    teamCodeLabel: "Invite code",
-    createTeamAction: "Create team",
-    creatingTeamAction: "Creating...",
-    joinTeamAction: "Join team",
-    joiningTeamAction: "Joining...",
-    copyCode: "Copy code",
-    copiedCode: "Code copied",
-    rotateCode: "Rotate code",
-    rotatingCode: "Rotating...",
-    leaveTeam: "Leave team",
-    leavingTeam: "Leaving team...",
-    captainBadge: "Captain",
-    memberBadge: "Member",
-    noTeamState:
-      "You are not in a team yet. To move through the main selection flow, create a team or join an existing one.",
-    inviteNote: "The invite block reflects the team's current working join code.",
-    teamDescriptionFallback: "No team description yet.",
-    accountTitle: "Account",
-    accountName: "Name",
-    accountEmail: "Email",
-    accountRole: "Role",
-    accountVerified: "Email verified",
-    yes: "Yes",
-    no: "No",
-    loadError: "Failed to load the current team state.",
-    requestFailed: "Request failed.",
-    signOutError: "Failed to sign out.",
-    createSuccess: "Team created and ready for invites.",
-    joinSuccess: "You joined the team successfully.",
-    rotateSuccess: "A fresh invite code is now active.",
-    leaveSuccess: "You left the team.",
-    bannerRegistration: "Registration and team formation are in progress. Screening has not started yet.",
-    bannerScreeningActive: "Screening is active! Complete the tasks to confirm your team's participation.",
-    bannerScreeningCompleted: "Screening is complete. Results are published below.",
-    bannerGoToScreening: "Go to screening",
-    bannerScreeningNotStarted: "Screening not started yet",
-    resultApproved: "Your team passed the screening! Welcome to the finals.",
-    resultRejected: "Unfortunately, your team did not pass the screening.",
-    resultPending: "Screening results have not been announced yet.",
-    resultNoTeam: "Create a team to participate in the screening.",
-    createTeamNamePlaceholder: "Cursor Core",
-    createTeamDescriptionPlaceholder: "Focus: AI product, workflow, or infra",
-    joinCodePlaceholder: "7AB4K9XZ",
-  },
-  es: {
-    loading: "Loading your dashboard...",
-    welcomeGreeting: "Hi,",
-    home: "Back home",
-    ranking: "Ranking",
-    sectionOverview: "Overview",
-    sectionTeam: "Team",
-    sectionCredits: "Credits",
-    sectionProject: "Project",
-    sectionAccount: "Account",
-    signOut: "Sign out",
-    signingOut: "Signing out...",
-    collapseSidebar: "Collapse",
-    expandSidebar: "Expand",
-    roleParticipant: "Participant",
-    roleLead: "Captain",
-    roleSuperAdmin: "Super admin",
-    roleModerator: "Moderator",
-    roleReviewer: "Reviewer",
-    noTeam: "No team yet",
-    teamLabel: "Team",
-    screeningLabel: "Screening",
-    readinessLabel: "Readiness",
-    screeningDraft: "Draft",
-    screeningSubmitted: "Under review",
-    screeningApproved: "Approved",
-    screeningRejected: "Rejected",
-    teamSeats: "Team seats",
-    teamInvite: "Invite",
-    inviteActive: "Active",
-    inviteExpired: "Expired",
-    inviteMissing: "Missing",
-    teamPanelTitle: "Team block",
-    membersTitle: "Team members",
-    createTeamTitle: "Create a team",
-    joinTeamTitle: "Join with a code",
-    createTeamDesc: "Create the team core and get an invite code for the rest of the members.",
-    joinTeamDesc: "If your captain already created the team, enter the invite code and take an open slot.",
-    teamNameLabel: "Team name",
-    teamDescriptionLabel: "Short description",
-    teamCodeLabel: "Invite code",
-    createTeamAction: "Create team",
-    creatingTeamAction: "Creating...",
-    joinTeamAction: "Join team",
-    joiningTeamAction: "Joining...",
-    copyCode: "Copy code",
-    copiedCode: "Code copied",
-    rotateCode: "Rotate code",
-    rotatingCode: "Rotating...",
-    leaveTeam: "Leave team",
-    leavingTeam: "Leaving team...",
-    captainBadge: "Captain",
-    memberBadge: "Member",
-    noTeamState:
-      "You are not in a team yet. To move through the main selection flow, create a team or join an existing one.",
-    inviteNote: "The invite block reflects the team's current working join code.",
-    teamDescriptionFallback: "No team description yet.",
-    accountTitle: "Account",
-    accountName: "Name",
-    accountEmail: "Email",
-    accountRole: "Role",
-    accountVerified: "Email verified",
-    yes: "Yes",
-    no: "No",
-    loadError: "Failed to load the current team state.",
-    requestFailed: "Request failed.",
-    signOutError: "Failed to sign out.",
-    createSuccess: "Team created and ready for invites.",
-    joinSuccess: "You joined the team successfully.",
-    rotateSuccess: "A fresh invite code is now active.",
-    leaveSuccess: "You left the team.",
-    bannerRegistration: "Registration and team formation are in progress. Screening has not started yet.",
-    bannerScreeningActive: "Screening is active! Complete the tasks to confirm your team's participation.",
-    bannerScreeningCompleted: "Screening is complete. Results are published below.",
-    bannerGoToScreening: "Go to screening",
-    bannerScreeningNotStarted: "Screening not started yet",
-    resultApproved: "Your team passed the screening! Welcome to the finals.",
-    resultRejected: "Unfortunately, your team did not pass the screening.",
-    resultPending: "Screening results have not been announced yet.",
-    resultNoTeam: "Create a team to participate in the screening.",
-    createTeamNamePlaceholder: "Cursor Core",
-    createTeamDescriptionPlaceholder: "Focus: AI product, workflow, or infra",
+    createTeamNamePlaceholder: "Team name",
+    createTeamDescriptionPlaceholder: "What you want to build, skills you are looking for",
     joinCodePlaceholder: "7AB4K9XZ",
   },
 } as const;
@@ -332,6 +161,11 @@ type TeamData = {
   invite: TeamInvite | null;
   members: TeamMember[];
   captainUserId: string | null;
+  minMembers?: number;
+  isOpen?: boolean;
+  isFormed?: boolean;
+  sizeStatus?: "forming" | "formed" | "full";
+  teamsLocked?: boolean;
   currentUserMembership: {
     role: "lead" | "member";
   } | null;
@@ -387,11 +221,11 @@ function formatRole(user: SessionUser | null, team: TeamData | null, copy: Dashb
 }
 
 export default function DashboardPage() {
-  const { language } = useLanguage();
-  const copy = pickLocale(DASHBOARD_COPY, language);
+  const copy = DASHBOARD_COPY.en;
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const [team, setTeam] = useState<TeamData | null>(null);
+  const teamsLocked = useTeamsLocked();
   const [isTeamLoading, setIsTeamLoading] = useState(true);
   const [screeningPhase, setScreeningPhase] = useState<string>("registration");
   const [pageError, setPageError] = useState<string | null>(null);
@@ -799,7 +633,6 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-            <LanguageSwitcher />
             <Link
               href="/ranking"
               className="inline-flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/80 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:border-[var(--accent-blue)]/50 hover:bg-[var(--bg-tertiary)]"
@@ -996,6 +829,8 @@ export default function DashboardPage() {
             </h2>
           </div>
 
+          <TeamLockNotice />
+
           {isTeamLoading ? (
             <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 p-8">
               <div className="flex items-center gap-3">
@@ -1067,6 +902,13 @@ export default function DashboardPage() {
                   <p className="mt-2 text-xs text-[var(--text-secondary)]">
                     {copy.inviteNote}
                   </p>
+                  <p className="mt-2 text-xs font-medium text-white">
+                    {team.sizeStatus === "full"
+                      ? `Team full (${team.maxMembers}/${team.maxMembers}): it is closed and the code does not work until someone leaves.`
+                      : team.sizeStatus === "formed"
+                        ? `Formed: ${team.memberCount} members, seats guaranteed if you are still ${team.minMembers ?? 4}+ at the lock. Room for ${team.maxMembers - team.memberCount} more.`
+                        : `Forming: ${team.memberCount} of at least ${team.minMembers ?? 4} members needed for guaranteed seats.`}
+                  </p>
                 </div>
 
                 {/* Members list */}
@@ -1099,6 +941,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+                {team.isOpen ? <AvailablePeople seatsLeft={team.maxMembers - team.memberCount} /> : null}
+
                 <div className="flex flex-wrap gap-2 border-t border-[var(--border-color)] pt-4">
                   {team.currentUserMembership?.role === "lead" && (
                     <Button
@@ -1119,7 +963,7 @@ export default function DashboardPage() {
                     size="md"
                     className="rounded-xl border border-red-500/20 text-red-200 hover:bg-red-500/10 hover:text-white"
                     onClick={handleLeaveTeam}
-                    disabled={activeAction === "leave"}
+                    disabled={activeAction === "leave" || teamsLocked}
                   >
                     <DoorOpen size={16} />
                     {activeAction === "leave" ? copy.leavingTeam : copy.leaveTeam}
@@ -1174,7 +1018,7 @@ export default function DashboardPage() {
                       type="submit"
                       size="md"
                       className="w-full rounded-lg"
-                      disabled={activeAction === "create"}
+                      disabled={activeAction === "create" || teamsLocked}
                     >
                       <ArrowRight size={16} />
                       {activeAction === "create"
@@ -1218,7 +1062,7 @@ export default function DashboardPage() {
                       variant="secondary"
                       size="md"
                       className="w-full rounded-lg"
-                      disabled={activeAction === "join"}
+                      disabled={activeAction === "join" || teamsLocked}
                     >
                       <Users size={16} />
                       {activeAction === "join"
@@ -1234,6 +1078,7 @@ export default function DashboardPage() {
               </SpotlightCard>
             </div>
           )}
+          {!isTeamLoading && !team ? <AvailabilityCard /> : null}
         </section>
 
         {/* Mentor request section — only for approved teams */}

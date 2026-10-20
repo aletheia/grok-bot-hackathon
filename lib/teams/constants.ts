@@ -1,5 +1,10 @@
+import { EVENT } from "@/lib/event";
+
 export const TEAM_LIMITS = {
-  maxMembers: 5,
+  /** Team size rules come from lib/event.ts (4–6 for this event). */
+  minMembers: EVENT.portal.team.minMembers,
+  maxMembers: EVENT.portal.team.maxMembers,
+  availableNoteMaxLength: 280,
   nameMinLength: 2,
   nameMaxLength: 64,
   descriptionMaxLength: 500,

@@ -2,7 +2,7 @@
 
 Landing site and participant platform for **Grok Hackathon at the Museum**. Registration for the event happens on [Luma](https://luma.com/spacexai-z1ys).
 
-**Event facts live in one place: [`lib/event.ts`](lib/event.ts).** Landing sections, metadata, Open Graph image, JSON-LD (`lib/event-jsonld.ts`), sitemap and footer all read from it. UI copy is in `lib/i18n.ts` (Italian default, English second).
+**Event facts live in one place: [`lib/event.ts`](lib/event.ts).** Landing sections, metadata, Open Graph image, JSON-LD (`lib/event-jsonld.ts`), sitemap and footer all read from it. UI copy is in `lib/i18n.ts`. The site and portal are English only. Logos and photos that are not available yet are `null` in `lib/event.ts` and render as labelled placeholders; set a path under `public/` to swap them in. Prizes, jury, evaluation criteria and tracks are arrays in the same file: an empty array shows “To be announced”.
 
 The platform underneath (forked from CURSOR 48H):
 
@@ -29,9 +29,10 @@ Open-source platform for running **48-hour AI hackathons**: landing site, regist
 | Area | What it does |
 |------|----------------|
 | **Landing** | Hero, sponsors, prizes, schedule, criteria, requirements, tech stack, partnership page. |
-| **Auth** | Email + Google / GitHub via [Better Auth](https://www.better-auth.com/). Optional 2FA for admins. Admin sign-up can be limited with `SUPER_ADMIN_EMAILS`. |
-| **Registration & onboarding** | User flow and completion status. |
-| **Teams** | Create / join / leave, transfer lead, members. Invite links (`/r/[code]`). |
+| **Auth** | Participants sign in with a 6-digit code emailed to their **Luma registration email** ([Better Auth](https://www.better-auth.com/) email OTP). Only emails on the imported Luma guest list (status not `declined`) get in; staff and `SUPER_ADMIN_EMAILS` bypass the list. Admins keep email + password with 2FA. |
+| **Luma guest list** | Admin → *Luma guest list*: upload the Luma CSV export (Guests → Export). Upserts by email, never deletes. |
+| **Teams** | 4–6 people. Create a team (secret 8-char code), join with a code, or mark yourself available. Auto-closes at 6, reopens below; lead passes to the earliest member; locked on 31 Oct 2026 23:59 Europe/Rome (`EVENT.portal.teamLockAt`). Rules at `/rules`. |
+| **Admission** | Admin → *Admission*: formed teams (4+) get guaranteed seats; others are queued first-come, first-served by Luma registration time up to the capacity (100). No automatic emails. |
 | **Screening** | MC questions, optional team video (YouTube / Drive). Admins approve or reject teams and manage questions. |
 | **Projects** | Participant projects and admin CRUD. |
 | **Credits** | Super-admin pools: split by team or participant, Excel upload of per-user links, shared links, short codes, audit log. |
@@ -119,10 +120,20 @@ Create a `.env` in the project root. Typical variables:
 | `SUPER_ADMIN_EMAILS` | See note | Comma-separated emails allowed for admin flows when configured |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional | [Google OAuth](https://console.cloud.google.com) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | Optional | [GitHub OAuth](https://github.com/settings/developers) |
-| `RESEND_API_KEY` | Optional | Transactional email (Resend) |
+| `RESEND_API_KEY` | **Yes (production)** | Resend key used to email sign-in codes. Without it production sign-in cannot work; in `npm run dev` the code is printed in the server log instead |
+| `EMAIL_FROM` | Production | Sender on a domain verified in Resend, e.g. `Grok Hackathon <portal@your-domain>`; defaults to Resend's test sender |
 | `NEXT_PUBLIC_SITE_URL` | Production | Canonical URL for metadata and sitemap (e.g. `https://your-domain.com`) |
 
 If `SUPER_ADMIN_EMAILS` is empty, restricted admin sign-up paths are effectively disabled.
+
+### Letting participants in (Luma guest list)
+
+1. In Luma open the event → **Guests** → **Export** (CSV).
+2. Sign in as super admin → **Admin → Luma guest list** → *Upload Luma guest CSV*.
+3. Headers are matched case-insensitively (`email`/`E-mail`, `name` or `first_name` + `last_name`, `approval_status`/`status`, `created_at`). Emails are trimmed and lower-cased. Re-import any time; rows are updated by email and never deleted.
+4. People whose email is not on the list are told to sign in with their Luma email or register on Luma. Statuses that cannot sign in are configured in `EVENT.portal.blockedLumaStatuses` (default `declined`).
+
+The FCFS order on the admission page uses the Luma `created_at` timestamp, then portal account creation, then import time (ties by email).
 
 ---
 

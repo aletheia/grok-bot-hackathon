@@ -10,5 +10,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
+    {
+      url: `${getSiteUrl()}/rules`,
+      lastModified: new Date(EVENT.contentUpdatedAt),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
   ];
 }

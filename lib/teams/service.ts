@@ -6,10 +6,19 @@ import { teamInvite, teamMember } from "@/db/schema/teams";
 import type { AppSessionUser } from "@/lib/auth/session";
 import { createTeamError } from "@/lib/teams/errors";
 import {
-  TEAM_INVITE_ALPHABET,
   TEAM_LIMITS,
   type TeamMembershipRole,
 } from "@/lib/teams/constants";
+import {
+  assertCanJoin,
+  assertTeamsOpen,
+  generateTeamCode,
+  isTeamFormed,
+  isTeamOpen,
+  isTeamsLocked,
+  pickNextLead,
+  teamSizeStatus,
+} from "@/lib/teams/policy";
 import type {
   AdminForceMembershipInput,
   CreateTeamInput,
@@ -36,14 +45,7 @@ function isFutureDate(value: Date | null | undefined) {
 }
 
 function createInviteCode() {
-  const bytes = randomBytes(TEAM_LIMITS.inviteCodeLength);
-  let code = "";
-
-  for (let index = 0; index < TEAM_LIMITS.inviteCodeLength; index += 1) {
-    code += TEAM_INVITE_ALPHABET[bytes[index]! % TEAM_INVITE_ALPHABET.length];
-  }
-
-  return code;
+  return generateTeamCode(randomBytes);
 }
 
 async function generateUniqueInviteCode(executor: DbExecutor) {
@@ -91,6 +93,13 @@ async function updateUserTeamState(
       isTeamLead: isLead,
       updatedAt: now(),
     })
+    .where(eq(user.id, userId));
+}
+
+async function clearAvailability(executor: DbExecutor, userId: string) {
+  await executor
+    .update(user)
+    .set({ availableForTeamAt: null, updatedAt: now() })
     .where(eq(user.id, userId));
 }
 
@@ -461,6 +470,11 @@ async function buildTeamDetails(
     createdAt: teamRow.createdAt,
     updatedAt: teamRow.updatedAt,
     captainUserId: members.find((member) => member.role === "lead")?.userId ?? null,
+    minMembers: TEAM_LIMITS.minMembers,
+    isOpen: teamRow.status === "active" && isTeamOpen(teamRow.memberCount, teamRow.maxMembers),
+    isFormed: isTeamFormed(teamRow.memberCount),
+    sizeStatus: teamSizeStatus(teamRow.memberCount),
+    teamsLocked: isTeamsLocked(),
     invite,
     members,
     currentUserMembership,
@@ -510,6 +524,7 @@ export async function listCurrentTeamMembers(actor: AppSessionUser) {
 }
 
 export async function createTeam(actor: AppSessionUser, input: CreateTeamInput) {
+  assertTeamsOpen();
   assertInviteSettings(input.inviteExpiresAt, input.inviteMaxUses);
 
   return db.transaction(async (tx) => {
@@ -552,12 +567,15 @@ export async function createTeam(actor: AppSessionUser, input: CreateTeamInput) 
     });
 
     await updateUserTeamState(tx, actor.id, createdTeam.id, true);
+    await clearAvailability(tx, actor.id);
 
     return buildTeamDetails(tx, createdTeam.id, actor.id);
   });
 }
 
 export async function joinTeamByCode(actor: AppSessionUser, input: JoinTeamInput) {
+  assertTeamsOpen();
+
   return db.transaction(async (tx) => {
     const existingMembership = await getActiveMembershipForUser(tx, actor.id, true);
 
@@ -601,9 +619,9 @@ export async function joinTeamByCode(actor: AppSessionUser, input: JoinTeamInput
       throw createTeamError(409, "TEAM_ARCHIVED", "Archived teams cannot accept new members.");
     }
 
-    if (lockedTeam.memberCount >= lockedTeam.maxMembers) {
-      throw createTeamError(409, "TEAM_FULL", "This team already has the maximum of 5 members.");
-    }
+    // The team row is locked FOR UPDATE above, so concurrent joins serialize here;
+    // the DB check constraint (member_count <= max_members) is the last line of defence.
+    assertCanJoin(lockedTeam.memberCount, lockedTeam.maxMembers);
 
     await tx.insert(teamMember).values({
       teamId: lockedTeam.id,
@@ -622,12 +640,15 @@ export async function joinTeamByCode(actor: AppSessionUser, input: JoinTeamInput
       .where(eq(teamInvite.id, invite.id));
 
     await updateUserTeamState(tx, actor.id, lockedTeam.id, false);
+    await clearAvailability(tx, actor.id);
 
     return buildTeamDetails(tx, lockedTeam.id, actor.id);
   });
 }
 
 export async function leaveCurrentTeam(actor: AppSessionUser) {
+  assertTeamsOpen();
+
   return db.transaction(async (tx) => {
     const activeMembership = await getActiveMembershipForUser(tx, actor.id, true);
 
@@ -636,20 +657,37 @@ export async function leaveCurrentTeam(actor: AppSessionUser) {
       throw createTeamError(409, "NOT_IN_TEAM", "You are not part of a team.");
     }
 
+    // Lock the team row so a concurrent join/leave sees a consistent member count.
+    const lockedTeam = (await getLockedTeam(tx, activeMembership.team.id)) ?? activeMembership.team;
+
+    // The lead role passes automatically to the earliest-joined remaining member.
+    let nextLeadUserId: string | undefined;
+    if (activeMembership.membership.role === "lead" && lockedTeam.memberCount > 1) {
+      const members = await tx
+        .select({ id: teamMember.id, userId: teamMember.userId, joinedAt: teamMember.joinedAt })
+        .from(teamMember)
+        .where(and(eq(teamMember.teamId, lockedTeam.id), isNull(teamMember.leftAt)));
+      nextLeadUserId = pickNextLead(members, actor.id)?.userId;
+    }
+
     await removeMembershipFromTeam(tx, {
-      teamRow: activeMembership.team,
+      teamRow: lockedTeam,
       membership: activeMembership.membership,
       removedByUserId: actor.id,
+      nextLeadUserId,
     });
 
     return {
-      leftTeamId: activeMembership.team.id,
-      archived: activeMembership.team.memberCount === 1,
+      leftTeamId: lockedTeam.id,
+      archived: lockedTeam.memberCount === 1,
+      newLeadUserId: nextLeadUserId ?? null,
     };
   });
 }
 
 export async function removeMemberFromCurrentTeam(actor: AppSessionUser, memberUserId: string) {
+  assertTeamsOpen();
+
   if (memberUserId === actor.id) {
     throw createTeamError(
       400,
@@ -962,7 +1000,7 @@ async function adminAssignMemberToTeam(
     }
 
     if (refreshedTargetTeam.memberCount >= refreshedTargetTeam.maxMembers) {
-      throw createTeamError(409, "TEAM_FULL", "This team already has 5 members.");
+      throw createTeamError(409, "TEAM_FULL", `This team already has the maximum of ${refreshedTargetTeam.maxMembers} members.`);
     }
 
     await tx.insert(teamMember).values({
@@ -1139,4 +1177,94 @@ export async function forceUpdateTeamMembership(
     default:
       throw createTeamError(400, "INVALID_ACTION", "Unsupported admin membership action.");
   }
+}
+
+// ---------------------------------------------------------------------------
+// "Available to join a team"
+// ---------------------------------------------------------------------------
+
+export async function setAvailability(
+  actor: AppSessionUser,
+  input: { available: boolean; note: string | null },
+) {
+  if (input.available) {
+    assertTeamsOpen();
+    const membership = await getActiveMembershipForUser(db, actor.id);
+    if (membership) {
+      throw createTeamError(
+        409,
+        "ALREADY_IN_TEAM",
+        "You are already in a team. Leave it first if you want to be listed as available.",
+      );
+    }
+  }
+
+  const [row] = await db
+    .update(user)
+    .set({
+      availableForTeamAt: input.available ? now() : null,
+      availableNote: input.note,
+      updatedAt: now(),
+    })
+    .where(eq(user.id, actor.id))
+    .returning({ availableForTeamAt: user.availableForTeamAt, availableNote: user.availableNote });
+
+  return {
+    available: Boolean(row?.availableForTeamAt),
+    since: row?.availableForTeamAt ?? null,
+    note: row?.availableNote ?? null,
+  };
+}
+
+export async function getAvailability(actor: AppSessionUser) {
+  const [row] = await db
+    .select({ availableForTeamAt: user.availableForTeamAt, availableNote: user.availableNote })
+    .from(user)
+    .where(eq(user.id, actor.id))
+    .limit(1);
+  return {
+    available: Boolean(row?.availableForTeamAt),
+    since: row?.availableForTeamAt ?? null,
+    note: row?.availableNote ?? null,
+  };
+}
+
+/**
+ * Participants marked available (and not in a team). Visible to signed-in team members
+ * and admins. Email addresses are NOT exposed: people reach each other through the note
+ * they chose to write.
+ */
+export async function listAvailableParticipants(actor: AppSessionUser) {
+  if (actor.role !== "super_admin") {
+    const membership = await getActiveMembershipForUser(db, actor.id);
+    if (!membership) {
+      throw createTeamError(
+        403,
+        "TEAM_REQUIRED",
+        "The list of available people is visible to members of a team.",
+      );
+    }
+  }
+
+  const rows = await db
+    .select({
+      userId: user.id,
+      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      image: user.image,
+      note: user.availableNote,
+      since: user.availableForTeamAt,
+    })
+    .from(user)
+    .where(and(sql`${user.availableForTeamAt} is not null`, isNull(user.teamId), eq(user.role, "participant")))
+    .orderBy(user.availableForTeamAt);
+
+  return rows.map((row) => ({
+    userId: row.userId,
+    name: [row.firstName, row.lastName].filter(Boolean).join(" ") || row.name,
+    image: row.image,
+    note: row.note,
+    since: row.since,
+  }));
 }
