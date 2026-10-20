@@ -23,7 +23,7 @@ function escapeHtml(value: string) {
 async function assertGuestListAccess(email: string) {
   const decision = await checkPortalSignIn(email);
   if (!decision.allowed) {
-    throw new APIError("FORBIDDEN", { message: decision.message, code: "NOT_ON_GUEST_LIST" });
+    throw new APIError("FORBIDDEN", { message: decision.message, code: decision.code });
   }
 }
 

@@ -185,8 +185,13 @@ export const EVENT = {
     },
     /** Team lock: no create/join/leave after this instant (Europe/Rome, CET after DST ends 25 Oct). */
     teamLockAt: "2026-10-31T23:59:00+01:00",
-    /** Luma approval statuses that may NOT sign in to the portal. */
-    blockedLumaStatuses: ["declined"] as string[],
+    /**
+     * Luma `approval_status` values that MAY sign in (compared after normalising: trim,
+     * lower-case, spaces/hyphens -> "_"). Only confirmed guests: Luma's API/CSV value is
+     * `approved`; "going" is Luma's UI label for the same status. Everything else
+     * (waitlist, pending_approval, invited, declined, empty) is refused.
+     */
+    approvedLumaStatuses: ["approved", "going"] as string[],
   },
 
   /** Bump when the public content changes; used as sitemap lastModified. */

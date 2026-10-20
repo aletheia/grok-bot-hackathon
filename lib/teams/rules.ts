@@ -19,7 +19,7 @@ export function getTeamRules(): TeamRule[] {
   return [
     {
       title: "Sign in with your Luma email",
-      body: `Use the same email you used to register on ${EVENT.registration.provider}. The portal only lets in people on the Luma guest list; we send a one-time code to that address.`,
+      body: `Use the same email you used to register on ${EVENT.registration.provider}. Only guests the organisers have approved on Luma can sign in (not waitlist or pending); we send a one-time code to that address.`,
     },
     {
       title: "Create, join or say you're available",

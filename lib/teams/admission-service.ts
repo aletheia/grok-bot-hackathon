@@ -4,7 +4,7 @@ import { team, user } from "@/db/schema/auth";
 import { lumaRegistrant } from "@/db/schema/luma";
 import { teamMember } from "@/db/schema/teams";
 import { EVENT } from "@/lib/event";
-import { isRegistrantAllowed } from "@/lib/luma/allowlist";
+import { isRegistrantApproved } from "@/lib/luma/allowlist";
 import { computeAdmission, type AdmissionTeam } from "@/lib/teams/admission";
 import { TEAM_LIMITS } from "@/lib/teams/constants";
 import { TEAM_LOCK_AT, isTeamsLocked } from "@/lib/teams/policy";
@@ -24,12 +24,6 @@ export async function getAdmissionOverview() {
     .innerJoin(user, eq(user.id, teamMember.userId))
     .where(and(isNull(teamMember.leftAt), eq(team.status, "active")));
 
-  const teamsById = new Map<number, AdmissionTeam>();
-  for (const row of memberRows) {
-    const entry = teamsById.get(row.teamId) ?? { id: row.teamId, name: row.teamName, members: [] };
-    entry.members.push({ userId: row.userId, name: row.name, email: row.email });
-    teamsById.set(row.teamId, entry);
-  }
 
   const guests = await db
     .select({
@@ -47,8 +41,22 @@ export async function getAdmissionOverview() {
     .from(lumaRegistrant)
     .leftJoin(user, sql`lower(${user.email}) = ${lumaRegistrant.email}`);
 
+  // Seats are only for confirmed guests: team members whose Luma status is not approved
+  // (e.g. moved back to waitlist after a re-import) do not count towards a formed team.
+  const approvedEmails = new Set(
+    guests.filter((g) => isRegistrantApproved({ email: g.email, lumaStatus: g.lumaStatus })).map((g) => g.email),
+  );
+  const teamsById = new Map<number, AdmissionTeam>();
+  for (const row of memberRows) {
+    if (!approvedEmails.has(row.email.trim().toLowerCase())) continue;
+    const entry = teamsById.get(row.teamId) ?? { id: row.teamId, name: row.teamName, members: [] };
+    entry.members.push({ userId: row.userId, name: row.name, email: row.email });
+    teamsById.set(row.teamId, entry);
+  }
+
   const candidates = guests
-    .filter((g) => isRegistrantAllowed({ email: g.email, lumaStatus: g.lumaStatus }))
+    // Only confirmed (approved) Luma guests count for seats; waitlist/pending/invited/declined do not.
+    .filter((g) => approvedEmails.has(g.email))
     .map((g) => {
       const t = g.teamId ? teamsById.get(g.teamId) : undefined;
       return {
@@ -77,6 +85,8 @@ export async function getAdmissionOverview() {
     teamLockAt: TEAM_LOCK_AT.toISOString(),
     teamsLocked: isTeamsLocked(),
     guestListSize: guests.length,
+    approvedGuests: candidates.length,
+    notApprovedGuests: guests.length - candidates.length,
     orderingRule:
       "Luma registration time (CSV created_at), then portal account creation time, then import time; ties by email.",
   };

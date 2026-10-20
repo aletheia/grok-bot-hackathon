@@ -29,7 +29,7 @@ export default function LoginPage() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notOnList, setNotOnList] = useState(false);
+  const [lumaHint, setLumaHint] = useState<null | "register" | "status">(null);
 
   useEffect(() => {
     if (!isPending && session?.user) {
@@ -40,7 +40,7 @@ export default function LoginPage() {
   const sendCode = async (event?: FormEvent) => {
     event?.preventDefault();
     setError(null);
-    setNotOnList(false);
+    setLumaHint(null);
     setBusy(true);
     try {
       const { error: sendError } = await authClient.emailOtp.sendVerificationOtp({
@@ -48,8 +48,8 @@ export default function LoginPage() {
         type: "sign-in",
       });
       if (sendError) {
-        const status = (sendError as { status?: number }).status;
-        setNotOnList(status === 403);
+        const { status, code } = sendError as { status?: number; code?: string };
+        if (status === 403) setLumaHint(code === "LUMA_NOT_APPROVED" ? "status" : "register");
         setError(errorMessage(sendError, "We could not send the code. Please try again."));
         return;
       }
@@ -115,14 +115,14 @@ export default function LoginPage() {
                 className="mb-6 w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-left text-sm text-red-200"
               >
                 <p>{error}</p>
-                {notOnList ? (
+                {lumaHint ? (
                   <a
                     href={EVENT.registration.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-2 inline-block font-semibold text-white underline"
                   >
-                    Register on Luma →
+                    {lumaHint === "status" ? "Check your registration on Luma →" : "Register on Luma →"}
                   </a>
                 ) : null}
               </div>
@@ -204,7 +204,8 @@ export default function LoginPage() {
               >
                 Register on Luma
               </a>{" "}
-              first. Only emails on the Luma guest list can sign in.{" "}
+              first. Only guests approved on Luma can sign in; if you are on the waitlist or pending, you can sign in once
+              the organisers approve you.{" "}
               <Link href="/rules" className="text-white underline">
                 How teams work
               </Link>

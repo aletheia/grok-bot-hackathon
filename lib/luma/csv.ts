@@ -7,6 +7,7 @@
  * matched case-insensitively with a few known aliases.
  */
 import { normalizeEmail, isValidEmail } from "@/lib/luma/email";
+import { normalizeLumaStatus } from "@/lib/luma/allowlist";
 
 /** RFC 4180-ish CSV: quoted fields, "" escapes, commas/newlines inside quotes, CRLF, BOM. */
 export function parseCsv(input: string): string[][] {
@@ -129,7 +130,7 @@ export function parseLumaGuestCsv(input: string): LumaCsvResult {
       cell(row, "name") ||
       [cell(row, "firstName"), cell(row, "lastName")].filter(Boolean).join(" ") ||
       null;
-    const status = cell(row, "status")?.toLowerCase() || null;
+    const status = normalizeLumaStatus(cell(row, "status")) || null;
     if (byEmail.has(email)) duplicates.add(email);
     byEmail.set(email, {
       email,

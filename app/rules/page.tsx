@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const FAQ: { q: string; a: string }[] = [
   {
     q: "Which email do I sign in with?",
-    a: `The one you used to register on ${EVENT.registration.provider}. We email a 6-digit code to it; there is no password. If the portal says your email is not on the guest list, register on Luma first or try the other address you may have used. The guest list is imported from Luma by the organisers, so a brand-new registration can take a while to show up.`,
+    a: `The one you used to register on ${EVENT.registration.provider}. We email a 6-digit code to it; there is no password. Only approved guests can sign in: if you are on the waitlist or still pending, you can sign in once the organisers approve your registration on Luma. If the portal says your email is not on the guest list, register on Luma first or try the other address you may have used. The guest list is imported from Luma by the organisers, so a new registration or approval can take a while to show up.`,
   },
   {
     q: "How do I get people into my team?",

@@ -36,7 +36,7 @@ Status: plan for PR #1 (branch `feat/grok-hackathon-pavia-landing`). Based on Lu
     - status: `approval_status`, `approval status`, `status`
     - registered: `created_at`, `registered_at`, `registration date`, `created at`
   - Rows are upserted by email (merge, never deletes). The admin gets back counts: inserted, updated, skipped (no or invalid email), duplicates in file.
-- **Who may sign in**: an email in `luma_registrant` whose status is not in `EVENT.portal.blockedLumaStatuses` (default: `declined`).
+- **Who may sign in**: an email in `luma_registrant` whose status is not in `EVENT.portal.blockedLumaStatuses` (default: `declined`). *Superseded, see "Decision: approved guests only" below.*
   - Bypass: `SUPER_ADMIN_EMAILS`, users whose role is not `participant` (staff/judges/mentors), and emails with a pending staff invite.
   - Matching is case-insensitive and trimmed (`normalizeEmail`).
 - **Mechanism**: Better Auth `emailOTP` plugin. The 6-digit code is sent through the existing Resend sender, with `sign-up` on first sign-in.
@@ -105,3 +105,11 @@ Code generation (length, alphabet, uniqueness retry); size limits and close at 6
 - `https://app.cursorcommunity.uz` (the template's production origin) was removed from `trustedOrigins`.
 - Sending a sign-in code tells the person whether their email is on the guest list. That small enumeration risk was accepted so the "not on the list → go to Luma" message is clear. Better Auth's built-in rate limit applies (about 3 requests per minute per IP on that endpoint).
 - If Resend fails, Better Auth runs the sender in the background: the person sees the code step but no email arrives, and the error is logged server-side. Configure `RESEND_API_KEY` and `EMAIL_FROM` before going live.
+
+## Decision: approved guests only (Luca, PR #1 review)
+
+- Only confirmed guests may sign in. The Luma `approval_status` value (Luma's API/CSV docs: `approved` = "Going", `pending_approval` = "Pending", `waitlist`, `invited`, `declined` = "Not Going") is normalised (trim, lower case, spaces/hyphens → `_`). A guest passes only if it matches `EVENT.portal.approvedLumaStatuses` = `approved` or `going`.
+- Waitlist, pending, invited and empty/unknown statuses get "Your Luma registration isn't approved yet. You can sign in once the organisers approve it on Luma." Declined gets its own declined message. Both use error code `LUMA_NOT_APPROVED`, so they are distinct from "not on the list" (`NOT_ON_GUEST_LIST`). Super admins and staff still bypass.
+- The gate runs on every session creation, so after a re-import an existing participant whose status is no longer approved cannot start a new session. Sessions that are already open stay valid until they expire.
+- Admission counts only approved guests, both in the FCFS queue and as members of formed teams.
+- Empty teams are archived (soft delete), as confirmed.

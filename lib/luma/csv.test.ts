@@ -33,7 +33,7 @@ describe("parseLumaGuestCsv", () => {
     const csv = [
       "api_id,name,first_name,last_name,email,approval_status,created_at",
       'gst-1,"Ada Lovelace",Ada,Lovelace,  Ada@Example.COM ,Approved,2026-09-01T10:00:00.000Z',
-      "gst-2,,Alan,Turing,alan@example.com,waitlist,2026-09-02T10:00:00.000Z",
+      "gst-2,,Alan,Turing,alan@example.com,Pending Approval,2026-09-02T10:00:00.000Z",
       "gst-3,No Email,,,,approved,",
       "gst-4,Bad,,,not-an-email,approved,",
       "gst-5,Ada again,,,ada@example.com,approved,2026-09-03T10:00:00.000Z",
@@ -53,7 +53,7 @@ describe("parseLumaGuestCsv", () => {
       {
         email: "alan@example.com",
         name: "Alan Turing",
-        lumaStatus: "waitlist",
+        lumaStatus: "pending_approval",
         lumaRegisteredAt: new Date("2026-09-02T10:00:00.000Z"),
       },
     ]);

@@ -92,7 +92,8 @@ export default function LumaGuestListPage() {
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
           Only emails on this list can sign in to the portal (staff and super admins excepted). In Luma, open the event →
           Guests → Export CSV, then upload it here. Re-importing updates existing rows by email and never deletes anyone.
-          Guests with status <code>declined</code> cannot sign in.
+          Only guests with approval status <code>approved</code> (&ldquo;Going&rdquo; in Luma) can sign in; waitlist,
+          pending, invited, declined and empty statuses are refused. Re-import after approving people on Luma.
         </p>
       </div>
 

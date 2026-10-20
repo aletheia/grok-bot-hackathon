@@ -27,6 +27,8 @@ type Overview = {
   teamLockAt: string;
   teamsLocked: boolean;
   guestListSize: number;
+  approvedGuests: number;
+  notApprovedGuests: number;
   orderingRule: string;
 };
 
@@ -66,8 +68,9 @@ export default function AdmissionPage() {
       <div>
         <h1 className="text-2xl font-bold text-white">Admission</h1>
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
-          Teams with 4 or more members are formed and all their members get guaranteed seats. Everyone else on the Luma
-          guest list (except declined) is admitted first-come, first-served until the capacity is reached. Order:{" "}
+          Teams with 4 or more members are formed and all their members get guaranteed seats. Everyone else who is an
+          approved Luma guest is admitted first-come, first-served until the capacity is reached. Only approved guests
+          count: waitlist, pending, invited and declined guests (and team members with those statuses) are not counted. Order:{" "}
           {data.orderingRule} Team lock: {formatRome(new Date(data.teamLockAt))} (Rome time) —{" "}
           {data.teamsLocked ? "locked, figures are final." : "not locked yet, figures are provisional."} This page sends
           no emails.
@@ -80,6 +83,10 @@ export default function AdmissionPage() {
         {stat("Remaining seats (FCFS)", data.remainingSeats)}
         {stat("Queue length", data.queue.length)}
       </div>
+      <p className="text-sm text-[var(--text-secondary)]">
+        Guest list: {data.guestListSize} imported, {data.approvedGuests} approved, {data.notApprovedGuests} not approved
+        (excluded).
+      </p>
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-white">Formed teams ({data.formedTeams.length})</h2>
