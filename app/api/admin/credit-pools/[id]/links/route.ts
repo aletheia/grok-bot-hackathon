@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import type { NextRequest } from "next/server";
 import { eq, inArray, or } from "drizzle-orm";
 import { db } from "@/db";
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const [pool] = await db.select().from(creditPool).where(eq(creditPool.id, poolId)).limit(1);
     if (!pool) throw new AppError(404, "NOT_FOUND", "Credit pool not found.");
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    const baseUrl = getAppUrl();
     const pathPrefix = baseUrl ? `${baseUrl.replace(/\/$/, "")}/r/` : "/r/";
 
     const teamAllocIds = await db

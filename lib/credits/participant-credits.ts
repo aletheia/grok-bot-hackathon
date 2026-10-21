@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import {
@@ -59,7 +60,7 @@ export async function getParticipantCreditsForUser(userId: string): Promise<Part
       ),
     );
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const baseUrl = getAppUrl();
   const pathPrefix = baseUrl ? `${baseUrl.replace(/\/$/, "")}/r/` : "/r/";
 
   const byAlloc = new Map<number, typeof links>();

@@ -6,7 +6,7 @@ import { EVENT } from "@/lib/event";
 import { formatTeamLock, getTeamRules } from "@/lib/teams/rules";
 
 export const metadata: Metadata = {
-  title: `How teams work — ${EVENT.name}`,
+  title: "How teams work",
   description: `Sign-in, team size, secret codes, the team lock and how seats are allocated at ${EVENT.name}.`,
   alternates: { canonical: "/rules" },
 };

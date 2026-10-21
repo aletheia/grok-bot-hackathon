@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import * as authSchema from "@/db/schema/auth";
 import { lumaRegistrant } from "@/db/schema/luma";
+import { getAppUrl, getVercelOrigins } from "@/lib/app-url";
 import { sendEmail } from "@/lib/email/send";
 import { EVENT } from "@/lib/event";
 import { normalizeEmail } from "@/lib/luma/email";
@@ -40,6 +41,9 @@ const trustedOrigins = Array.from(
     [
       process.env.BETTER_AUTH_URL,
       process.env.NEXT_PUBLIC_APP_URL,
+      getAppUrl(),
+      // Preview deployments are reachable on both the unique and the branch URL.
+      ...getVercelOrigins(),
       "http://localhost:3000",
       "http://localhost:3001",
       "http://127.0.0.1:3000",
@@ -133,10 +137,7 @@ export const auth = betterAuth({
     },
   }),
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL:
-    process.env.BETTER_AUTH_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    "http://localhost:3000",
+  baseURL: getAppUrl(),
   basePath: "/api/auth",
   trustedOrigins,
   emailAndPassword: {

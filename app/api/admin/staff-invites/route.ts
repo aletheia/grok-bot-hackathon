@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import { eq, and, isNull, gt, desc } from "drizzle-orm";
 import { siteConfig } from "@/lib/site";
 import { NextResponse } from "next/server";
@@ -12,10 +13,7 @@ import {
   getStaffInviteExpiresAt,
 } from "@/lib/staff/invite";
 
-const baseUrl = () =>
-  (process.env.NEXT_PUBLIC_APP_URL ??
-  process.env.BETTER_AUTH_URL ??
-  "http://localhost:3000").replace(/\/+$/, "");
+const baseUrl = () => getAppUrl();
 
 export async function GET(request: Request) {
   try {
