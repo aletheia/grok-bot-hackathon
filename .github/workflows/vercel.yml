@@ -1,0 +1,105 @@
+# Deploys to Vercel with the Vercel CLI (the project is not Git-linked in Vercel).
+#
+# - Preview:    every pull request to main (one comment per PR with the preview URL).
+# - Production: push to main, or manual run (workflow_dispatch). Gated by the
+#               GitHub Environment "production" (required reviewer: aletheia).
+#
+# Repository secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+# App env vars (DATABASE_URL, BETTER_AUTH_SECRET, RESEND_API_KEY, ...) live in the
+# Vercel project, not in GitHub; `vercel pull` fetches them for the build.
+name: Vercel
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_CLI_VERSION: "65"
+
+jobs:
+  preview:
+    name: Preview deployment
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: vercel-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install Vercel CLI
+        run: npm install --global vercel@${VERCEL_CLI_VERSION}
+      - name: Pull Vercel environment (preview)
+        run: vercel pull --yes --environment=preview --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Build
+        run: vercel build --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Deploy (preview)
+        id: deploy
+        run: |
+          out="$(vercel deploy --prebuilt --token="${{ secrets.VERCEL_TOKEN }}")"
+          # The CLI prints either the bare URL or a JSON summary; take the first deployment URL.
+          url="$(printf '%s\n' "$out" | grep -oE 'https://[^" ]+\.vercel\.app' | head -n 1)"
+          test -n "$url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Preview: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Comment preview URL on the PR
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+        with:
+          script: |
+            const marker = "<!-- vercel-preview -->";
+            const body = `${marker}\n**Vercel preview:** ${process.env.PREVIEW_URL}\n\nCommit ${context.payload.pull_request.head.sha.slice(0, 7)}. Preview deployments use Vercel Authentication (team login).`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  production:
+    name: Production deployment
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    concurrency:
+      group: vercel-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install Vercel CLI
+        run: npm install --global vercel@${VERCEL_CLI_VERSION}
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Build
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+      - name: Deploy (production)
+        id: deploy
+        run: |
+          out="$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")"
+          # The CLI prints either the bare URL or a JSON summary; take the first deployment URL.
+          url="$(printf '%s\n' "$out" | grep -oE 'https://[^" ]+\.vercel\.app' | head -n 1)"
+          test -n "$url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Production: $url" >> "$GITHUB_STEP_SUMMARY"
