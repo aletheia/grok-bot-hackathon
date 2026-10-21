@@ -14,13 +14,6 @@ export function Hosts() {
           </li>
         ))}
       </ul>
-      <div className="mt-8 flex flex-wrap items-center gap-4">
-        <span className="text-[var(--text-secondary)]">
-          {t('landing', 'hostedBy')} <span className="font-semibold text-white">{EVENT.organizer.name}</span>
-        </span>
-        <AssetSlot src={EVENT.assets.logos.spacexai} kind="logo" label={EVENT.organizer.shortName} width={120} height={56} />
-      </div>
-
       <div className="relative mt-20 overflow-hidden rounded-[2rem] bg-white/[0.04] px-6 py-14 text-center md:px-12">
         <Blob variant="pink" size={64} className="absolute left-6 top-6 hidden sm:block" />
         <Blob variant="blue" size={72} delay={0.8} className="absolute bottom-6 right-6 hidden sm:block" />

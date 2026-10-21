@@ -1,4 +1,5 @@
 import { EVENT, EVENT_DESCRIPTION } from "@/lib/event";
+import { getJsonLdSponsors } from "@/lib/landing-content";
 
 /** schema.org Event for the homepage, built only from lib/event.ts. */
 export function buildEventJsonLd(siteUrl: string) {
@@ -9,6 +10,9 @@ export function buildEventJsonLd(siteUrl: string) {
       : registration.status === "waitlist"
         ? "https://schema.org/SoldOut"
         : "https://schema.org/Discontinued";
+
+  // Only named sponsors/partners; placeholders are never published.
+  const sponsors = getJsonLdSponsors(EVENT.sponsors.tiers);
 
   return {
     "@context": "https://schema.org",
@@ -51,5 +55,6 @@ export function buildEventJsonLd(siteUrl: string) {
       url: registration.url,
       availability,
     },
+    ...(sponsors.length > 0 ? { sponsor: sponsors } : {}),
   };
 }

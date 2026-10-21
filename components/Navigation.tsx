@@ -14,7 +14,10 @@ const NAV_ITEMS = [
   { key: 'hardware', href: '/#hardware' },
   { key: 'schedule', href: '/#schedule' },
   { key: 'teams', href: '/#teams' },
+  { key: 'prizes', href: '/#prizes' },
+  { key: 'jury', href: '/#jury' },
   { key: 'venue', href: '/#venue' },
+  { key: 'sponsors', href: '/#sponsors' },
 ] as const;
 
 /** Landing navigation. The primary CTA is the Luma page; the portal is reached via "Sign in" / "Dashboard". */
@@ -37,7 +40,7 @@ export function Navigation() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  const linkClass = 'inline-flex min-h-[44px] items-center px-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-white';
+  const linkClass = 'inline-flex min-h-[44px] items-center whitespace-nowrap px-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-white';
   const portal = session?.user ? { href: '/dashboard', label: t('nav', 'dashboard') } : { href: '/register', label: t('nav', 'signIn') };
 
   return (
@@ -59,7 +62,7 @@ export function Navigation() {
             <span className="hidden font-display text-base font-extrabold uppercase text-white sm:block">{siteConfig.shortName}</span>
           </Link>
 
-          <ul className="hidden items-center gap-3 lg:flex">
+          <ul className="hidden items-center gap-1 xl:flex">
             {NAV_ITEMS.map((item) => (
               <li key={item.key}>
                 <a href={item.href} className={linkClass}>
@@ -74,7 +77,7 @@ export function Navigation() {
               {portal.label}
             </Link>
             <div className="hidden md:block">
-              <LumaCta size="md" />
+              <LumaCta size="md" className="whitespace-nowrap" />
             </div>
             <button
               type="button"
@@ -82,7 +85,7 @@ export function Navigation() {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? t('nav', 'menuClose') : t('nav', 'menuOpen')}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white lg:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white xl:hidden"
             >
               {open ? <X aria-hidden="true" className="h-6 w-6" /> : <Menu aria-hidden="true" className="h-6 w-6" />}
             </button>
@@ -90,7 +93,7 @@ export function Navigation() {
         </nav>
 
         {open && (
-          <div id="mobile-menu" className="border-t border-white/10 px-5 pb-6 pt-2 lg:hidden">
+          <div id="mobile-menu" className="border-t border-white/10 px-5 pb-6 pt-2 xl:hidden">
             <ul className="flex flex-col">
               {NAV_ITEMS.map((item) => (
                 <li key={item.key}>

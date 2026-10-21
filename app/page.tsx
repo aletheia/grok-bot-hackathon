@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { AfterEvent, Awards, Brief, Hardware, Hero, Hosts, Practical, Schedule, Speaker, Teams, Venue } from "@/components/landing";
+import { AfterEvent, Brief, Hardware, Hero, Hosts, Jury, Practical, Prizes, Schedule, Speaker, Sponsors, Teams, Venue } from "@/components/landing";
 import { formatDateRange } from "@/lib/event";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
@@ -29,10 +29,12 @@ export default function Home() {
         <Schedule />
         <Speaker />
         <Teams />
-        <Awards />
+        <Prizes />
+        <Jury />
         <Practical />
         <Venue />
         <AfterEvent />
+        <Sponsors />
         <Hosts />
       </main>
       <Footer />

@@ -37,9 +37,64 @@ export type RegistrationStatus = "open" | "waitlist" | "closed";
 export type AssetSrc = string | null;
 
 export type Track = { title: string; description?: string };
-export type Prize = { title: string; description?: string };
-export type JuryMember = { name: string; role?: string; photo?: AssetSrc };
 export type Criterion = { title: string; description?: string; weight?: string };
+
+/**
+ * A prize. `place` 1–3 puts it on the podium; leave `place` out for special or track prizes.
+ * `title: null` (or a missing podium place) renders a "Prize to be announced" card.
+ */
+export type Prize = {
+  place?: 1 | 2 | 3;
+  /** e.g. "Best use of Grok Voice". For podium prizes the place label is shown anyway. */
+  title: string | null;
+  /** What the winners get, exactly as announced (e.g. an amount or an item). `null` = to be announced. */
+  reward?: string | null;
+  description?: string | null;
+  /** Optional track the prize belongs to (should match a title in EVENT.tracks). */
+  track?: string | null;
+};
+
+/** A juror. `name: null` renders a labelled placeholder card. */
+export type JuryMember = {
+  name: string | null;
+  role?: string | null;
+  org?: string | null;
+  /** Square photo under /public (e.g. "/assets/jury/jane-doe.jpg") or absolute URL. */
+  photo?: AssetSrc;
+  /** One or two sentences. */
+  bio?: string | null;
+  /** Optional profile link (LinkedIn, personal site…). */
+  link?: string | null;
+};
+
+/** A sponsor or partner. `name: null` renders a "Sponsor logo" placeholder. */
+export type Sponsor = {
+  name: string | null;
+  /** Logo under /public (e.g. "/assets/sponsors/acme.svg") or absolute URL. `null` = labelled placeholder with the name. */
+  logo?: AssetSrc;
+  url?: string | null;
+};
+
+export type SponsorTier = {
+  id: string;
+  /** Heading shown above the tier, e.g. "Organized by", "Main sponsors", "Partners". */
+  title: string;
+  /** organizer = the event organizer (not repeated in JSON-LD); sponsor/partner = listed as schema.org sponsors once named. */
+  kind: "organizer" | "sponsor" | "partner";
+  /** Logo size in the grid. */
+  size: "lg" | "md" | "sm";
+  /** How many "Sponsor logo" placeholders to show while `sponsors` is empty (0 hides the tier). */
+  placeholderSlots: number;
+  sponsors: Sponsor[];
+};
+
+/** Logos Luca will provide. Put files in /public/assets/… and set the path, or use an absolute URL. `null` = labelled placeholder. */
+const LOGOS = {
+  spacexai: null as AssetSrc,
+  ctrlAltMuseum: null as AssetSrc,
+  compvter: null as AssetSrc,
+  startupWeekend: null as AssetSrc,
+};
 
 export const EVENT = {
   name: "Grok Hackathon at the Museum",
@@ -77,12 +132,7 @@ export const EVENT = {
    * or use an absolute URL. `null` renders a labelled placeholder.
    */
   assets: {
-    logos: {
-      spacexai: null as AssetSrc,
-      ctrlAltMuseum: null as AssetSrc,
-      compvter: null as AssetSrc,
-      startupWeekend: null as AssetSrc,
-    },
+    logos: LOGOS,
   },
 
   venue: {
@@ -136,9 +186,55 @@ export const EVENT = {
 
   /** To be published. Empty arrays render a "To be announced" state. */
   tracks: [] as Track[],
-  prizes: [] as Prize[],
-  jury: [] as JuryMember[],
   criteria: [] as Criterion[],
+
+  /**
+   * PRIZES (landing #prizes). Add one entry per prize, e.g.
+   *   { place: 1, title: "Best overall", reward: "<as announced>", description: "…" }
+   *   { title: "Best use of Grok Voice", reward: "<as announced>", track: "<track title>" }
+   * Podium places 1–3 without an entry show "Prize to be announced". Entries without
+   * `place` appear in the "Special and track prizes" list (hidden while there are none).
+   */
+  prizes: [] as Prize[],
+
+  /**
+   * JURY (landing #jury). Add one entry per juror:
+   *   { name: "…", role: "…", org: "…", photo: "/assets/jury/<file>.jpg", bio: "…", link: "https://…" }
+   * While the list is empty, `juryPlaceholderSlots` placeholder cards are shown.
+   * The evaluation criteria card (EVENT.criteria above) sits next to the jury.
+   */
+  jury: [] as JuryMember[],
+  juryPlaceholderSlots: 3,
+
+  /**
+   * SPONSORS (landing #sponsors). Fill `sponsors` in each tier:
+   *   { name: "…", logo: "/assets/sponsors/<file>.svg", url: "https://…" }
+   * Rename, add or remove tiers freely; an empty tier shows `placeholderSlots`
+   * "Sponsor logo" boxes (0 hides it). Named sponsor/partner entries are also added to
+   * the event JSON-LD; placeholders never are.
+   */
+  sponsors: {
+    tiers: [
+      {
+        id: "organizer",
+        title: "Organized by",
+        kind: "organizer",
+        size: "lg",
+        placeholderSlots: 0,
+        sponsors: [{ name: "SpaceXAI", logo: LOGOS.spacexai, url: null }],
+      },
+      { id: "main", title: "Main sponsors", kind: "sponsor", size: "lg", placeholderSlots: 2, sponsors: [] },
+      { id: "partners", title: "Partners", kind: "partner", size: "md", placeholderSlots: 4, sponsors: [] },
+    ] as SponsorTier[],
+    /**
+     * "Become a sponsor" contact. TODO(Luca): set a real email and/or page URL.
+     * While both are null the CTA says the contact is to be announced (no invented address).
+     */
+    contact: {
+      email: null as string | null,
+      url: null as string | null,
+    },
+  },
 
   schedule: [
     {

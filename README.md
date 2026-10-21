@@ -2,7 +2,7 @@
 
 Landing site and participant platform for **Grok Hackathon at the Museum**. Registration for the event happens on [Luma](https://luma.com/spacexai-z1ys).
 
-**Event facts live in one place: [`lib/event.ts`](lib/event.ts).** Landing sections, metadata, Open Graph image, JSON-LD (`lib/event-jsonld.ts`), sitemap and footer all read from it. UI copy is in `lib/i18n.ts`. The site and portal are English only. Logos and photos that are not available yet are `null` in `lib/event.ts` and render as labelled placeholders; set a path under `public/` to swap them in. Prizes, jury, evaluation criteria and tracks are arrays in the same file: an empty array shows “To be announced”.
+**Event facts live in one place: [`lib/event.ts`](lib/event.ts).** Landing sections, metadata, Open Graph image, JSON-LD (`lib/event-jsonld.ts`), sitemap and footer all read from it. UI copy is in `lib/i18n.ts`. The site and portal are English only. Logos and photos that are not available yet are `null` in `lib/event.ts` and render as labelled placeholders; set a path under `public/` to swap them in. Prizes (`EVENT.prizes`, podium places 1–3 plus special/track prizes), jury (`EVENT.jury`), sponsors (`EVENT.sponsors.tiers` and `EVENT.sponsors.contact`), evaluation criteria and tracks live in the same file, with a comment on how to fill each: empty entries render labelled placeholders or “To be announced”, and only named sponsors reach the JSON-LD.
 
 The platform underneath (forked from CURSOR 48H):
 

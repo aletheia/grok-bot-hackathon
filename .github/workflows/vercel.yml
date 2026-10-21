@@ -62,7 +62,7 @@ jobs:
         with:
           script: |
             const marker = "<!-- vercel-preview -->";
-            const body = `${marker}\n**Vercel preview:** ${process.env.PREVIEW_URL}\n\nCommit ${context.payload.pull_request.head.sha.slice(0, 7)}. Preview deployments use Vercel Authentication (team login).`;
+            const body = `${marker}\n**Vercel preview:** ${process.env.PREVIEW_URL}\n\nCommit ${context.payload.pull_request.head.sha.slice(0, 7)}. Previews are public (no Vercel login needed).`;
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
             const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
