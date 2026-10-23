@@ -45,6 +45,15 @@ export type HardwareItem = {
   image?: HardwareImage;
 };
 
+/** One tool or product participants can use ("You can use" on the landing). */
+export type GrokStackItem = {
+  name: string;
+  /** One plain-English line. */
+  description: string;
+  /** Official page (docs or product page); opens in a new tab. */
+  url?: string;
+};
+
 export type RegistrationStatus = "open" | "waitlist" | "closed";
 
 /** Image asset: path under /public (e.g. "/assets/logos/spacexai.svg") or absolute URL. `null` = placeholder. */
@@ -184,7 +193,47 @@ export const EVENT = {
   brief:
     "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by Thursday afternoon show something that didn't work when you started.",
 
-  grokSurfaces: ["Grok API", "Grok Voice", "Grok Bots"],
+  /**
+   * What participants can use, from the official docs (docs.x.ai, x.ai/news, cursor.com/docs).
+   * Only products that exist and are available to developers; no availability or pricing claims here.
+   */
+  grokStack: [
+    {
+      name: "Grok API",
+      description: "Grok 4.7 for chat, reasoning and code, with function calling and structured outputs.",
+      url: "https://docs.x.ai/overview",
+    },
+    {
+      name: "Search and code tools",
+      description: "Web search, X search, code execution and search over your own documents, built into the API.",
+      url: "https://docs.x.ai/developers/tools/overview",
+    },
+    {
+      name: "Grok Voice",
+      description: "Real-time speech-to-speech agents, text to speech and speech to text.",
+      url: "https://docs.x.ai/developers/model-capabilities/audio/voice",
+    },
+    {
+      name: "Grok Imagine",
+      description: "Generate and edit images and videos from text.",
+      url: "https://docs.x.ai/developers/model-capabilities/imagine",
+    },
+    {
+      name: "Grok Build",
+      description: "A coding agent for your terminal, also usable in scripts and from editors.",
+      url: "https://docs.x.ai/build/overview",
+    },
+    {
+      name: "Grok Bot",
+      description: "AI teammates with their own computer that work across your apps.",
+      url: "https://x.ai/news/introducing-grok-bot",
+    },
+    {
+      name: "Cursor",
+      description: "A coding agent for the desktop and the terminal, with parallel cloud agents and Grok 4.7 among its models.",
+      url: "https://cursor.com/docs",
+    },
+  ] satisfies GrokStackItem[],
 
   hardware: [
     // The two simulator drawings are similar: keep them apart in the grid (dog and arm sit between them).

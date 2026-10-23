@@ -42,6 +42,26 @@ describe("event config", () => {
     expect(new Set(alts).size).toBe(alts.length);
   });
 
+  it("\"You can use\" lists the verified Grok stack and Cursor, each with a line and an official https link", () => {
+    expect(EVENT.grokStack.map((i) => i.name)).toEqual([
+      "Grok API",
+      "Search and code tools",
+      "Grok Voice",
+      "Grok Imagine",
+      "Grok Build",
+      "Grok Bot",
+      "Cursor",
+    ]);
+    expect(new Set(EVENT.grokStack.map((i) => i.name)).size).toBe(EVENT.grokStack.length);
+    for (const item of EVENT.grokStack) {
+      expect(item.description.length).toBeGreaterThan(10);
+      expect(item.description).not.toMatch(/credit|free|\$/i);
+      expect(new URL(item.url!).protocol).toBe("https:");
+      expect(["docs.x.ai", "x.ai", "cursor.com"]).toContain(new URL(item.url!).hostname);
+    }
+    expect(t("landing", "briefWith")).toBe("You can use");
+  });
+
   it("schedule days fall within the event dates", () => {
     expect(EVENT.schedule.map((d) => d.date)).toEqual(["2026-11-04", "2026-11-05"]);
   });
