@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EVENT, formatAddress, formatDateRange, formatDayLabel, getMapsUrl } from "@/lib/event";
+import { EVENT, formatAddress, formatDateRange, formatDayLabel, getMapsUrl, type ScheduleDay } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
 import { t, translations } from "@/lib/i18n";
 
@@ -9,6 +9,14 @@ describe("event config", () => {
     expect(EVENT.startDate).toBe("2026-11-04T09:00:00+01:00");
     expect(EVENT.endDate).toBe("2026-11-05T22:30:00+01:00");
     expect(new Date(EVENT.startDate).getTime()).toBeLessThan(new Date(EVENT.endDate).getTime());
+  });
+
+  it("marks the Ctrl+Alt Ecosystem presentation as invitation only (and nothing else)", () => {
+    const days: readonly ScheduleDay[] = EVENT.schedule;
+    const items = days.flatMap((d) => d.items);
+    const flagged = items.filter((i) => i.invitationOnly);
+    expect(flagged.map((i) => i.title)).toEqual(["Ctrl+Alt Ecosystem presentation"]);
+    expect(t("landing", "invitationOnly")).toBe("Invitation only");
   });
 
   it("schedule days fall within the event dates", () => {

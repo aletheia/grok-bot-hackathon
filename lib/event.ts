@@ -20,6 +20,8 @@ export type ScheduleItem = {
   endTime?: string;
   title: string;
   detail?: string;
+  /** Not open to all participants: the landing renders an "Invitation only" badge on the item. */
+  invitationOnly?: boolean;
 };
 
 export type ScheduleDay = {
@@ -270,7 +272,7 @@ export const EVENT = {
       date: "2026-11-04",
       items: [
         { time: "09:00", title: "Kick-off", detail: "Hardware tour, find a team, start building." },
-        { time: "18:00", title: "Ctrl+Alt Ecosystem presentation" },
+        { time: "18:00", title: "Ctrl+Alt Ecosystem presentation", invitationOnly: true },
         { title: "Hacking continues through the night", detail: "The museum stays open to participants." },
       ],
     },
