@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { EVENT } from "@/lib/event";
 import { Logo, NoiseOverlay } from "@/components/ui";
+import { RegistrationNotice } from "@/components/RegistrationNotice";
 
 const LOADING_UI = (
   <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
@@ -101,6 +102,7 @@ export default function LoginPage() {
       <NoiseOverlay />
       <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)] px-4 py-12">
         <div className="w-full max-w-md">
+          <RegistrationNotice className="mb-6" />
           <div className="glass-card p-8 sm:p-10 flex flex-col items-center text-center">
             <Logo size={48} className="mb-6" />
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Sign in to the team portal</h1>

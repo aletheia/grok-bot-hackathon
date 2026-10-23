@@ -29,6 +29,7 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { ProjectSection } from "@/components/dashboard/ProjectSection";
 import { AvailabilityCard, AvailablePeople, TeamLockNotice, useTeamsLocked } from "@/components/dashboard/TeamExtras";
+import { RegistrationNotice } from "@/components/RegistrationNotice";
 import { PartnerCreditsPanel } from "@/components/participant/PartnerCreditsPanel";
 import { Button, NoiseOverlay, SpotlightCard } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
@@ -829,6 +830,7 @@ export default function DashboardPage() {
             </h2>
           </div>
 
+          <RegistrationNotice className="mb-4" showRulesLink={false} />
           <TeamLockNotice />
 
           {isTeamLoading ? (

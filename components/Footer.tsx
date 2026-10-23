@@ -21,6 +21,11 @@ export function Footer() {
         </div>
         <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <li>
+            <Link href="/tracks" className={ext}>
+              {t('footer', 'tracks')}
+            </Link>
+          </li>
+          <li>
             <Link href="/rules" className={ext}>
               {t('footer', 'rules')}
             </Link>

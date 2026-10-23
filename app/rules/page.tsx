@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
+import { RegistrationNotice } from "@/components/RegistrationNotice";
 import { Navigation } from "@/components/Navigation";
 import { EVENT } from "@/lib/event";
+import { formatRegistrationDay, REGISTRATION_CLOSES_AT, REGISTRATION_OPENS_AT } from "@/lib/registration";
 import { formatTeamLock, getTeamRules } from "@/lib/teams/rules";
 
 export const metadata: Metadata = {
@@ -12,6 +14,10 @@ export const metadata: Metadata = {
 };
 
 const FAQ: { q: string; a: string }[] = [
+  {
+    q: "When can I register, and as what?",
+    a: `Team registration opens on ${formatRegistrationDay(REGISTRATION_OPENS_AT)} and runs until ${formatRegistrationDay(REGISTRATION_CLOSES_AT)}. You can register as an individual looking for a team, or as a team, naming the other participants. Registering as a team gives priority for participation confirmation. Teams can still be created, joined and changed in the portal until the team lock on ${formatTeamLock()}.`,
+  },
   {
     q: "Which email do I sign in with?",
     a: `The one you used to register on ${EVENT.registration.provider}. We email a 6-digit code to it; there is no password. Only approved guests can sign in: if you are on the waitlist or still pending, you can sign in once the organisers approve your registration on Luma. If the portal says your email is not on the guest list, register on Luma first or try the other address you may have used. The guest list is imported from Luma by the organisers, so a new registration or approval can take a while to show up.`,
@@ -46,6 +52,8 @@ export default function RulesPage() {
           {EVENT.name} is built in teams of {EVENT.portal.team.minMembers} to {EVENT.portal.team.maxMembers}. Here is
           everything about signing in, forming a team and getting a seat.
         </p>
+
+        <RegistrationNotice className="mt-8" showRulesLink={false} />
 
         <ol className="mt-10 space-y-4">
           {rules.map((rule, i) => (

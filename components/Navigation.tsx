@@ -11,6 +11,7 @@ import { siteConfig } from '@/lib/site';
 
 const NAV_ITEMS = [
   { key: 'brief', href: '/#brief' },
+  { key: 'tracks', href: '/#tracks' },
   { key: 'hardware', href: '/#hardware' },
   { key: 'schedule', href: '/#schedule' },
   { key: 'teams', href: '/#teams' },

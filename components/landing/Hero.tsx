@@ -3,6 +3,7 @@ import { CalendarDays, MapPin } from 'lucide-react';
 import { EVENT, formatDateRange } from '@/lib/event';
 import { t } from '@/lib/i18n';
 import { Blob } from './Blob';
+import { RegistrationNotice } from '@/components/RegistrationNotice';
 import { LumaCta } from './shared';
 
 export function Hero() {
@@ -61,6 +62,7 @@ export function Hero() {
         {EVENT.registration.status === 'waitlist' && (
           <p className="mt-4 text-sm text-[var(--text-secondary)]">{t('landing', 'statusWaitlist')}</p>
         )}
+        <RegistrationNotice className="mt-10 max-w-3xl" />
         <p className="mt-8 text-sm text-[var(--text-secondary)]">
           {t('landing', 'hostedBy')} <span className="font-semibold text-white">{EVENT.organizer.name}</span>
         </p>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { AfterEvent, Brief, Hardware, Hero, Hosts, Jury, Practical, Prizes, Schedule, Speaker, Sponsors, Teams, Venue } from "@/components/landing";
+import { AfterEvent, Brief, Hardware, Hero, Hosts, Jury, Practical, Prizes, Schedule, Speaker, Sponsors, Teams, Tracks, Venue } from "@/components/landing";
 import { formatDateRange } from "@/lib/event";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
@@ -25,6 +25,7 @@ export default function Home() {
       <main id="content" className="bg-[#0a0a0a]">
         <Hero />
         <Brief />
+        <Tracks />
         <Hardware />
         <Schedule />
         <Speaker />

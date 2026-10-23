@@ -7,6 +7,7 @@ export const translations = {
     brief: "The brief",
     hardware: "Hardware",
     schedule: "Schedule",
+    tracks: "Tracks",
     teams: "Teams",
     prizes: "Prizes",
     jury: "Jury",
@@ -34,8 +35,13 @@ export const translations = {
     briefTitle: "Hardware + API + Grok",
     briefWith: "You can use",
 
-    tracksTag: "Inspiration tracks",
-    tracksTitle: "Where to start",
+    tracksTag: "Challenges",
+    tracksTitle: "Proposed Tracks",
+    tracksProposed: "Proposed",
+    tracksViewBrief: "View the full brief",
+    tracksViewTrack: "Full brief for",
+    trackQuestion: "Guiding question",
+    trackResult: "Main result",
 
     hardwareTag: "Hardware",
     hardwareTitle: "What you get to hack on",
@@ -105,6 +111,7 @@ export const translations = {
 
   footer: {
     luma: "Luma page",
+    tracks: "Tracks",
     rules: "Team rules",
   },
 

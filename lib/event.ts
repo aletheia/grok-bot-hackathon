@@ -1,3 +1,5 @@
+import { TRACKS_CONTENT } from "@/lib/tracks";
+
 /**
  * Single source of truth for the current event.
  *
@@ -36,7 +38,6 @@ export type RegistrationStatus = "open" | "waitlist" | "closed";
 /** Image asset: path under /public (e.g. "/assets/logos/spacexai.svg") or absolute URL. `null` = placeholder. */
 export type AssetSrc = string | null;
 
-export type Track = { title: string; description?: string };
 export type Criterion = { title: string; description?: string; weight?: string };
 
 /**
@@ -117,6 +118,13 @@ export const EVENT = {
     status: "waitlist" as RegistrationStatus,
     approvalRequired: true,
     capacity: 100,
+    /**
+     * Team registration window (Europe/Rome, CET: DST ended 25 Oct). The banner on the landing, /rules,
+     * /register and the dashboard derives "opens on / open until / closed" from these two instants.
+     * Closes at the end of the day (23:59). Note: the team lock (portal.teamLockAt) is a day later.
+     */
+    registrationOpens: "2026-10-26T00:00:00+01:00",
+    registrationCloses: "2026-10-30T23:59:00+01:00",
   },
 
   /**
@@ -177,7 +185,8 @@ export const EVENT = {
   },
 
   /** To be published. Empty arrays render a "To be announced" state. */
-  tracks: [] as Track[],
+  /** Proposed tracks (landing recap + /tracks). Content lives in lib/tracks.ts. */
+  tracks: TRACKS_CONTENT,
   criteria: [] as Criterion[],
 
   /**
