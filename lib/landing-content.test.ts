@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { EVENT, type SponsorTier } from "@/lib/event";
+import { EVENT } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
-import { getJsonLdSponsors, getJurySlots, getPodium, getSpecialPrizes, getSponsorContactHref, getSponsorTiers } from "@/lib/landing-content";
+import { getJsonLdSponsors, getJurySlots, getPodium, getSpecialPrizes, getSponsorContactHref, getSponsorItems } from "@/lib/landing-content";
 
 describe("prizes", () => {
   it("always renders three podium slots, placeholders when nothing is announced", () => {
@@ -35,22 +35,19 @@ describe("jury", () => {
 });
 
 describe("sponsors", () => {
-  const tiers: SponsorTier[] = [
-    { id: "org", title: "Organized by", kind: "organizer", size: "lg", placeholderSlots: 0, sponsors: [{ name: "Org" }] },
-    { id: "main", title: "Main", kind: "sponsor", size: "lg", placeholderSlots: 2, sponsors: [] },
-    { id: "p", title: "Partners", kind: "partner", size: "md", placeholderSlots: 0, sponsors: [{ name: "P1", url: "https://p1.test" }, { name: null }] },
-    { id: "hidden", title: "Hidden", kind: "partner", size: "sm", placeholderSlots: 0, sponsors: [] },
-  ];
+  const list = [{ name: "P1", url: "https://p1.test" }, { name: null }, { name: "P2", url: "" }];
 
-  it("fills empty tiers with placeholders and drops tiers with no slots", () => {
-    const rendered = getSponsorTiers(tiers);
-    expect(rendered.map((t) => t.id)).toEqual(["org", "main", "p"]);
-    expect(rendered[1].items).toEqual([null, null]);
-    expect(rendered[2].items).toEqual([{ name: "P1", url: "https://p1.test" }, null]);
+  it("renders named sponsors in order, or placeholders while none are named", () => {
+    expect(getSponsorItems(list, 4).map((s) => s?.name)).toEqual(["P1", "P2"]);
+    expect(getSponsorItems([], 3)).toEqual([null, null, null]);
+    expect(getSponsorItems([{ name: null }], 0)).toEqual([]);
   });
 
-  it("publishes only named sponsors/partners in JSON-LD, never the organizer or placeholders", () => {
-    expect(getJsonLdSponsors(tiers)).toEqual([{ "@type": "Organization", name: "P1", url: "https://p1.test" }]);
+  it("publishes named sponsors in JSON-LD without empty urls", () => {
+    expect(getJsonLdSponsors(list)).toEqual([
+      { "@type": "Organization", name: "P1", url: "https://p1.test" },
+      { "@type": "Organization", name: "P2" },
+    ]);
   });
 
   it("uses only a configured contact for the CTA", () => {
@@ -59,14 +56,15 @@ describe("sponsors", () => {
     expect(getSponsorContactHref({ email: "", url: "https://x.test" })).toBe("https://x.test");
   });
 
-  it("current config: six named logos in one tier, no invented urls/tiers/contact", () => {
+  const names = ["Ctrl+Alt Museum", "Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"];
+
+  it("current config: six named logos in one flat list, no invented urls/tiers/contact", () => {
     expect(EVENT.prizes).toEqual([]);
     expect(EVENT.jury).toEqual([]);
     expect(EVENT.sponsors.contact).toEqual({ email: null, url: null });
-    const tier = EVENT.sponsors.tiers.find((t) => t.id === "sponsors");
-    expect(tier?.sponsors.map((s) => s.name)).toEqual(["Ctrl+Alt Museum", "Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"]);
-    expect(tier?.placeholderSlots).toBe(0);
-    for (const s of tier!.sponsors) {
+    expect(EVENT.sponsors).not.toHaveProperty("tiers");
+    expect(EVENT.sponsors.list.map((s) => s.name)).toEqual(names);
+    for (const s of EVENT.sponsors.list) {
       expect(s.url ?? null).toBeNull();
       expect(s.logo).toMatch(/^\/assets\/sponsors\/[a-z-]+\.png$/);
       expect(existsSync(join(process.cwd(), "public", s.logo!))).toBe(true);
@@ -75,9 +73,9 @@ describe("sponsors", () => {
     }
   });
 
-  it("JSON-LD lists the named sponsors with no empty urls", () => {
+  it("JSON-LD lists the six sponsors, not the organizer, with no urls", () => {
     const ld = buildEventJsonLd("https://example.test") as { sponsor?: { "@type": string; name: string; url?: string }[] };
-    expect(ld.sponsor?.map((s) => s.name)).toEqual(["Ctrl+Alt Museum", "Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"]);
+    expect(ld.sponsor?.map((s) => s.name)).toEqual(names);
     expect(ld.sponsor?.every((s) => s["@type"] === "Organization" && !("url" in s))).toBe(true);
     expect(JSON.stringify(ld)).not.toContain('"url":""');
   });

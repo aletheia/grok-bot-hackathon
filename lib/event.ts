@@ -80,19 +80,6 @@ export type Sponsor = {
   url?: string | null;
 };
 
-export type SponsorTier = {
-  id: string;
-  /** Heading shown above the tier, e.g. "Organized by", "Main sponsors", "Partners". */
-  title: string;
-  /** organizer = the event organizer (not repeated in JSON-LD); sponsor/partner = listed as schema.org sponsors once named. */
-  kind: "organizer" | "sponsor" | "partner";
-  /** Logo size in the grid. */
-  size: "lg" | "md" | "sm";
-  /** How many "Sponsor logo" placeholders to show while `sponsors` is empty (0 hides the tier). */
-  placeholderSlots: number;
-  sponsors: Sponsor[];
-};
-
 /** Logos Luca will provide. Put files in /public/assets/… and set the path, or use an absolute URL. `null` = labelled placeholder. */
 const LOGOS = {
   spacexai: null as AssetSrc,
@@ -212,41 +199,25 @@ export const EVENT = {
   juryPlaceholderSlots: 3,
 
   /**
-   * SPONSORS (landing #sponsors). Fill `sponsors` in each tier:
+   * SPONSORS (landing #sponsors). One flat list: every logo gets an identical tile, no tiers.
+   * Add an entry per sponsor:
    *   { name: "…", logo: "/assets/sponsors/<file>.png", logoWidth: 800, logoHeight: 200, url: "https://…" }
-   * (Logos may be white-on-transparent: tiles are dark. logoWidth/logoHeight = the file's pixel size.)
-   * Rename, add or remove tiers freely; an empty tier shows `placeholderSlots`
-   * "Sponsor logo" boxes (0 hides it). Named sponsor/partner entries are also added to
-   * the event JSON-LD; placeholders never are.
+   * (logoWidth/logoHeight = the file's pixel size; white-on-transparent logos are fine, tiles are dark;
+   * `url` is optional and makes the tile a link.) Named sponsors are also added to the event JSON-LD.
+   * While `list` is empty, `placeholderSlots` "Sponsor logo" boxes are shown.
    */
   sponsors: {
-    tiers: [
-      {
-        id: "organizer",
-        title: "Organized by",
-        kind: "organizer",
-        size: "lg",
-        placeholderSlots: 0,
-        sponsors: [{ name: "SpaceXAI", logo: LOGOS.spacexai, url: null }],
-      },
-      {
-        // Logos are white artwork on transparent PNGs: the grid draws them on dark tiles.
-        // Tier/role per sponsor is not decided yet, so they share one tier. Add `url` to link a logo.
-        id: "sponsors",
-        title: "Sponsors & partners",
-        kind: "sponsor",
-        size: "md",
-        placeholderSlots: 0,
-        sponsors: [
-          { name: "Ctrl+Alt Museum", logo: "/assets/sponsors/ctrl-alt-museum.png", logoWidth: 274, logoHeight: 400 },
-          { name: "Radixia", logo: "/assets/sponsors/radixia.png", logoWidth: 800, logoHeight: 138 },
-          { name: "Pavia – Open your mind", logo: "/assets/sponsors/pavia-open-your-mind.png", logoWidth: 800, logoHeight: 357 },
-          { name: "SICAM", logo: "/assets/sponsors/sicam.png", logoWidth: 456, logoHeight: 400 },
-          { name: "Riso Scotti", logo: "/assets/sponsors/riso-scotti.png", logoWidth: 651, logoHeight: 400 },
-          { name: "Coherency", logo: "/assets/sponsors/coherency.png", logoWidth: 523, logoHeight: 400 },
-        ],
-      },
-    ] as SponsorTier[],
+    /** Shown in the "Organized by" row above the grid (not repeated in JSON-LD sponsors). */
+    organizer: { name: "SpaceXAI", logo: LOGOS.spacexai, url: null } as Sponsor,
+    placeholderSlots: 6,
+    list: [
+      { name: "Ctrl+Alt Museum", logo: "/assets/sponsors/ctrl-alt-museum.png", logoWidth: 274, logoHeight: 400 },
+      { name: "Radixia", logo: "/assets/sponsors/radixia.png", logoWidth: 800, logoHeight: 138 },
+      { name: "Pavia – Open your mind", logo: "/assets/sponsors/pavia-open-your-mind.png", logoWidth: 800, logoHeight: 357 },
+      { name: "SICAM", logo: "/assets/sponsors/sicam.png", logoWidth: 456, logoHeight: 400 },
+      { name: "Riso Scotti", logo: "/assets/sponsors/riso-scotti.png", logoWidth: 651, logoHeight: 400 },
+      { name: "Coherency", logo: "/assets/sponsors/coherency.png", logoWidth: 523, logoHeight: 400 },
+    ] as Sponsor[],
     /**
      * "Become a sponsor" contact. TODO(Luca): set a real email and/or page URL.
      * While both are null the CTA says the contact is to be announced (no invented address).

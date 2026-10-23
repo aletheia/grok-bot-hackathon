@@ -1,4 +1,4 @@
-import type { JuryMember, Prize, Sponsor, SponsorTier } from "@/lib/event";
+import type { JuryMember, Prize, Sponsor } from "@/lib/event";
 
 /**
  * Pure helpers that turn the (possibly empty) prize / jury / sponsor config in
@@ -30,25 +30,18 @@ export function getJurySlots(jury: readonly JuryMember[], slots: number): (JuryM
   return Array.from({ length: Math.max(0, slots) }, () => null);
 }
 
-export type RenderedTier = Omit<SponsorTier, "sponsors"> & { items: (Sponsor | null)[] };
-
-/** Tiers ready to render: named sponsors, placeholders for unnamed ones; empty tiers get `placeholderSlots` placeholders or are dropped. */
-export function getSponsorTiers(tiers: readonly SponsorTier[]): RenderedTier[] {
-  return tiers
-    .map(({ sponsors, ...tier }) => {
-      const items = sponsors.length > 0 ? sponsors.map((s) => (filled(s.name) ? s : null)) : Array.from({ length: Math.max(0, tier.placeholderSlots) }, () => null);
-      return { ...tier, items };
-    })
-    .filter((tier) => tier.items.length > 0);
+/** Sponsors to render in the flat grid: named ones, or `slots` placeholders (`null`) while none are named. */
+export function getSponsorItems(list: readonly Sponsor[], slots: number): (Sponsor | null)[] {
+  const named = list.filter((s) => filled(s.name));
+  if (named.length > 0) return named;
+  return Array.from({ length: Math.max(0, slots) }, () => null);
 }
 
-/** Named sponsors and partners (not the organizer, never placeholders) for schema.org `sponsor`. */
-export function getJsonLdSponsors(tiers: readonly SponsorTier[]): { "@type": "Organization"; name: string; url?: string }[] {
-  return tiers
-    .filter((tier) => tier.kind !== "organizer")
-    .flatMap((tier) => tier.sponsors)
+/** Named sponsors (never the organizer or placeholders) for schema.org `sponsor`. */
+export function getJsonLdSponsors(list: readonly Sponsor[]): { "@type": "Organization"; name: string; url?: string }[] {
+  return list
     .filter((s): s is Sponsor & { name: string } => filled(s.name))
-    .map((s) => ({ "@type": "Organization" as const, name: s.name.trim(), ...(filled(s.url) ? { url: s.url } : {}) }));
+    .map((s) => ({ "@type": "Organization" as const, name: s.name.trim(), ...(filled(s.url) ? { url: s.url.trim() } : {}) }));
 }
 
 /** "Become a sponsor" target: email first, then URL; `null` when no contact is configured. */

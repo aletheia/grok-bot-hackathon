@@ -2,24 +2,20 @@ import Image from 'next/image';
 import { ExternalLink } from 'lucide-react';
 import { EVENT, type Sponsor } from '@/lib/event';
 import { t } from '@/lib/i18n';
-import { getSponsorContactHref, getSponsorTiers, type RenderedTier } from '@/lib/landing-content';
+import { getSponsorContactHref, getSponsorItems } from '@/lib/landing-content';
 import { Section } from './shared';
 
 /**
- * Logos are often white artwork on transparent PNGs, so every named sponsor sits on the same
- * dark tile (--bg-tertiary) with a fixed-height logo box: wide and near-square logos get the
- * same visual weight (max height 72px, max width of the tile minus padding) and stay readable
- * whatever the section background is.
+ * All sponsors are equals: one flat grid, identical tiles. Logos are often white artwork on
+ * transparent PNGs, so every tile is dark (--bg-tertiary) with a height-capped logo box:
+ * wide and near-square logos get similar visual weight and stay readable on any section background.
  */
-const TILE: Record<RenderedTier['size'], { grid: string; tile: string; logo: string }> = {
-  lg: { grid: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3', tile: 'h-36', logo: 'max-h-16 max-w-[13rem]' },
-  md: { grid: 'grid-cols-2 lg:grid-cols-3', tile: 'h-28 sm:h-32', logo: 'max-h-14 max-w-full sm:max-h-[4.5rem] sm:max-w-[12rem]' },
-  sm: { grid: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6', tile: 'h-24', logo: 'max-h-10 max-w-full' },
-};
+const TILE = 'flex h-28 w-full items-center justify-center rounded-3xl border border-white/10 bg-[var(--bg-tertiary)] px-5 py-4 sm:h-32';
+const LOGO = 'h-auto w-auto max-h-14 max-w-full object-contain sm:max-h-[4.5rem] sm:max-w-[12rem]';
 
-function SponsorLogo({ sponsor, className }: { sponsor: Sponsor & { name: string }; className: string }) {
+function SponsorLogo({ sponsor }: { sponsor: Sponsor & { name: string } }) {
   if (!sponsor.logo) {
-    // Named but no logo file yet: labelled placeholder, same as before the logo is supplied.
+    // Named but no logo file yet: labelled placeholder.
     return (
       <span
         role="img"
@@ -38,26 +34,59 @@ function SponsorLogo({ sponsor, className }: { sponsor: Sponsor & { name: string
       width={sponsor.logoWidth ?? 400}
       height={sponsor.logoHeight ?? 160}
       unoptimized
-      className={`h-auto w-auto object-contain ${className}`}
+      className={LOGO}
     />
   );
 }
 
-function Tier({ tier }: { tier: RenderedTier }) {
-  const size = TILE[tier.size];
-  const headingId = `sponsors-${tier.id}`;
+function Tile({ sponsor }: { sponsor: Sponsor & { name: string } }) {
+  const logo = <SponsorLogo sponsor={sponsor} />;
+  if (sponsor.url) {
+    return (
+      <a
+        href={sponsor.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${TILE} transition-colors hover:border-white/40`}
+        aria-label={`${sponsor.name} ${t('landing', 'opensInNewTab')}`}
+      >
+        {logo}
+      </a>
+    );
+  }
+  return <div className={TILE}>{logo}</div>;
+}
+
+export function Sponsors() {
+  const items = getSponsorItems(EVENT.sponsors.list, EVENT.sponsors.placeholderSlots);
+  const organizer = EVENT.sponsors.organizer as Sponsor & { name: string };
+  const contactHref = getSponsorContactHref(EVENT.sponsors.contact);
+  const external = contactHref !== null && !contactHref.startsWith('mailto:');
+
   return (
-    <div>
-      <h3 id={headingId} className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-        {tier.title}
-      </h3>
-      <ul aria-labelledby={headingId} className={`mt-4 grid gap-4 ${size.grid}`}>
-        {tier.items.map((sponsor, i) => {
-          if (!sponsor?.name) {
-            return (
+    <Section id="sponsors" tag={t('landing', 'sponsorsTag')} title={t('landing', 'sponsorsTitle')} accent="orange">
+      <div className="space-y-10">
+        <div>
+          <h3 id="sponsors-organizer" className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+            {t('landing', 'organizedBy')}
+          </h3>
+          <ul aria-labelledby="sponsors-organizer" className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3">
+            <li className="min-w-0">
+              <Tile sponsor={organizer} />
+            </li>
+          </ul>
+        </div>
+
+        <ul aria-label={t('landing', 'sponsorsTitle')} className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+          {items.map((sponsor, i) =>
+            sponsor?.name ? (
+              <li key={sponsor.name} className="min-w-0">
+                <Tile sponsor={sponsor as Sponsor & { name: string }} />
+              </li>
+            ) : (
               <li
-                key={`${tier.id}-placeholder-${i}`}
-                className={`flex items-center justify-center rounded-3xl border-2 border-dashed border-white/15 p-4 ${size.tile}`}
+                key={`placeholder-${i}`}
+                className="flex h-28 items-center justify-center rounded-3xl border-2 border-dashed border-white/15 p-4 sm:h-32"
                 data-placeholder="sponsor"
               >
                 <span
@@ -68,45 +97,9 @@ function Tier({ tier }: { tier: RenderedTier }) {
                   {t('landing', 'sponsorPlaceholder')} logo
                 </span>
               </li>
-            );
-          }
-          const named = sponsor as Sponsor & { name: string };
-          const logo = <SponsorLogo sponsor={named} className={size.logo} />;
-          const tileClass = `flex items-center justify-center rounded-3xl border border-white/10 bg-[var(--bg-tertiary)] px-5 py-4 ${size.tile}`;
-          return (
-            <li key={sponsor.name} className="min-w-0">
-              {sponsor.url ? (
-                <a
-                  href={sponsor.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${tileClass} w-full transition-colors hover:border-white/40`}
-                  aria-label={`${sponsor.name} ${t('landing', 'opensInNewTab')}`}
-                >
-                  {logo}
-                </a>
-              ) : (
-                <div className={`${tileClass} w-full`}>{logo}</div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-export function Sponsors() {
-  const tiers = getSponsorTiers(EVENT.sponsors.tiers);
-  const contactHref = getSponsorContactHref(EVENT.sponsors.contact);
-  const external = contactHref !== null && !contactHref.startsWith('mailto:');
-
-  return (
-    <Section id="sponsors" tag={t('landing', 'sponsorsTag')} title={t('landing', 'sponsorsTitle')} accent="orange">
-      <div className="space-y-10">
-        {tiers.map((tier) => (
-          <Tier key={tier.id} tier={tier} />
-        ))}
+            ),
+          )}
+        </ul>
       </div>
 
       <div className="mt-12 flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:flex-row md:items-center md:justify-between md:p-8">

@@ -71,9 +71,10 @@ export const translations = {
     jurorLink: "Profile",
     criteriaTitle: "Evaluation criteria",
 
-    sponsorsTag: "Sponsors",
-    sponsorsTitle: "Sponsors and partners",
+    sponsorsTag: "With the support of",
+    sponsorsTitle: "Sponsors",
     sponsorPlaceholder: "Sponsor",
+    organizedBy: "Organized by",
     becomeSponsorTitle: "Become a sponsor",
     becomeSponsorText: "Interested in supporting the builders at the museum? Get in touch with the organizers.",
     becomeSponsorCta: "Contact us about sponsoring",

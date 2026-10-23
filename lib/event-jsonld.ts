@@ -11,8 +11,8 @@ export function buildEventJsonLd(siteUrl: string) {
         ? "https://schema.org/SoldOut"
         : "https://schema.org/Discontinued";
 
-  // Only named sponsors/partners; placeholders are never published.
-  const sponsors = getJsonLdSponsors(EVENT.sponsors.tiers);
+  // Only named sponsors; placeholders are never published.
+  const sponsors = getJsonLdSponsors(EVENT.sponsors.list);
 
   return {
     "@context": "https://schema.org",
