@@ -30,7 +30,7 @@ Open-source platform for running **48-hour AI hackathons**: landing site, regist
 |------|----------------|
 | **Landing** | Hero, sponsors, prizes, schedule, criteria, requirements, tech stack, partnership page. |
 | **Auth** | Participants sign in with a 6-digit code emailed to their **Luma registration email** ([Better Auth](https://www.better-auth.com/) email OTP). Only **approved** guests on the imported Luma guest list (`approval_status = approved`) get in; waitlist, pending, invited, declined and empty statuses are refused with their own message; staff and `SUPER_ADMIN_EMAILS` bypass the list. Admins keep email + password with 2FA. |
-| **Luma guest list** | Admin → *Luma guest list*: upload the Luma CSV export (Guests → Export). Upserts by email, never deletes. |
+| **Luma guest list** | Admin → *Luma guest list*: **Sync from Luma** reads every guest of the event from the Luma API (read-only GETs, `LUMA_API_KEY` + `LUMA_EVENT_API_ID`) and upserts statuses by email, including approved → declined downgrades; shows counts and the last sync time. CSV upload (Guests → Export) stays as a fallback. Neither deletes anyone. At sign-in, an email that is not approved locally is also looked up live on Luma; on any Luma error the local table decides (an error never opens access). |
 | **Teams** | 4–6 people. Register a team (you immediately get its secret 8-char code, stored in `team.join_code` / `team_invite.code`, unique, no 0/1/I/O, case-insensitive), join a team by entering a code, or register as looking for a team. Registration opens 26 Oct and runs to the same moment as the lock. Auto-closes at 6, reopens below; lead passes to the earliest member; locked on 31 Oct 2026 23:59 Europe/Rome (`EVENT.portal.teamLockAt`). Rules at `/rules`. |
 | **Admission** | Admin → *Admission*: formed teams (4+ approved members) get guaranteed seats; other approved guests are queued first-come, first-served by Luma registration time up to the capacity (100). Non-approved guests are not counted. No automatic emails. |
 | **Screening** | MC questions, optional team video (YouTube / Drive). Admins approve or reject teams and manage questions. |
@@ -128,6 +128,7 @@ If `SUPER_ADMIN_EMAILS` is empty, restricted admin sign-up paths are effectively
 
 ### Letting participants in (Luma guest list)
 
+0. Preferred: sign in as super admin → **Admin → Luma guest list** → **Sync from Luma** (needs `LUMA_API_KEY`; the integration only ever reads event `LUMA_EVENT_API_ID`, default `evt-IEb2nHBuHyLU7Jz`). Luma API limits: 50 guests per page, 200 requests/minute. Fallback CSV:
 1. In Luma open the event → **Guests** → **Export** (CSV).
 2. Sign in as super admin → **Admin → Luma guest list** → *Upload Luma guest CSV*.
 3. Headers are matched case-insensitively (`email`/`E-mail`, `name` or `first_name` + `last_name`, `approval_status`/`status`, `created_at`). Emails are trimmed and lower-cased. Re-import any time; rows are updated by email and never deleted.

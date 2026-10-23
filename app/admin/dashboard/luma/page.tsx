@@ -21,6 +21,19 @@ type ImportResult = {
   duplicateEmails: number;
 };
 
+type SyncInfo = {
+  at: string;
+  pages: number;
+  fetched: number;
+  inserted: number;
+  existing: number;
+  statusChanged: number;
+  downgraded: number;
+  upgraded: number;
+  byStatus: Record<string, number>;
+  missingFromLuma: number;
+};
+
 async function readJson(res: Response) {
   const json = await res.json().catch(() => ({}));
   if (!res.ok || !json.success) throw new Error(json?.error?.message ?? `HTTP ${res.status}`);
@@ -34,6 +47,36 @@ export default function LumaGuestListPage() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [uploading, setUploading] = useState(false);
   const [filter, setFilter] = useState("");
+  const [syncConfigured, setSyncConfigured] = useState<boolean | null>(null);
+  const [lastSync, setLastSync] = useState<SyncInfo | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  const loadSync = useCallback(async () => {
+    try {
+      const data = await readJson(await fetch("/api/admin/luma-registrants/sync", { credentials: "include" }));
+      setSyncConfigured(Boolean(data.configured));
+      setLastSync(data.lastSync ?? null);
+    } catch {
+      setSyncConfigured(false);
+    }
+  }, []);
+
+  const syncNow = async () => {
+    setSyncing(true);
+    setSyncError(null);
+    try {
+      const data = await readJson(
+        await fetch("/api/admin/luma-registrants/sync", { method: "POST", credentials: "include" }),
+      );
+      setLastSync(data);
+      await load();
+    } catch (e) {
+      setSyncError(e instanceof Error ? e.message : "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,7 +93,8 @@ export default function LumaGuestListPage() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+    void loadSync();
+  }, [load, loadSync]);
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
@@ -90,12 +134,58 @@ export default function LumaGuestListPage() {
       <div>
         <h1 className="text-2xl font-bold text-white">Luma guest list</h1>
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
-          Only emails on this list can sign in to the portal (staff and super admins excepted). In Luma, open the event →
-          Guests → Export CSV, then upload it here. Re-importing updates existing rows by email and never deletes anyone.
+          Only emails on this list can sign in to the portal (staff and super admins excepted). Use{" "}
+          <strong>Sync from Luma</strong> to read the guest list straight from the Luma API (read-only). As a fallback, in
+          Luma open the event → Guests → Export CSV and upload it below. Both update existing rows by email and never
+          delete anyone. At sign-in, an email that is not approved here is also checked live on Luma.
           Only guests with approval status <code>approved</code> (&ldquo;Going&rdquo; in Luma) can sign in; waitlist,
           pending, invited, declined and empty statuses are refused. Re-import after approving people on Luma.
         </p>
       </div>
+
+      <section className="space-y-3 rounded-xl border border-[var(--border-color)] bg-white/5 p-4" aria-label="Luma sync">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void syncNow()}
+            disabled={syncing || syncConfigured === false}
+            className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {syncing ? "Syncing…" : "Sync from Luma"}
+          </button>
+          <span className="text-sm text-[var(--text-secondary)]">
+            {syncConfigured === false
+              ? "Luma API not configured (LUMA_API_KEY missing): use the CSV import."
+              : lastSync
+                ? `Last synced ${formatRome(new Date(lastSync.at))} (Rome time)`
+                : "Never synced."}
+          </span>
+        </div>
+        {syncError ? (
+          <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+            {syncError}
+          </div>
+        ) : null}
+        {lastSync ? (
+          <div className="text-sm text-[var(--text-secondary)]">
+            <p>
+              {lastSync.fetched} guests read from Luma: {lastSync.inserted} new, {lastSync.existing} already listed,{" "}
+              {lastSync.statusChanged} with a changed status ({lastSync.upgraded} newly approved, {lastSync.downgraded}{" "}
+              no longer approved).
+              {lastSync.missingFromLuma > 0
+                ? ` ${lastSync.missingFromLuma} local rows are not on Luma's list (kept as they are).`
+                : ""}
+            </p>
+            <p className="mt-2 flex flex-wrap gap-2">
+              {Object.entries(lastSync.byStatus).map(([status, count]) => (
+                <span key={status} className="rounded-full border border-[var(--border-color)] px-2 py-0.5">
+                  {status}: {count}
+                </span>
+              ))}
+            </p>
+          </div>
+        ) : null}
+      </section>
 
       <label className="inline-flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--border-color)] bg-white/5 px-4 py-3 text-sm text-white hover:bg-white/10">
         <input

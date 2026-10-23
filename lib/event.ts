@@ -115,6 +115,11 @@ export const EVENT = {
   registration: {
     url: "https://luma.com/spacexai-z1ys",
     provider: "Luma",
+    /**
+     * Luma API id of THIS event. The Luma API key may also see other events of the same calendar: the
+     * integration only ever reads this one (override with LUMA_EVENT_API_ID).
+     */
+    lumaEventId: "evt-IEb2nHBuHyLU7Jz",
     status: "waitlist" as RegistrationStatus,
     approvalRequired: true,
     capacity: 100,
