@@ -45,6 +45,7 @@ export const translations = {
 
     hardwareTag: "Hardware",
     hardwareTitle: "What you get to hack on",
+    hardwareAlsoLead: "And also:",
 
     scheduleTag: "Schedule",
     scheduleTitle: "Two days, one night",

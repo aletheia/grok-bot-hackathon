@@ -1,3 +1,5 @@
+import { existsSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EVENT, formatAddress, formatDateRange, formatDayLabel, getMapsUrl, type ScheduleDay } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
@@ -17,6 +19,27 @@ describe("event config", () => {
     const flagged = items.filter((i) => i.invitationOnly);
     expect(flagged.map((i) => i.title)).toEqual(["Ctrl+Alt Ecosystem presentation"]);
     expect(t("landing", "invitationOnly")).toBe("Invitation only");
+  });
+
+  it("hardware: four illustrated cards (simulators not adjacent) and drones as text only", () => {
+    expect(EVENT.hardware.map((h) => h.id)).toEqual(["robot-dog", "flight-sim", "robotic-arm", "driving-sim", "drones"]);
+    const names = Object.fromEntries(EVENT.hardware.map((h) => [h.id, h.name]));
+    expect(names["robotic-arm"]).toBe("A robotic arm");
+    expect(names.drones).toBe("A few drones");
+    const ids = EVENT.hardware.map((h) => h.id);
+    expect(Math.abs(ids.indexOf("flight-sim") - ids.indexOf("driving-sim"))).toBeGreaterThan(1);
+    for (const h of EVENT.hardware.filter((i) => i.id !== "drones")) {
+      const img = h.image!;
+      expect(img.src).toMatch(/^\/assets\/hardware\/[a-z-]+\.png$/);
+      expect(existsSync(join(process.cwd(), "public", img.src))).toBe(true);
+      expect(statSync(join(process.cwd(), "public", img.src)).size).toBeLessThan(150 * 1024);
+      expect(img.width).toBeGreaterThan(0);
+      expect(img.height).toBeGreaterThan(0);
+      expect(img.alt).toMatch(/^Line drawing of /);
+    }
+    expect(EVENT.hardware.find((h) => h.id === "drones")!.image).toBeUndefined();
+    const alts = EVENT.hardware.flatMap((h) => (h.image ? [h.image.alt] : []));
+    expect(new Set(alts).size).toBe(alts.length);
   });
 
   it("schedule days fall within the event dates", () => {
