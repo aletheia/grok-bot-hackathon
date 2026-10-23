@@ -56,9 +56,9 @@ describe("sponsors", () => {
     expect(getSponsorContactHref({ email: "", url: "https://x.test" })).toBe("https://x.test");
   });
 
-  const names = ["Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency", "SeaVision"];
+  const names = ["Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency", "SeaVision", "Spazio Robot"];
 
-  it("current config: six named logos in one flat list, no invented urls/tiers/contact", () => {
+  it("current config: seven named logos in one flat list, no invented urls/tiers/contact", () => {
     expect(EVENT.prizes).toEqual([]);
     expect(EVENT.jury.length).toBeGreaterThan(0);
     expect(EVENT.sponsors.contact).toEqual({ email: null, url: null });
@@ -73,11 +73,15 @@ describe("sponsors", () => {
     }
   });
 
-  it("SeaVision is last in the grid with alt text SeaVision and an optimised asset", () => {
-    const sv = EVENT.sponsors.list.at(-1)!;
-    expect(sv.name).toBe("SeaVision");
+  it("SeaVision and Spazio Robot have alt text and optimised assets; Spazio Robot is last in the grid", () => {
+    const sv = EVENT.sponsors.list.find((s) => s.name === "SeaVision")!;
     expect(sv.logoAlt).toBe("SeaVision");
     expect(statSync(join(process.cwd(), "public", sv.logo!)).size).toBeLessThan(100 * 1024);
+    const sr = EVENT.sponsors.list.at(-1)!;
+    expect(sr.name).toBe("Spazio Robot");
+    expect(sr.logoAlt).toBe("Spazio Robot");
+    expect(sr.logo).toBe("/assets/sponsors/spazio-robot.png");
+    expect(statSync(join(process.cwd(), "public", sr.logo!)).size).toBeLessThan(100 * 1024);
   });
 
   it("first row: SpaceXAI and Ctrl+Alt Museum as equal logo tiles, not repeated in the grid", () => {
@@ -92,7 +96,7 @@ describe("sponsors", () => {
     for (const o of organizers) expect(gridNames).not.toContain(o.name);
   });
 
-  it("JSON-LD lists the six sponsors, not the organizers, with no urls", () => {
+  it("JSON-LD lists the seven sponsors, not the organizers, with no urls", () => {
     const ld = buildEventJsonLd("https://example.test") as { sponsor?: { "@type": string; name: string; url?: string }[] };
     expect(ld.sponsor?.map((s) => s.name)).toEqual(names);
     expect(ld.sponsor?.every((s) => s["@type"] === "Organization" && !("url" in s))).toBe(true);
