@@ -30,9 +30,19 @@ export type ScheduleDay = {
   items: ScheduleItem[];
 };
 
+/** Line drawing (white on transparent, shown on a dark panel). Width/height = the file's pixel size. */
+export type HardwareImage = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+};
+
 export type HardwareItem = {
-  id: "robot-dog" | "driving-sim" | "flight-sim" | "drones";
+  id: "robot-dog" | "driving-sim" | "flight-sim" | "robotic-arm" | "drones";
   name: string;
+  /** Items without an image (drones) are listed as plain text under the illustrated cards. */
+  image?: HardwareImage;
 };
 
 export type RegistrationStatus = "open" | "waitlist" | "closed";
@@ -177,9 +187,37 @@ export const EVENT = {
   grokSurfaces: ["Grok API", "Grok Voice", "Grok Bots"],
 
   hardware: [
-    { id: "robot-dog", name: "A robotic dog" },
-    { id: "driving-sim", name: "A driving simulator" },
-    { id: "flight-sim", name: "A flight simulator" },
+    // The two simulator drawings are similar: keep them apart in the grid (dog and arm sit between them).
+    {
+      id: "robot-dog",
+      name: "A robotic dog",
+      image: { src: "/assets/hardware/robot-dog.png", width: 491, height: 379, alt: "Line drawing of a robotic dog" },
+    },
+    {
+      id: "flight-sim",
+      name: "A flight simulator",
+      image: {
+        src: "/assets/hardware/flight-sim.png",
+        width: 720,
+        height: 582,
+        alt: "Line drawing of a three-screen flight simulator on a motion platform",
+      },
+    },
+    {
+      id: "robotic-arm",
+      name: "A robotic arm",
+      image: { src: "/assets/hardware/robotic-arm.png", width: 421, height: 436, alt: "Line drawing of a robotic arm" },
+    },
+    {
+      id: "driving-sim",
+      name: "A driving simulator",
+      image: {
+        src: "/assets/hardware/driving-sim.png",
+        width: 502,
+        height: 441,
+        alt: "Line drawing of a driving simulator with seat and steering wheel",
+      },
+    },
     { id: "drones", name: "A few drones" },
   ] satisfies HardwareItem[],
 
