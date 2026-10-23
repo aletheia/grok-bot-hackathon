@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EVENT } from "@/lib/event";
@@ -56,9 +56,9 @@ describe("sponsors", () => {
     expect(getSponsorContactHref({ email: "", url: "https://x.test" })).toBe("https://x.test");
   });
 
-  const names = ["Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"];
+  const names = ["Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency", "SeaVision"];
 
-  it("current config: five named logos in one flat list, no invented urls/tiers/contact", () => {
+  it("current config: six named logos in one flat list, no invented urls/tiers/contact", () => {
     expect(EVENT.prizes).toEqual([]);
     expect(EVENT.jury).toEqual([]);
     expect(EVENT.sponsors.contact).toEqual({ email: null, url: null });
@@ -73,6 +73,13 @@ describe("sponsors", () => {
     }
   });
 
+  it("SeaVision is last in the grid with alt text SeaVision and an optimised asset", () => {
+    const sv = EVENT.sponsors.list.at(-1)!;
+    expect(sv.name).toBe("SeaVision");
+    expect(sv.logoAlt).toBe("SeaVision");
+    expect(statSync(join(process.cwd(), "public", sv.logo!)).size).toBeLessThan(100 * 1024);
+  });
+
   it("first row: SpaceXAI and Ctrl+Alt Museum as equal logo tiles, not repeated in the grid", () => {
     const organizers = EVENT.sponsors.organizers;
     expect(organizers.map((o) => o.name)).toEqual(["SpaceXAI", "Ctrl+Alt Museum"]);
@@ -85,7 +92,7 @@ describe("sponsors", () => {
     for (const o of organizers) expect(gridNames).not.toContain(o.name);
   });
 
-  it("JSON-LD lists the five sponsors, not the organizers, with no urls", () => {
+  it("JSON-LD lists the six sponsors, not the organizers, with no urls", () => {
     const ld = buildEventJsonLd("https://example.test") as { sponsor?: { "@type": string; name: string; url?: string }[] };
     expect(ld.sponsor?.map((s) => s.name)).toEqual(names);
     expect(ld.sponsor?.every((s) => s["@type"] === "Organization" && !("url" in s))).toBe(true);

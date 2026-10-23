@@ -237,6 +237,7 @@ export const EVENT = {
       { name: "SICAM", logo: "/assets/sponsors/sicam.png", logoWidth: 456, logoHeight: 400 },
       { name: "Riso Scotti", logo: "/assets/sponsors/riso-scotti.png", logoWidth: 651, logoHeight: 400 },
       { name: "Coherency", logo: "/assets/sponsors/coherency.png", logoWidth: 523, logoHeight: 400 },
+      { name: "SeaVision", logo: "/assets/sponsors/seavision.png", logoWidth: 800, logoHeight: 185, logoAlt: "SeaVision" },
     ] as Sponsor[],
     /**
      * "Become a sponsor" contact. TODO(Luca): set a real email and/or page URL.
