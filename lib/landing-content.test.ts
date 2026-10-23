@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EVENT, type SponsorTier } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
@@ -57,12 +59,26 @@ describe("sponsors", () => {
     expect(getSponsorContactHref({ email: "", url: "https://x.test" })).toBe("https://x.test");
   });
 
-  it("current config: no invented sponsors, jurors, prizes or contact", () => {
+  it("current config: six named logos in one tier, no invented urls/tiers/contact", () => {
     expect(EVENT.prizes).toEqual([]);
     expect(EVENT.jury).toEqual([]);
     expect(EVENT.sponsors.contact).toEqual({ email: null, url: null });
-    const named = EVENT.sponsors.tiers.flatMap((t) => t.sponsors.map((s) => s.name));
-    expect(named).toEqual([EVENT.organizer.shortName]);
-    expect(buildEventJsonLd("https://example.test")).not.toHaveProperty("sponsor");
+    const tier = EVENT.sponsors.tiers.find((t) => t.id === "sponsors");
+    expect(tier?.sponsors.map((s) => s.name)).toEqual(["Ctrl+Alt Museum", "Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"]);
+    expect(tier?.placeholderSlots).toBe(0);
+    for (const s of tier!.sponsors) {
+      expect(s.url ?? null).toBeNull();
+      expect(s.logo).toMatch(/^\/assets\/sponsors\/[a-z-]+\.png$/);
+      expect(existsSync(join(process.cwd(), "public", s.logo!))).toBe(true);
+      expect(s.logoWidth).toBeGreaterThan(0);
+      expect(s.logoHeight).toBeGreaterThan(0);
+    }
+  });
+
+  it("JSON-LD lists the named sponsors with no empty urls", () => {
+    const ld = buildEventJsonLd("https://example.test") as { sponsor?: { "@type": string; name: string; url?: string }[] };
+    expect(ld.sponsor?.map((s) => s.name)).toEqual(["Ctrl+Alt Museum", "Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"]);
+    expect(ld.sponsor?.every((s) => s["@type"] === "Organization" && !("url" in s))).toBe(true);
+    expect(JSON.stringify(ld)).not.toContain('"url":""');
   });
 });

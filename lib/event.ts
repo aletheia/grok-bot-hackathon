@@ -72,6 +72,11 @@ export type Sponsor = {
   name: string | null;
   /** Logo under /public (e.g. "/assets/sponsors/acme.svg") or absolute URL. `null` = labelled placeholder with the name. */
   logo?: AssetSrc;
+  /** Intrinsic pixel size of the logo file (used by next/image to reserve space). Defaults to 400x160 for a placeholder-sized box. */
+  logoWidth?: number;
+  logoHeight?: number;
+  /** Alt text override; defaults to "<name> logo". */
+  logoAlt?: string;
   url?: string | null;
 };
 
@@ -208,7 +213,8 @@ export const EVENT = {
 
   /**
    * SPONSORS (landing #sponsors). Fill `sponsors` in each tier:
-   *   { name: "…", logo: "/assets/sponsors/<file>.svg", url: "https://…" }
+   *   { name: "…", logo: "/assets/sponsors/<file>.png", logoWidth: 800, logoHeight: 200, url: "https://…" }
+   * (Logos may be white-on-transparent: tiles are dark. logoWidth/logoHeight = the file's pixel size.)
    * Rename, add or remove tiers freely; an empty tier shows `placeholderSlots`
    * "Sponsor logo" boxes (0 hides it). Named sponsor/partner entries are also added to
    * the event JSON-LD; placeholders never are.
@@ -223,8 +229,23 @@ export const EVENT = {
         placeholderSlots: 0,
         sponsors: [{ name: "SpaceXAI", logo: LOGOS.spacexai, url: null }],
       },
-      { id: "main", title: "Main sponsors", kind: "sponsor", size: "lg", placeholderSlots: 2, sponsors: [] },
-      { id: "partners", title: "Partners", kind: "partner", size: "md", placeholderSlots: 4, sponsors: [] },
+      {
+        // Logos are white artwork on transparent PNGs: the grid draws them on dark tiles.
+        // Tier/role per sponsor is not decided yet, so they share one tier. Add `url` to link a logo.
+        id: "sponsors",
+        title: "Sponsors & partners",
+        kind: "sponsor",
+        size: "md",
+        placeholderSlots: 0,
+        sponsors: [
+          { name: "Ctrl+Alt Museum", logo: "/assets/sponsors/ctrl-alt-museum.png", logoWidth: 274, logoHeight: 400 },
+          { name: "Radixia", logo: "/assets/sponsors/radixia.png", logoWidth: 800, logoHeight: 138 },
+          { name: "Pavia – Open your mind", logo: "/assets/sponsors/pavia-open-your-mind.png", logoWidth: 800, logoHeight: 357 },
+          { name: "SICAM", logo: "/assets/sponsors/sicam.png", logoWidth: 456, logoHeight: 400 },
+          { name: "Riso Scotti", logo: "/assets/sponsors/riso-scotti.png", logoWidth: 651, logoHeight: 400 },
+          { name: "Coherency", logo: "/assets/sponsors/coherency.png", logoWidth: 523, logoHeight: 400 },
+        ],
+      },
     ] as SponsorTier[],
     /**
      * "Become a sponsor" contact. TODO(Luca): set a real email and/or page URL.
