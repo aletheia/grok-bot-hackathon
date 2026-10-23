@@ -83,7 +83,7 @@ export type Sponsor = {
 
 /** Logos Luca will provide. Put files in /public/assets/… and set the path, or use an absolute URL. `null` = labelled placeholder. */
 const LOGOS = {
-  spacexai: null as AssetSrc,
+  spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
   ctrlAltMuseum: null as AssetSrc,
   compvter: null as AssetSrc,
   startupWeekend: null as AssetSrc,
@@ -222,11 +222,16 @@ export const EVENT = {
    * While `list` is empty, `placeholderSlots` "Sponsor logo" boxes are shown.
    */
   sponsors: {
-    /** Shown in the "Organized by" row above the grid (not repeated in JSON-LD sponsors). */
-    organizer: { name: "SpaceXAI", logo: LOGOS.spacexai, url: null } as Sponsor,
+    /**
+     * First row, "Organized by": SpaceXAI and Ctrl+Alt Museum as two equal tiles. They are not repeated in the
+     * flat sponsors grid below nor in JSON-LD `sponsor`.
+     */
+    organizers: [
+      { name: "SpaceXAI", logo: "/assets/sponsors/spacexai.png", logoWidth: 391, logoHeight: 63, logoAlt: "SpaceXAI", url: null },
+      { name: "Ctrl+Alt Museum", logo: "/assets/sponsors/ctrl-alt-museum.png", logoWidth: 274, logoHeight: 400, url: null },
+    ] as Sponsor[],
     placeholderSlots: 6,
     list: [
-      { name: "Ctrl+Alt Museum", logo: "/assets/sponsors/ctrl-alt-museum.png", logoWidth: 274, logoHeight: 400 },
       { name: "Radixia", logo: "/assets/sponsors/radixia.png", logoWidth: 800, logoHeight: 138 },
       { name: "Pavia – Open your mind", logo: "/assets/sponsors/pavia-open-your-mind.png", logoWidth: 800, logoHeight: 357 },
       { name: "SICAM", logo: "/assets/sponsors/sicam.png", logoWidth: 456, logoHeight: 400 },

@@ -56,9 +56,9 @@ describe("sponsors", () => {
     expect(getSponsorContactHref({ email: "", url: "https://x.test" })).toBe("https://x.test");
   });
 
-  const names = ["Ctrl+Alt Museum", "Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"];
+  const names = ["Radixia", "Pavia – Open your mind", "SICAM", "Riso Scotti", "Coherency"];
 
-  it("current config: six named logos in one flat list, no invented urls/tiers/contact", () => {
+  it("current config: five named logos in one flat list, no invented urls/tiers/contact", () => {
     expect(EVENT.prizes).toEqual([]);
     expect(EVENT.jury).toEqual([]);
     expect(EVENT.sponsors.contact).toEqual({ email: null, url: null });
@@ -73,7 +73,19 @@ describe("sponsors", () => {
     }
   });
 
-  it("JSON-LD lists the six sponsors, not the organizer, with no urls", () => {
+  it("first row: SpaceXAI and Ctrl+Alt Museum as equal logo tiles, not repeated in the grid", () => {
+    const organizers = EVENT.sponsors.organizers;
+    expect(organizers.map((o) => o.name)).toEqual(["SpaceXAI", "Ctrl+Alt Museum"]);
+    expect(organizers[0].logoAlt).toBe("SpaceXAI");
+    for (const o of organizers) {
+      expect(o.logo).toMatch(/^\/assets\/sponsors\/[a-z-]+\.png$/);
+      expect(existsSync(join(process.cwd(), "public", o.logo!))).toBe(true);
+    }
+    const gridNames = EVENT.sponsors.list.map((s) => s.name);
+    for (const o of organizers) expect(gridNames).not.toContain(o.name);
+  });
+
+  it("JSON-LD lists the five sponsors, not the organizers, with no urls", () => {
     const ld = buildEventJsonLd("https://example.test") as { sponsor?: { "@type": string; name: string; url?: string }[] };
     expect(ld.sponsor?.map((s) => s.name)).toEqual(names);
     expect(ld.sponsor?.every((s) => s["@type"] === "Organization" && !("url" in s))).toBe(true);

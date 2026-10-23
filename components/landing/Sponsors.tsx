@@ -13,7 +13,7 @@ import { Section } from './shared';
 const TILE = 'flex h-28 w-full items-center justify-center rounded-3xl border border-white/10 bg-[var(--bg-tertiary)] px-5 py-4 sm:h-32';
 const LOGO = 'h-auto w-auto max-h-14 max-w-full object-contain sm:max-h-[4.5rem] sm:max-w-[12rem]';
 
-function SponsorLogo({ sponsor }: { sponsor: Sponsor & { name: string } }) {
+function SponsorLogo({ sponsor, wide = false }: { sponsor: Sponsor & { name: string }; wide?: boolean }) {
   if (!sponsor.logo) {
     // Named but no logo file yet: labelled placeholder.
     return (
@@ -34,13 +34,13 @@ function SponsorLogo({ sponsor }: { sponsor: Sponsor & { name: string } }) {
       width={sponsor.logoWidth ?? 400}
       height={sponsor.logoHeight ?? 160}
       unoptimized
-      className={LOGO}
+      className={wide ? `${LOGO} sm:max-w-[15rem]` : LOGO}
     />
   );
 }
 
-function Tile({ sponsor }: { sponsor: Sponsor & { name: string } }) {
-  const logo = <SponsorLogo sponsor={sponsor} />;
+function Tile({ sponsor, wide = false }: { sponsor: Sponsor & { name: string }; wide?: boolean }) {
+  const logo = <SponsorLogo sponsor={sponsor} wide={wide} />;
   if (sponsor.url) {
     return (
       <a
@@ -59,7 +59,7 @@ function Tile({ sponsor }: { sponsor: Sponsor & { name: string } }) {
 
 export function Sponsors() {
   const items = getSponsorItems(EVENT.sponsors.list, EVENT.sponsors.placeholderSlots);
-  const organizer = EVENT.sponsors.organizer as Sponsor & { name: string };
+  const organizers = EVENT.sponsors.organizers as (Sponsor & { name: string })[];
   const contactHref = getSponsorContactHref(EVENT.sponsors.contact);
   const external = contactHref !== null && !contactHref.startsWith('mailto:');
 
@@ -71,9 +71,11 @@ export function Sponsors() {
             {t('landing', 'organizedBy')}
           </h3>
           <ul aria-labelledby="sponsors-organizer" className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-3">
-            <li className="min-w-0">
-              <Tile sponsor={organizer} />
-            </li>
+            {organizers.map((organizer) => (
+              <li key={organizer.name} className="min-w-0">
+                <Tile sponsor={organizer} wide />
+              </li>
+            ))}
           </ul>
         </div>
 
