@@ -121,10 +121,11 @@ export const EVENT = {
     /**
      * Team registration window (Europe/Rome, CET: DST ended 25 Oct). The banner on the landing, /rules,
      * /register and the dashboard derives "opens on / open until / closed" from these two instants.
-     * Closes at the end of the day (23:59). Note: the team lock (portal.teamLockAt) is a day later.
+     * Closes on October 31 at 23:59 (Rome time): the same moment as the team lock (portal.teamLockAt), so there is
+     * a single deadline for registering and for team changes.
      */
     registrationOpens: "2026-10-26T00:00:00+01:00",
-    registrationCloses: "2026-10-30T23:59:00+01:00",
+    registrationCloses: "2026-10-31T23:59:00+01:00",
   },
 
   /**

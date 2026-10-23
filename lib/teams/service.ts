@@ -10,8 +10,9 @@ import {
   type TeamMembershipRole,
 } from "@/lib/teams/constants";
 import {
-  assertCanJoin,
+  assertCodeJoinable,
   assertTeamsOpen,
+  isCodeCollisionError,
   generateTeamCode,
   isTeamFormed,
   isTeamOpen,
@@ -46,6 +47,29 @@ function isFutureDate(value: Date | null | undefined) {
 
 function createInviteCode() {
   return generateTeamCode(randomBytes);
+}
+
+/**
+ * Codes are random and checked for uniqueness before insert; the unique indexes catch the (very unlikely)
+ * race between two concurrent generations. Postgres aborts the transaction on that error, so the whole
+ * operation is retried with a fresh code.
+ */
+async function withCodeCollisionRetry<T>(run: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < TEAM_LIMITS.inviteCodeGenerationAttempts; attempt += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      if (!isCodeCollisionError(error)) throw error;
+      lastError = error;
+    }
+  }
+  throw createTeamError(
+    500,
+    "INVITE_CODE_GENERATION_FAILED",
+    "Failed to generate a unique team code. Please try again.",
+    lastError instanceof Error ? lastError.message : undefined,
+  );
 }
 
 async function generateUniqueInviteCode(executor: DbExecutor) {
@@ -523,7 +547,11 @@ export async function listCurrentTeamMembers(actor: AppSessionUser) {
   return listActiveTeamMembers(db, activeMembership.team.id);
 }
 
-export async function createTeam(actor: AppSessionUser, input: CreateTeamInput) {
+export function createTeam(actor: AppSessionUser, input: CreateTeamInput) {
+  return withCodeCollisionRetry(() => createTeamOnce(actor, input));
+}
+
+async function createTeamOnce(actor: AppSessionUser, input: CreateTeamInput) {
   assertTeamsOpen();
   assertInviteSettings(input.inviteExpiresAt, input.inviteMaxUses);
 
@@ -593,35 +621,15 @@ export async function joinTeamByCode(actor: AppSessionUser, input: JoinTeamInput
       .where(eq(teamInvite.code, input.code))
       .limit(1);
 
-    if (!invite) {
+    // The team row is locked FOR UPDATE, so concurrent joins serialize here; the DB check constraint
+    // (member_count <= max_members) is the last line of defence.
+    const lockedTeam = invite ? await getLockedTeam(tx, invite.teamId) : null;
+
+    assertCodeJoinable({ code: input.code, invite: invite ?? null, team: lockedTeam });
+
+    if (!invite || !lockedTeam) {
       throw createTeamError(404, "INVALID_INVITE_CODE", "Invite code is invalid.");
     }
-
-    const lockedTeam = await getLockedTeam(tx, invite.teamId);
-
-    if (!lockedTeam) {
-      throw createTeamError(404, "TEAM_NOT_FOUND", "Team not found.");
-    }
-
-    if (invite.revokedAt || lockedTeam.joinCode !== input.code) {
-      throw createTeamError(409, "INVALID_INVITE_CODE", "Invite code is no longer active.");
-    }
-
-    if (invite.expiresAt && invite.expiresAt.getTime() <= Date.now()) {
-      throw createTeamError(409, "INVITE_EXPIRED", "Invite code has expired.");
-    }
-
-    if (invite.maxUses !== null && invite.usedCount >= invite.maxUses) {
-      throw createTeamError(409, "INVITE_EXHAUSTED", "Invite code can no longer be used.");
-    }
-
-    if (lockedTeam.status !== "active") {
-      throw createTeamError(409, "TEAM_ARCHIVED", "Archived teams cannot accept new members.");
-    }
-
-    // The team row is locked FOR UPDATE above, so concurrent joins serialize here;
-    // the DB check constraint (member_count <= max_members) is the last line of defence.
-    assertCanJoin(lockedTeam.memberCount, lockedTeam.maxMembers);
 
     await tx.insert(teamMember).values({
       teamId: lockedTeam.id,
@@ -754,7 +762,11 @@ export async function transferCurrentTeamLead(actor: AppSessionUser, newLeadUser
   });
 }
 
-export async function updateCurrentTeam(actor: AppSessionUser, input: UpdateTeamInput) {
+export function updateCurrentTeam(actor: AppSessionUser, input: UpdateTeamInput) {
+  return withCodeCollisionRetry(() => updateCurrentTeamOnce(actor, input));
+}
+
+async function updateCurrentTeamOnce(actor: AppSessionUser, input: UpdateTeamInput) {
   assertInviteSettings(input.inviteExpiresAt, input.inviteMaxUses);
 
   return db.transaction(async (tx) => {

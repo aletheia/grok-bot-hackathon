@@ -32,7 +32,7 @@ export type RegistrationNotice = {
 };
 
 const BODY =
-  "You can register as an individual looking for a team, or as a team, naming the other participants. Registering as a team gives priority for participation confirmation.";
+  "Register a team and share its secret code, or join a team with a code from a teammate. On your own? Register as looking for a team. Registering a team gives priority for participation confirmation.";
 
 export function getRegistrationNotice(
   now: Date | number = Date.now(),
@@ -43,10 +43,10 @@ export function getRegistrationNotice(
   const open = formatRegistrationDay(opens);
   const close = formatRegistrationDay(closes);
   if (state === "before") {
-    return { state, headline: `Team registration opens on ${open} and runs until ${close}.`, body: BODY };
+    return { state, headline: `Registration opens on ${open} and runs until ${close}.`, body: BODY };
   }
   if (state === "open") {
-    return { state, headline: `Team registration is open until ${close} (23:59, Rome time).`, body: BODY };
+    return { state, headline: `Registration is open until ${close} (23:59, Rome time).`, body: BODY };
   }
-  return { state, headline: `Team registration closed on ${close}.`, body: "" };
+  return { state, headline: `Registration closed on ${close}.`, body: "" };
 }

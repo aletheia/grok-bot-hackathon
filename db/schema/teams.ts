@@ -81,6 +81,7 @@ export const teamInvite = pgTable(
       "team_invite_max_uses_check",
       sql`${table.maxUses} is null or ${table.maxUses} > 0`,
     ),
+    check("team_invite_code_format_check", sql`${table.code} ~ '^[2-9A-HJ-NP-Z]{8}$'`),
     check("team_invite_used_count_check", sql`${table.usedCount} >= 0`),
   ],
 );

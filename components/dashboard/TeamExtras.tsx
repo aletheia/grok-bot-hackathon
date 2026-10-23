@@ -86,7 +86,7 @@ export function TeamLockNotice() {
 type Availability = { available: boolean; since: string | null; note: string | null };
 
 /** "I'm available" toggle for people without a team. */
-export function AvailabilityCard() {
+export function AvailabilityCard({ step = "No team yet?", title = "Mark yourself as available" }: { step?: string; title?: string } = {}) {
   const locked = useTeamsLocked();
   const [state, setState] = useState<Availability | null>(null);
   const [note, setNote] = useState("");
@@ -120,12 +120,12 @@ export function AvailabilityCard() {
 
   return (
     <div className="mt-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 p-5 sm:p-6">
-      <p className="text-xs font-medium uppercase tracking-wider text-emerald-300">No team yet?</p>
-      <h3 className="mt-1 text-lg font-semibold text-white">Mark yourself as available</h3>
+      <p className="text-xs font-medium uppercase tracking-wider text-emerald-300">{step}</p>
+      <h3 className="mt-1 text-lg font-semibold text-white">{title}</h3>
       <p className="mt-2 text-sm text-[var(--text-secondary)]">
-        Teams that are still looking for people will see your name, your profile and the note below. Your email is
+        Register as looking for a team: teams that still have room will see your name, your profile and the note below, and can send you their team code to enter under Join a team. Your email is
         never shown, so add how to reach you (for example a Telegram or LinkedIn handle) and what you like to work on.
-        Creating or joining a team removes you from the list.
+        Registering or joining a team removes you from the list.
       </p>
       <label className="mt-4 block">
         <span className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">
@@ -149,7 +149,7 @@ export function AvailabilityCard() {
           className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/90 px-4 py-2 text-sm font-semibold text-black hover:bg-emerald-400 disabled:opacity-50"
         >
           <UserPlus size={16} />
-          {state?.available ? "Update my note" : "I'm available"}
+          {state?.available ? "Update my note" : "I'm looking for a team"}
         </button>
         {state?.available ? (
           <>
@@ -190,7 +190,7 @@ export function AvailablePeople({ seatsLeft }: { seatsLeft: number }) {
         People available to join ({seatsLeft} {seatsLeft === 1 ? "seat" : "seats"} left in your team)
       </p>
       <p className="mt-1 text-xs text-[var(--text-secondary)]">
-        Reach out using the contact they wrote in their note, then share your team code with them.
+        Reach out using the contact they wrote in their note and share your team code with them: they enter it under Join a team.
       </p>
       {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
       {items === null && !error ? <p className="mt-3 text-sm text-[var(--text-muted)]">Loading…</p> : null}

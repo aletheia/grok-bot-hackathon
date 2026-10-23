@@ -1,0 +1,3 @@
+-- NOT VALID: enforced for every new/updated row without scanning (or failing on) rows written before this migration.
+ALTER TABLE "team" ADD CONSTRAINT "team_join_code_format_check" CHECK ("team"."join_code" ~ '^[2-9A-HJ-NP-Z]{8}$') NOT VALID;--> statement-breakpoint
+ALTER TABLE "team_invite" ADD CONSTRAINT "team_invite_code_format_check" CHECK ("team_invite"."code" ~ '^[2-9A-HJ-NP-Z]{8}$') NOT VALID;

@@ -72,6 +72,8 @@ export const team = pgTable(
   },
   (table) => [
     uniqueIndex("team_join_code_unique").on(table.joinCode),
+    // Codes are stored upper-case from the 32-symbol alphabet (no 0/1/I/O), so the unique index is effectively case-insensitive.
+    check("team_join_code_format_check", sql`${table.joinCode} ~ '^[2-9A-HJ-NP-Z]{8}$'`),
     index("team_status_idx").on(table.status),
     index("team_created_by_user_id_idx").on(table.createdByUserId),
     index("team_screening_status_idx").on(table.screeningStatus),

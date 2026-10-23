@@ -55,7 +55,7 @@ export const translations = {
     speakerTitle: "With us on Thursday",
 
     teamsTag: "Teams",
-    teamsTitle: "How teams work",
+    teamsTitle: "Three ways to take part",
     teamsCta: "Sign in to the portal",
     teamsRules: "Read the full rules",
 
@@ -125,7 +125,7 @@ export const translations = {
     claiming: "Claiming…",
     emptySubtitle: "No credits issued yet",
     emptyNoTeam:
-      "Create a team or join with a code — partner credits are for members of teams that pass screening.",
+      "Register a team or join one with a code — partner credits are for members of teams that pass screening.",
     emptyDraft:
       "Complete the screening stage. Once your team is approved, organizers can distribute credits.",
     emptySubmitted:

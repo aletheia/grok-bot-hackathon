@@ -54,7 +54,7 @@ const SCREENING_COPY = {
     currentVideo: "Current video:",
     videoLinkLabel: "Video link",
     saving: "Saving…",
-    noTeam: "Create or join a team to add a demo video.",
+    noTeam: "Register or join a team to add a demo video.",
     leadOnlyVideo: "Only the team lead can set and edit the team demo video link.",
     rejectedLabel: "Application rejected.",
     rejectedReasonLabel: "Reason",

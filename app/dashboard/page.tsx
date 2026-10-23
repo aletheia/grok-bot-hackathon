@@ -69,14 +69,17 @@ const DASHBOARD_COPY = {
     inviteMissing: "Missing",
     teamPanelTitle: "Your team",
     membersTitle: "Team members",
-    createTeamTitle: "Create a team",
-    joinTeamTitle: "Join with a code",
-    createTeamDesc: "Start a team and get its secret code. Share the code with the people you want on your team.",
-    joinTeamDesc: "Got a code from a teammate? Enter it here to join their team (if it still has room).",
+    createTeamTitle: "Register a team",
+    createTeamStep: "Path 1",
+    joinTeamStep: "Path 2",
+    joinTeamTitle: "Join a team",
+    createTeamDesc: "Create your team and get its secret code right away. You share the code with the people you want; they use Join a team to enter it. Registering a team gives priority for participation confirmation.",
+    joinTeamDesc: "Got a code from a teammate? Enter it here to join their team. Letters can be upper or lower case; spaces and dashes are ignored.",
     teamNameLabel: "Team name",
     teamDescriptionLabel: "Short description",
-    teamCodeLabel: "Secret team code",
-    createTeamAction: "Create team",
+    teamCodeLabel: "Your team code",
+    joinCodeLabel: "Team code",
+    createTeamAction: "Register team and get my code",
     creatingTeamAction: "Creating...",
     joinTeamAction: "Join team",
     joiningTeamAction: "Joining...",
@@ -89,8 +92,8 @@ const DASHBOARD_COPY = {
     captainBadge: "Lead",
     memberBadge: "Member",
     noTeamState:
-      "You are not in a team yet. Create one, join with a code, or mark yourself as available below.",
-    inviteNote: "Share this code only with people you want in your team. Anyone with it can join while the team has room.",
+      "You are not in a team yet. Pick one of the three paths: register a team, join a team with a code, or say you are looking for a team.",
+    inviteNote: "Share this code only with people you want in your team: they open Join a team on their dashboard and enter it. It works while the team has room. Every member can see and copy it here.",
     teamDescriptionFallback: "No team description yet.",
     accountTitle: "Account",
     accountName: "Name",
@@ -102,11 +105,11 @@ const DASHBOARD_COPY = {
     loadError: "Failed to load the current team state.",
     requestFailed: "Request failed.",
     signOutError: "Failed to sign out.",
-    createSuccess: "Team created and ready for invites.",
+    createSuccess: "Team registered. Your team code is below: copy it and share it with your teammates.",
     joinSuccess: "You joined the team successfully.",
     rotateSuccess: "A fresh invite code is now active.",
     leaveSuccess: "You left the team. If you were the lead, the earliest-joined member is now lead.",
-    bannerRegistration: "Team formation is open until 31 October 2026 at 23:59 (Rome time).",
+    bannerRegistration: "Registration and team changes are open until 31 October 2026 at 23:59 (Rome time).",
     bannerScreeningActive: "Screening is active! Complete the tasks to confirm your team's participation.",
     bannerScreeningCompleted: "Screening is complete. Results are published below.",
     bannerGoToScreening: "Go to screening",
@@ -114,7 +117,7 @@ const DASHBOARD_COPY = {
     resultApproved: "Your team passed the screening! Welcome to the finals.",
     resultRejected: "Unfortunately, your team did not pass the screening.",
     resultPending: "Screening results have not been announced yet.",
-    resultNoTeam: "Create a team to participate in the screening.",
+    resultNoTeam: "Register a team or join one to participate in the screening.",
     createTeamNamePlaceholder: "Team name",
     createTeamDescriptionPlaceholder: "What you want to build, skills you are looking for",
     joinCodePlaceholder: "7AB4K9XZ",
@@ -446,7 +449,7 @@ export default function DashboardPage() {
       await requestApi<TeamData>("/api/teams/join", {
         method: "POST",
         body: JSON.stringify({
-          code: joinCode.trim().toUpperCase(),
+          code: joinCode,
         }),
       });
 
@@ -889,16 +892,19 @@ export default function DashboardPage() {
                     {copy.teamCodeLabel}
                   </p>
                   <p className="mt-2 flex items-center gap-2 break-all font-mono text-lg font-semibold tracking-widest text-white">
-                    {team.invite?.code ?? "—"}
+                    <span data-testid="team-code">{team.invite?.code ?? "—"}</span>
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
-                      className="h-8 w-8 shrink-0 p-0"
+                      className="shrink-0 gap-1.5 px-3"
                       onClick={handleCopyInvite}
                       title={copy.copyCode}
+                      aria-label={copy.copyCode}
+                      disabled={!team.invite?.code}
                     >
                       <Copy size={14} />
+                      <span className="font-sans text-xs tracking-normal">{copy.copyCode}</span>
                     </Button>
                   </p>
                   <p className="mt-2 text-xs text-[var(--text-secondary)]">
@@ -979,7 +985,7 @@ export default function DashboardPage() {
                 <div className="space-y-5">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wider text-[var(--accent-blue)]">
-                      {copy.createTeamTitle}
+                      {copy.createTeamStep}
                     </p>
                     <h3 className="mt-1 text-lg font-semibold text-white">
                       {copy.createTeamTitle}
@@ -1035,7 +1041,7 @@ export default function DashboardPage() {
                 <div className="space-y-5">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wider text-[var(--accent-purple)]">
-                      {copy.joinTeamTitle}
+                      {copy.joinTeamStep}
                     </p>
                     <h3 className="mt-1 text-lg font-semibold text-white">
                       {copy.joinTeamTitle}
@@ -1048,11 +1054,14 @@ export default function DashboardPage() {
                   <form className="space-y-4" onSubmit={handleJoinTeam}>
                     <label className="block">
                       <span className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">
-                        {copy.teamCodeLabel}
+                        {copy.joinCodeLabel}
                       </span>
                       <input
                         value={joinCode}
-                        onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
+                        onChange={(event) => setJoinCode(event.target.value)}
+                        autoComplete="off"
+                        autoCapitalize="characters"
+                        spellCheck={false}
                         className="h-11 w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 font-mono tracking-widest text-white outline-none transition-colors focus:border-[var(--accent-purple)] focus:ring-1 focus:ring-[var(--accent-purple)]/30"
                         placeholder={copy.joinCodePlaceholder}
                         required
@@ -1080,7 +1089,7 @@ export default function DashboardPage() {
               </SpotlightCard>
             </div>
           )}
-          {!isTeamLoading && !team ? <AvailabilityCard /> : null}
+          {!isTeamLoading && !team ? <AvailabilityCard step="Path 3" title="I'm looking for a team" /> : null}
         </section>
 
         {/* Mentor request section — only for approved teams */}

@@ -12,6 +12,25 @@ export function formatTeamLock(): string {
 
 export type TeamRule = { title: string; body: string };
 
+/** The three ways to take part, in the order they appear on the landing, on /rules and in the portal. */
+export function getTeamPaths(): TeamRule[] {
+  const { minMembers, maxMembers } = EVENT.portal.team;
+  return [
+    {
+      title: "Register a team",
+      body: `Sign in, create your team (name and a short description) and you immediately get its secret code. It stays visible to every member on your dashboard. Share it with the people you want: a team has ${minMembers} to ${maxMembers} members.`,
+    },
+    {
+      title: "Join a team",
+      body: "Got a code from a teammate? Sign in, choose Join a team and enter it. If the code is wrong, no longer active, or the team is full, you get a clear message.",
+    },
+    {
+      title: "I'm looking for a team",
+      body: "On your own? Mark yourself as looking for a team and add how to reach you. Teams with room can see your name, profile and note, and send you their code.",
+    },
+  ];
+}
+
 /** The team rules, in order. Shown on the landing, on /rules and next to the team screens. */
 export function getTeamRules(): TeamRule[] {
   const { minMembers, maxMembers } = EVENT.portal.team;
@@ -22,8 +41,8 @@ export function getTeamRules(): TeamRule[] {
       body: `Use the same email you used to register on ${EVENT.registration.provider}. Only guests the organisers have approved on Luma can sign in (not waitlist or pending); we send a one-time code to that address.`,
     },
     {
-      title: "Create, join or say you're available",
-      body: "Create a team and get its secret code, join a team with the code a teammate shares with you, or mark yourself as available so teams looking for people can find you.",
+      title: "Register a team, join one, or look for one",
+      body: "Register a team and get its secret code, join a team by entering the code a teammate shares with you, or register as looking for a team so teams with room can find you. Registering a team gives priority for participation confirmation.",
     },
     {
       title: `Teams of ${minMembers} to ${maxMembers}`,
@@ -35,7 +54,7 @@ export function getTeamRules(): TeamRule[] {
     },
     {
       title: `Teams lock on ${formatTeamLock()}`,
-      body: "After that moment nobody can create, join or leave a team. Sort out your team before then.",
+      body: "This is also the end of registration. After that moment nobody can register, join or leave a team. Sort out your team before then.",
     },
     {
       title: `Guaranteed seats for teams of ${minMembers}+`,

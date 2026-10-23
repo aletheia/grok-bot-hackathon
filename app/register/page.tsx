@@ -110,6 +110,11 @@ export default function LoginPage() {
               Use the <strong className="text-white">same email you used to register on Luma</strong> for{" "}
               {EVENT.name}. We will email you a 6-digit code — no password needed.
             </p>
+            <p className="text-sm text-[var(--text-muted)] mb-6">
+              Once you are in, you can <strong className="text-white">register a team</strong> and get its code,{" "}
+              <strong className="text-white">join a team</strong> with a code, or register as{" "}
+              <strong className="text-white">looking for a team</strong>.
+            </p>
 
             {error ? (
               <div

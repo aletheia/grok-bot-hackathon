@@ -29,7 +29,7 @@ const STEPS: Record<OnboardingLanguage, StepContent[]> = {
     {
       icon: Users,
       title: "Registration & Team Formation",
-      text: "After onboarding, you'll land on your dashboard. There you can create a team, join one with its team code, or mark yourself as available to join a team. Teams have 4 to 6 people, and they lock on 31 October at 23:59 (Rome time).",
+      text: "After onboarding, you'll land on your dashboard. There you can register a team and get its secret code, join a team by entering a code a teammate shares, or register as looking for a team. Teams have 4 to 6 people, and registration and team changes close on 31 October at 23:59 (Rome time).",
     },
     {
       icon: Clock,
