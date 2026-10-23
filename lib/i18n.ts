@@ -75,6 +75,8 @@ export const translations = {
     jurorRole: "Role · Organization",
     jurorBio: "Short bio to be announced.",
     jurorLink: "Profile",
+    readMore: "Read more",
+    close: "Close",
     criteriaTitle: "Evaluation criteria",
 
     sponsorsTag: "With the support of",

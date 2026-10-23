@@ -40,6 +40,8 @@ describe("proposed tracks", () => {
   it("keeps criteria, prizes and jury as announcements", () => {
     expect(EVENT.criteria).toEqual([]);
     expect(EVENT.prizes).toEqual([]);
-    expect(EVENT.jury).toEqual([]);
+    // Jury: names only until Luca confirms the rest (no invented roles/bios), plus one "to be announced" card.
+    expect(EVENT.jury.map((j) => j.name)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", null]);
+    for (const j of EVENT.jury) expect(Object.keys(j)).toEqual(["name"]);
   });
 });

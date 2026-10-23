@@ -62,8 +62,10 @@ export type JuryMember = {
   org?: string | null;
   /** Square photo under /public (e.g. "/assets/jury/jane-doe.jpg") or absolute URL. */
   photo?: AssetSrc;
-  /** One or two sentences. */
+  /** Full bio (a few sentences). Shown in the "Read more" dialog when it is longer than `bioShort`. */
   bio?: string | null;
+  /** One short sentence for the card (clamped to two lines). Falls back to `bio` when omitted. */
+  bioShort?: string | null;
   /** Optional profile link (LinkedIn, personal site…). */
   link?: string | null;
 };
@@ -205,12 +207,26 @@ export const EVENT = {
   prizes: [] as Prize[],
 
   /**
-   * JURY (landing #jury). Add one entry per juror:
-   *   { name: "…", role: "…", org: "…", photo: "/assets/jury/<file>.jpg", bio: "…", link: "https://…" }
-   * While the list is empty, `juryPlaceholderSlots` placeholder cards are shown.
+   * JURY (landing #jury). One entry per juror, all fields except `name` optional:
+   *   { name: "…", role: "…", org: "…", photo: "/assets/jury/<file>.jpg", bio: "…", bioShort: "…", link: "https://…" }
+   * - No `photo`: the card shows a circular initials avatar (e.g. "LC") in an accent colour. With `photo`
+   *   (a square file Luca provides under /public/assets/jury/) it is cropped to a circle; alt "Portrait of <name>".
+   * - Cards show name, "role · org" and `bioShort` (or `bio`) clamped to two lines. A "Read more" button appears
+   *   only when `bio` is longer than `bioShort`.
+   * - `{ name: null }` renders a dashed "To be announced" card. While the list is empty, `juryPlaceholderSlots`
+   *   of them are shown.
    * The evaluation criteria card (EVENT.criteria above) sits next to the jury.
    */
-  jury: [] as JuryMember[],
+  // TODO(Luca): confirm the list and fill role / org / bio / bioShort / photo / link. Names only for now:
+  // nothing else is invented.
+  jury: [
+    { name: "Luca Bianchi" },
+    { name: "Lorenzo Cerri" },
+    { name: "Alessandro Rano" },
+    { name: "Alberto Giusti" },
+    { name: "Claudio Peroni" },
+    { name: null },
+  ] as JuryMember[],
   juryPlaceholderSlots: 3,
 
   /**

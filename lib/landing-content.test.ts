@@ -60,7 +60,7 @@ describe("sponsors", () => {
 
   it("current config: six named logos in one flat list, no invented urls/tiers/contact", () => {
     expect(EVENT.prizes).toEqual([]);
-    expect(EVENT.jury).toEqual([]);
+    expect(EVENT.jury.length).toBeGreaterThan(0);
     expect(EVENT.sponsors.contact).toEqual({ email: null, url: null });
     expect(EVENT.sponsors).not.toHaveProperty("tiers");
     expect(EVENT.sponsors.list.map((s) => s.name)).toEqual(names);
