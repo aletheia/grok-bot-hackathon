@@ -13,7 +13,7 @@ export function SiteStructuredData() {
         name: siteConfig.name,
         description: siteConfig.description,
         url,
-        inLanguage: ["en-US", "de-DE", "es-ES"],
+        inLanguage: "en",
         publisher: { "@id": `${url}/#organization` },
       },
       {

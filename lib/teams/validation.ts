@@ -1,4 +1,5 @@
 import { AppError } from "@/lib/api/http";
+import { assertValidTeamCodeFormat, normalizeTeamCode } from "@/lib/teams/policy";
 import {
   TEAM_LIMITS,
   type AdminMembershipAction,
@@ -207,9 +208,11 @@ export function parseCreateTeamInput(input: unknown): CreateTeamInput {
 export function parseJoinTeamInput(input: unknown): JoinTeamInput {
   const data = ensureObject(input);
 
-  return {
-    code: parseRequiredString(data, "code", { minLength: 4, maxLength: 64 }).toUpperCase(),
-  };
+  const raw = parseRequiredString(data, "code", { minLength: 1, maxLength: 64 });
+  const code = normalizeTeamCode(raw);
+  assertValidTeamCodeFormat(code);
+
+  return { code };
 }
 
 export function parseUpdateTeamInput(input: unknown): UpdateTeamInput {

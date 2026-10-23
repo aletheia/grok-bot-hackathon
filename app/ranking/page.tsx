@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Logo, NoiseOverlay } from "@/components/ui";
+import { siteConfig } from "@/lib/site";
 
 type JudgeSlotPub = { displayName: string } | null;
 
@@ -143,7 +144,7 @@ export default function RankingPage() {
             <div className="flex items-center gap-4">
               <Link href="/" className="group flex items-center gap-3">
                 <Logo size={36} />
-                <span className="font-bold text-white hidden sm:block">CURSOR 48H</span>
+                <span className="font-bold text-white hidden sm:block">{siteConfig.shortName}</span>
               </Link>
             </div>
             <div className="flex items-center gap-3">

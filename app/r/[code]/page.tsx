@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { lookupRedemptionByShortCode } from "@/lib/credits/redeem";
@@ -22,7 +23,7 @@ export default async function RedeemPage({ params }: Props) {
     redirect(redirectUrl);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const baseUrl = getAppUrl();
   const fullLink = baseUrl ? `${baseUrl.replace(/\/$/, "")}/r/${shortCode}` : `/r/${shortCode}`;
 
   return (

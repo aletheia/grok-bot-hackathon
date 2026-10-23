@@ -18,7 +18,10 @@ function storageKey(pathname: string) {
 export function ScrollRestoration() {
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
-  pathnameRef.current = pathname;
+
+  useLayoutEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;

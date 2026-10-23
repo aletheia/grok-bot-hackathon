@@ -1,279 +1,120 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useLanguage } from '@/lib/LanguageContext';
+import { Menu, X } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
-import { Logo, IconMenu, IconX } from '@/components/ui';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { Logo } from '@/components/ui';
+import { LumaCta } from '@/components/landing/shared';
+import { t } from '@/lib/i18n';
+import { siteConfig } from '@/lib/site';
 
-type NavVariant = 'partnership' | 'participant';
+const NAV_ITEMS = [
+  { key: 'brief', href: '/#brief' },
+  { key: 'tracks', href: '/#tracks' },
+  { key: 'hardware', href: '/#hardware' },
+  { key: 'schedule', href: '/#schedule' },
+  { key: 'teams', href: '/#teams' },
+  { key: 'prizes', href: '/#prizes' },
+  { key: 'jury', href: '/#jury' },
+  { key: 'venue', href: '/#venue' },
+  { key: 'sponsors', href: '/#sponsors' },
+] as const;
 
-interface NavigationProps {
-  variant?: NavVariant;
-}
-
-const partnershipNavItems = [
-  { key: 'about', href: '#about' },
-  { key: 'support', href: '#support' },
-  { key: 'audience', href: '#audience' },
-  { key: 'partners', href: '#partners' },
-  { key: 'contacts', href: '#contacts' },
-];
-
-const participantNavItems = [
-  { key: 'prizes', href: '#prizes' },
-  { key: 'judges', href: '#judges' },
-  { key: 'criteria', href: '#criteria' },
-  { key: 'register', href: '/register', highlight: true },
-];
-
-const participantNavItemsLoggedIn = [
-  { key: 'prizes', href: '#prizes' },
-  { key: 'judges', href: '#judges' },
-  { key: 'criteria', href: '#criteria' },
-  { key: 'dashboard', href: '/dashboard', highlight: true },
-];
-
-export function Navigation({ variant = 'partnership' }: NavigationProps) {
-  const { t } = useLanguage();
+/** Landing navigation. The primary CTA is the Luma page; the portal is reached via "Sign in" / "Dashboard". */
+export function Navigation() {
   const { data: session } = authClient.useSession();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const participantItems = session?.user ? participantNavItemsLoggedIn : participantNavItems;
-  const navItems = variant === 'participant' ? participantItems : partnershipNavItems;
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith('#')) {
-      e.preventDefault();
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-      setIsMobileMenuOpen(false);
-    }
-  };
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const linkClass = 'inline-flex min-h-[44px] items-center whitespace-nowrap px-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-white';
+  const portal = session?.user ? { href: '/dashboard', label: t('nav', 'dashboard') } : { href: '/register', label: t('nav', 'signIn') };
 
   return (
-    <motion.nav
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
-      className={`
-        fixed top-0 left-0 right-0 z-50 transition-all duration-300
-        ${isScrolled 
-          ? 'bg-[var(--bg-primary)]/80 backdrop-blur-xl border-b border-[var(--border-color)]' 
-          : 'bg-transparent'
-        }
-      `}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Link 
-              href="/" 
-              className="flex items-center gap-3 group"
-            >
-              <Logo size={40} />
-              <motion.span 
-                className="font-bold text-lg text-white hidden sm:block"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                CURSOR 48H
-              </motion.span>
-            </Link>
-          </motion.div>
+    <>
+      <a
+        href="#content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-5 focus:py-3 focus:font-semibold focus:text-black"
+      >
+        {t('nav', 'skipToContent')}
+      </a>
+      <header
+        className={`fixed inset-x-0 top-0 z-40 transition-colors ${
+          isScrolled || open ? 'border-b border-white/10 bg-[#0a0a0a]/90 backdrop-blur-xl' : 'bg-transparent'
+        }`}
+      >
+        <nav aria-label={t('nav', 'primary')} className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8 md:h-20">
+          <Link href="/" className="flex min-h-[44px] items-center gap-3" aria-label={`${siteConfig.shortName} — ${t('nav', 'home')}`}>
+            <Logo size={36} />
+            <span className="hidden font-display text-base font-extrabold uppercase text-white sm:block">{siteConfig.shortName}</span>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {navItems.map((item, index) => (
-                <motion.a
-                  key={item.key}
-                  href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={`
-                  text-sm font-medium transition-colors relative
-                  ${('highlight' in item && item.highlight)
-                    ? 'bg-[var(--accent-blue)] text-white px-4 py-2 rounded-lg hover:bg-[var(--accent-blue)]/90'
-                    : 'text-[var(--text-secondary)] hover:text-white'
-                  }
-                `}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index + 0.3 }}
-                  whileHover={{ y: ('highlight' in item && item.highlight) ? 0 : -2 }}
-                >
+          <ul className="hidden items-center gap-1 xl:flex">
+            {NAV_ITEMS.map((item) => (
+              <li key={item.key}>
+                <a href={item.href} className={linkClass}>
                   {t('nav', item.key)}
-                  {!('highlight' in item && item.highlight) && (
-                    <motion.span
-                      className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[var(--accent-purple)]"
-                      whileHover={{ width: '100%' }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  )}
-                </motion.a>
+                </a>
+              </li>
             ))}
+          </ul>
 
-            {/* Partnership Link (only on participant page) */}
-            {variant === 'participant' && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Link
-                  href="/partnership"
-                  className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
-                >
-                  {t('nav', 'partnership')}
-                </Link>
-              </motion.div>
-            )}
-
-            {/* Register CTA (only on partnership page) */}
-            {variant === 'partnership' && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <Link
-                  href="/register"
-                  className="inline-block rounded-lg bg-[var(--accent-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-blue)]/90 transition-colors"
-                >
-                  {t('nav', 'register')}
-                </Link>
-              </motion.div>
-            )}
+          <div className="flex items-center gap-3">
+            <Link href={portal.href} className={`${linkClass} hidden sm:inline-flex`}>
+              {portal.label}
+            </Link>
+            <div className="hidden md:block">
+              <LumaCta size="md" className="whitespace-nowrap" />
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              aria-label={open ? t('nav', 'menuClose') : t('nav', 'menuOpen')}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full text-white xl:hidden"
+            >
+              {open ? <X aria-hidden="true" className="h-6 w-6" /> : <Menu aria-hidden="true" className="h-6 w-6" />}
+            </button>
           </div>
+        </nav>
 
-          {/* Language Switcher + Mobile Menu */}
-          <div className="flex items-center gap-4">
-            {/* Language Switcher */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <LanguageSwitcher />
-            </motion.div>
-
-            {/* Mobile Menu Button */}
-            <motion.button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-[var(--text-secondary)] hover:text-white"
-              whileTap={{ scale: 0.9 }}
-            >
-              <AnimatePresence mode="wait">
-                {isMobileMenuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <IconX size={24} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <IconMenu size={24} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
+        {open && (
+          <div id="mobile-menu" className="border-t border-white/10 px-5 pb-6 pt-2 xl:hidden">
+            <ul className="flex flex-col">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.key}>
+                  <a href={item.href} onClick={() => setOpen(false)} className="flex min-h-[48px] items-center text-lg font-semibold text-white">
+                    {t('nav', item.key)}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <Link href={portal.href} className="flex min-h-[48px] items-center text-lg font-semibold text-white">
+                  {portal.label}
+                </Link>
+              </li>
+            </ul>
+            <div className="mt-4">
+              <LumaCta size="md" />
+            </div>
           </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="md:hidden overflow-hidden"
-            >
-              <div className="pb-4 border-t border-[var(--border-color)] pt-4">
-                {navItems.map((item, index) => (
-                    <motion.a
-                      key={item.key}
-                      href={item.href}
-                      onClick={(e) => handleNavClick(e, item.href)}
-                      className={`
-                      py-3 min-h-[44px] flex items-center text-base font-medium transition-colors
-                      ${('highlight' in item && item.highlight)
-                        ? 'text-[var(--accent-blue)]'
-                        : 'text-[var(--text-secondary)] hover:text-white active:text-[var(--accent-purple)]'
-                      }
-                    `}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      {t('nav', item.key)}
-                    </motion.a>
-                ))}
-                
-                {/* Additional link for mobile */}
-                {variant === 'participant' ? (
-                  <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: (navItems.length + 1) * 0.05 }}
-                  >
-                    <Link
-                      href="/partnership"
-                      className="py-3 min-h-[44px] flex items-center text-base font-medium text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {t('nav', 'partnership')}
-                    </Link>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: (navItems.length + 1) * 0.05 }}
-                  >
-                    <Link
-                      href="/register"
-                      className="py-3 min-h-[44px] flex items-center text-base font-medium text-[var(--accent-blue)] hover:text-white"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {t('nav', 'register')}
-                    </Link>
-                  </motion.div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.nav>
+        )}
+      </header>
+    </>
   );
 }

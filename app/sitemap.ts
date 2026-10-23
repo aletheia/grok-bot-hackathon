@@ -1,21 +1,26 @@
 import type { MetadataRoute } from "next";
+import { EVENT } from "@/lib/event";
 import { getSiteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = getSiteUrl();
-  const lastModified = new Date();
-
-  const publicPaths = [
-    { path: "", changeFrequency: "weekly" as const, priority: 1 },
-    { path: "/partnership", changeFrequency: "monthly" as const, priority: 0.9 },
-    { path: "/ranking", changeFrequency: "daily" as const, priority: 0.85 },
-    { path: "/register", changeFrequency: "monthly" as const, priority: 0.8 },
+  return [
+    {
+      url: `${getSiteUrl()}/`,
+      lastModified: new Date(EVENT.contentUpdatedAt),
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    {
+      url: `${getSiteUrl()}/tracks`,
+      lastModified: new Date(EVENT.contentUpdatedAt),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${getSiteUrl()}/rules`,
+      lastModified: new Date(EVENT.contentUpdatedAt),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
   ];
-
-  return publicPaths.map(({ path, changeFrequency, priority }) => ({
-    url: `${base}${path}`,
-    lastModified,
-    changeFrequency,
-    priority,
-  }));
 }

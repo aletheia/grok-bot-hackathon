@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { Check, Video, Send, AlertCircle, Loader2, Users, ExternalLink, Link as LinkIcon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { NoiseOverlay } from "@/components/ui";
-import { useLanguage } from "@/lib/LanguageContext";
 
 type Question = {
   id: number;
@@ -55,85 +54,7 @@ const SCREENING_COPY = {
     currentVideo: "Current video:",
     videoLinkLabel: "Video link",
     saving: "Saving…",
-    noTeam: "Create or join a team to add a demo video.",
-    leadOnlyVideo: "Only the team lead can set and edit the team demo video link.",
-    rejectedLabel: "Application rejected.",
-    rejectedReasonLabel: "Reason",
-    rejectedHint: "Fix the issues and resubmit.",
-    submittedInfo: "Application is under review. Wait for the super admin decision.",
-    approvedInfo: "Application approved. Editing answers and video is disabled.",
-    teamProgress:
-      "Team members: {members}. Logic: {logic}. Video: {video}.",
-    allAnswered: "everyone answered",
-    notAllAnswered: "not everyone answered",
-    videoAdded: "added",
-    videoMissing: "missing",
-    submitAction: "Submit for review",
-    submittingAction: "Submitting…",
-    openVideo: "Open video",
-  },
-  de: {
-    loading: "Loading…",
-    redirecting: "Redirecting to dashboard…",
-    title: "Screening Tasks",
-    subtitle:
-      "Answer the questions and add your team demo video link (YouTube or Google Drive). After submission, your application goes to review.",
-    loadError: "Failed to load data.",
-    saveAnswerError: "Failed to save answer.",
-    saveVideoError: "Failed to save video.",
-    submitError: "Failed to submit.",
-    logicTitle: "Logic tasks ({count} of 5)",
-    logicDesc: "Each team member must answer all questions.",
-    noQuestions: "Questions are not published yet. Please wait or contact organizers.",
-    videoTitle: "Team Demo Video",
-    videoTopic: "Video topic: «What is an ideal product?»",
-    videoDesc:
-      "One video per team, up to 2 minutes. Paste a YouTube or Google Drive link.",
-    videoPublicHint: "The video link must be public and accessible without a password.",
-    videoPlaceholder: "YouTube or Google Drive — paste link",
-    currentVideo: "Current video:",
-    videoLinkLabel: "Video link",
-    saving: "Saving…",
-    noTeam: "Create or join a team to add a demo video.",
-    leadOnlyVideo: "Only the team lead can set and edit the team demo video link.",
-    rejectedLabel: "Application rejected.",
-    rejectedReasonLabel: "Reason",
-    rejectedHint: "Fix the issues and resubmit.",
-    submittedInfo: "Application is under review. Wait for the super admin decision.",
-    approvedInfo: "Application approved. Editing answers and video is disabled.",
-    teamProgress:
-      "Team members: {members}. Logic: {logic}. Video: {video}.",
-    allAnswered: "everyone answered",
-    notAllAnswered: "not everyone answered",
-    videoAdded: "added",
-    videoMissing: "missing",
-    submitAction: "Submit for review",
-    submittingAction: "Submitting…",
-    openVideo: "Open video",
-  },
-  es: {
-    loading: "Loading…",
-    redirecting: "Redirecting to dashboard…",
-    title: "Screening Tasks",
-    subtitle:
-      "Answer the questions and add your team demo video link (YouTube or Google Drive). After submission, your application goes to review.",
-    loadError: "Failed to load data.",
-    saveAnswerError: "Failed to save answer.",
-    saveVideoError: "Failed to save video.",
-    submitError: "Failed to submit.",
-    logicTitle: "Logic tasks ({count} of 5)",
-    logicDesc: "Each team member must answer all questions.",
-    noQuestions: "Questions are not published yet. Please wait or contact organizers.",
-    videoTitle: "Team Demo Video",
-    videoTopic: "Video topic: «What is an ideal product?»",
-    videoDesc:
-      "One video per team, up to 2 minutes. Paste a YouTube or Google Drive link.",
-    videoPublicHint: "The video link must be public and accessible without a password.",
-    videoPlaceholder: "YouTube or Google Drive — paste link",
-    currentVideo: "Current video:",
-    videoLinkLabel: "Video link",
-    saving: "Saving…",
-    noTeam: "Create or join a team to add a demo video.",
+    noTeam: "Register or join a team to add a demo video.",
     leadOnlyVideo: "Only the team lead can set and edit the team demo video link.",
     rejectedLabel: "Application rejected.",
     rejectedReasonLabel: "Reason",
@@ -154,8 +75,7 @@ const SCREENING_COPY = {
 
 export default function ScreeningPage() {
   const router = useRouter();
-  const { language } = useLanguage();
-  const copy = SCREENING_COPY[language];
+  const copy = SCREENING_COPY.en;
   const { data: session, isPending } = authClient.useSession();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});

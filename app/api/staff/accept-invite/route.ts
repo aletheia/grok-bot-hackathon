@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import { randomUUID } from "crypto";
 import { eq, and, isNull, gt } from "drizzle-orm";
 import { hashPassword } from "better-auth/crypto";
@@ -7,10 +8,7 @@ import { AppError } from "@/lib/api/http";
 import { parseJsonBody, toErrorResponse } from "@/lib/api/http";
 import { NextResponse } from "next/server";
 
-const baseUrl = () =>
-  (process.env.NEXT_PUBLIC_APP_URL ??
-  process.env.BETTER_AUTH_URL ??
-  "http://localhost:3000").replace(/\/+$/, "");
+const baseUrl = () => getAppUrl();
 
 type Body = {
   token: string;
