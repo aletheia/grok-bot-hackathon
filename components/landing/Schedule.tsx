@@ -35,6 +35,14 @@ export function Schedule() {
                     </span>
                     <span>
                       <span className="block text-lg font-semibold text-white">{item.title}</span>
+                      {item.invitationOnly && (
+                        <span
+                          className="mt-1 inline-block rounded-full border-2 px-3 py-0.5 font-mono text-base font-semibold"
+                          style={{ borderColor: accent, color: accent }}
+                        >
+                          {t('landing', 'invitationOnly')}
+                        </span>
+                      )}
                       {item.detail && <span className="block text-[var(--text-secondary)]">{item.detail}</span>}
                     </span>
                   </li>

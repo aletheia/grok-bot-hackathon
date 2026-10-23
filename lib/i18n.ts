@@ -50,6 +50,7 @@ export const translations = {
     scheduleTitle: "Two days, one night",
     scheduleTz: "All times are Rome time (CET).",
     overnight: "Overnight",
+    invitationOnly: "Invitation only",
 
     speakerTag: "Speaker",
     speakerTitle: "With us on Thursday",
