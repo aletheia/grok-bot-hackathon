@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { OTP_SEND_FAILED_MESSAGE } from "@/lib/auth/otp-messages";
 import { EVENT } from "@/lib/event";
 import { Logo, NoiseOverlay } from "@/components/ui";
 import { RegistrationNotice } from "@/components/RegistrationNotice";
@@ -51,7 +52,7 @@ export default function LoginPage() {
       if (sendError) {
         const { status, code } = sendError as { status?: number; code?: string };
         if (status === 403) setLumaHint(code === "LUMA_NOT_APPROVED" ? "status" : "register");
-        setError(errorMessage(sendError, "We could not send the code. Please try again."));
+        setError(errorMessage(sendError, OTP_SEND_FAILED_MESSAGE));
         return;
       }
       setStep("code");
