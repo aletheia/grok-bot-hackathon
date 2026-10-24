@@ -86,6 +86,25 @@ describe("send-verification-otp through better-auth", () => {
     expect((await post("ok@example.com")).status).toBe(200);
   });
 
+  it("a rejected send (network error) is surfaced too", async () => {
+    state.sendEmail.mockRejectedValue(new Error("fetch failed"));
+    const res = await post("ok@example.com");
+    expect(res.status).toBe(500);
+    expect(await res.json()).toMatchObject({ code: "EMAIL_SEND_FAILED" });
+  });
+
+  it("concurrent requests do not swap outcomes", async () => {
+    state.sendEmail.mockImplementation(async (mail: { to: string }) => {
+      await new Promise((r) => setTimeout(r, mail.to.startsWith("bad") ? 40 : 5));
+      return mail.to.startsWith("bad") ? { ok: false, error: "refused" } : { ok: true };
+    });
+    const [bad, good1, good2] = await Promise.all([post("bad@example.com"), post("good1@example.com"), post("good2@example.com")]);
+    expect(bad.status).toBe(500);
+    expect(good1.status).toBe(200);
+    expect(good2.status).toBe(200);
+    expect(await good1.json()).toEqual({ success: true });
+  });
+
   it("not registered: 403 NOT_ON_GUEST_LIST plus exactly one invite per address", async () => {
     state.decision = NOT_ON_LIST;
     const first = await post("New@Example.com");
