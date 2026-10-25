@@ -261,6 +261,7 @@ export default function LoginPage() {
   return (
     <>
       <NoiseOverlay />
+      {/* Geist applies to /register only: the body font (globals.css) is deliberately left as on main. */}
       <div className="min-h-screen bg-[var(--bg-primary)] font-sans">
         <div className="mx-auto w-full max-w-[1080px] px-4 pb-16 pt-4 sm:px-6 sm:pt-6 lg:pt-8">
           <header className="mb-4 flex items-center justify-between sm:mb-6">
