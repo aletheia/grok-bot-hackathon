@@ -30,3 +30,17 @@ export function otpVerifyErrorMessage(code: string | undefined | null): string |
 export function sanitizeOtp(value: string): string {
   return value.replace(/\D/g, "").slice(0, 6);
 }
+
+export const OTP_RATE_LIMITED_MESSAGE = "Please wait a moment before requesting another code.";
+
+/**
+ * Text for any failed auth call on the sign-in page. Known better-auth codes win over the HTTP status
+ * (TOO_MANY_ATTEMPTS arrives as 403, the rate limiter as 429), then the server message, then the fallback.
+ */
+export function authErrorText(error: unknown, fallback: string): string {
+  const err = error as { message?: string; status?: number; code?: string } | null;
+  const byCode = otpVerifyErrorMessage(err?.code);
+  if (byCode) return byCode;
+  if (err?.status === 429) return OTP_RATE_LIMITED_MESSAGE;
+  return err?.message?.trim() || fallback;
+}

@@ -8,7 +8,7 @@ import {
   OTP_LATEST_ONLY_HINT,
   OTP_RESEND_COOLDOWN_SECONDS,
   OTP_SEND_FAILED_MESSAGE,
-  otpVerifyErrorMessage,
+  authErrorText,
   sanitizeOtp,
 } from "@/lib/auth/otp-messages";
 import { EVENT } from "@/lib/event";
@@ -22,12 +22,6 @@ const LOADING_UI = (
 );
 
 type Step = "email" | "code";
-
-function errorMessage(error: unknown, fallback: string) {
-  const err = error as { message?: string; status?: number } | null;
-  if (err?.status === 429) return "Too many attempts. Please wait a minute and try again.";
-  return err?.message?.trim() || fallback;
-}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -65,7 +59,7 @@ export default function LoginPage() {
       if (sendError) {
         const { status, code } = sendError as { status?: number; code?: string };
         if (status === 403) setLumaHint(code === "LUMA_NOT_APPROVED" ? "status" : "register");
-        setError(errorMessage(sendError, OTP_SEND_FAILED_MESSAGE));
+        setError(authErrorText(sendError, OTP_SEND_FAILED_MESSAGE));
         return;
       }
       setCode("");
@@ -88,11 +82,7 @@ export default function LoginPage() {
         otp: sanitizeOtp(code),
       });
       if (signInError) {
-        const { code: errorCode } = signInError as { code?: string };
-        setError(
-          otpVerifyErrorMessage(errorCode) ??
-            errorMessage(signInError, "That code did not work. Check it or request a new one."),
-        );
+        setError(authErrorText(signInError, "That code did not work. Check it or request a new one."));
         return;
       }
       router.replace("/dashboard");
