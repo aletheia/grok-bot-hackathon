@@ -5,6 +5,7 @@ import { redactError } from "@/lib/auth/portal-access-email";
 
 
 const SEND_OTP_PATH = "/email-otp/send-verification-otp";
+const VERIFY_OTP_PATH = "/sign-in/email-otp";
 
 type SendEmail = (params: { to: string; subject: string; html: string }) => Promise<{ ok: boolean; error?: string }>;
 type Log = (message: string) => void;
@@ -54,6 +55,15 @@ export function createSendVerificationOTP(deps: { sendEmail: SendEmail; log: Log
 }
 
 export const otpSendFailureHook = createAuthMiddleware(async (ctx) => {
+  if (ctx.path === VERIFY_OTP_PATH) {
+    // Makes a rejected sign-in diagnosable from the runtime logs: only the reason, never the address or the code.
+    const returned = ctx.context.returned as { statusCode?: number; body?: { code?: string } } | undefined;
+    const code = returned?.body?.code;
+    if (returned instanceof Error && code && code !== OTP_SEND_FAILED_CODE) {
+      console.warn(`sign-in code rejected: ${code} (${returned.statusCode ?? "?"})`);
+    }
+    return;
+  }
   if (ctx.path !== SEND_OTP_PATH || !ctx.request || !failedRequests.has(ctx.request)) return;
   failedRequests.delete(ctx.request);
   throw new APIError("INTERNAL_SERVER_ERROR", { message: OTP_SEND_FAILED_MESSAGE, code: OTP_SEND_FAILED_CODE });
