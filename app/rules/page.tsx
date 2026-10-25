@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { RegistrationNotice } from "@/components/RegistrationNotice";
 import { Navigation } from "@/components/Navigation";
 import { EVENT } from "@/lib/event";
-import { formatRegistrationDay, REGISTRATION_CLOSES_AT, REGISTRATION_OPENS_AT } from "@/lib/registration";
+import { formatRegistrationDay, REGISTRATION_CLOSES_AT } from "@/lib/registration";
 import { formatTeamLock, getTeamPaths, getTeamRules } from "@/lib/teams/rules";
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const FAQ: { q: string; a: string }[] = [
   {
     q: "When can I register, and as what?",
-    a: `Registration opens on ${formatRegistrationDay(REGISTRATION_OPENS_AT)} and runs until ${formatRegistrationDay(REGISTRATION_CLOSES_AT)} (${formatTeamLock()}). That is also the team lock: one deadline for registering and for changing teams. You can register a team (you get a secret code to share), join a team with a code, or register as an individual looking for a team. Registering a team gives priority for participation confirmation.`,
+    a: `Registration closes on ${formatRegistrationDay(REGISTRATION_CLOSES_AT)} (${formatTeamLock()}). That is also the team lock: one deadline for registering and for changing teams. You can register a team (you get a secret code to share), join a team with a code, or register as an individual looking for a team. Registering a team gives priority for participation confirmation.`,
   },
   {
     q: "Which email do I sign in with?",
