@@ -40,13 +40,11 @@ export function getRegistrationNotice(
   closes: Date = REGISTRATION_CLOSES_AT,
 ): RegistrationNotice {
   const state = getRegistrationState(now, opens, closes);
-  const open = formatRegistrationDay(opens);
   const close = formatRegistrationDay(closes);
-  if (state === "before") {
-    return { state, headline: `Registration opens on ${open} and runs until ${close}.`, body: BODY };
-  }
-  if (state === "open") {
-    return { state, headline: `Registration is open until ${close} (23:59, Rome time).`, body: BODY };
+  // Deadline only: the opening date is deliberately not advertised, so the pre-opening and open
+  // states show the same line. The "before" state still exists as a gate in getRegistrationState.
+  if (state === "before" || state === "open") {
+    return { state, headline: `Registration closes on ${close} (23:59, Rome time).`, body: BODY };
   }
   return { state, headline: `Registration closed on ${close}.`, body: "" };
 }

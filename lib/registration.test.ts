@@ -37,16 +37,24 @@ describe("registration window", () => {
     expect(getRegistrationState(at("2026-10-28T12:00:00+01:00").getTime())).toBe("open");
   });
 
-  it("writes the headline for each state with the October 26 to October 31 window", () => {
+  it("writes a deadline-only headline for each state and never advertises the opening date", () => {
     expect(getRegistrationNotice(at("2026-10-20T12:00:00+02:00")).headline).toBe(
-      "Registration opens on October 26 and runs until October 31.",
+      "Registration closes on October 31 (23:59, Rome time).",
     );
     expect(getRegistrationNotice(at("2026-10-27T12:00:00+01:00")).headline).toBe(
-      "Registration is open until October 31 (23:59, Rome time).",
+      "Registration closes on October 31 (23:59, Rome time).",
     );
+    expect(getRegistrationNotice(at("2026-10-25T12:00:00+01:00")).state).toBe("before");
     const closed = getRegistrationNotice(at("2026-11-01T12:00:00+01:00"));
     expect(closed.headline).toBe("Registration closed on October 31.");
     expect(closed.body).toBe("");
+  });
+
+  it("never mentions the opening date or 'opens' in any state", () => {
+    for (const iso of ["2026-10-20T12:00:00+02:00", "2026-10-27T12:00:00+01:00", "2026-11-01T12:00:00+01:00"]) {
+      const { headline, body } = getRegistrationNotice(at(iso));
+      expect(`${headline} ${body}`).not.toMatch(/opens|October 26|26 Oct/i);
+    }
   });
 
   it("never mentions October 30 as a deadline", () => {

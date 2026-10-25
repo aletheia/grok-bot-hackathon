@@ -148,7 +148,7 @@ export const EVENT = {
     capacity: 100,
     /**
      * Team registration window (Europe/Rome, CET: DST ended 25 Oct). The banner on the landing, /rules,
-     * /register and the dashboard derives "opens on / open until / closed" from these two instants.
+     * /register and the dashboard derives "closes on / closed" from these instants (the opening date is not shown).
      * Closes on October 31 at 23:59 (Rome time): the same moment as the team lock (portal.teamLockAt), so there is
      * a single deadline for registering and for team changes.
      */

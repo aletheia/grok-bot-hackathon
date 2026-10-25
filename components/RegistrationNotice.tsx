@@ -6,7 +6,7 @@ import { CalendarClock } from 'lucide-react';
 import { getRegistrationNotice } from '@/lib/registration';
 
 /**
- * Team registration banner. Its text comes from EVENT.registration.registrationOpens/Closes.
+ * Team registration banner. Its text comes from EVENT.registration.registrationCloses (deadline only; the opening date is not shown).
  * Pages are statically prerendered, so the first paint uses the build-time answer and the real
  * state (before / open / closed) is re-evaluated in the browser right after mount.
  */
