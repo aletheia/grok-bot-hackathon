@@ -10,20 +10,38 @@ import * as authSchema from "@/db/schema/auth";
 import { lumaRegistrant } from "@/db/schema/luma";
 import { getAppUrl, getVercelOrigins } from "@/lib/app-url";
 import { sendEmail } from "@/lib/email/send";
-import { EVENT } from "@/lib/event";
+import { consumeThrottle, throttleKey } from "@/lib/auth/email-throttle";
+import { createSendVerificationOTP, otpSendFailureHook } from "@/lib/auth/otp-delivery";
+import { sendPortalAccessEmail } from "@/lib/auth/portal-access-email";
 import { normalizeEmail } from "@/lib/luma/email";
 import { checkPortalSignIn, getSuperAdminEmails } from "@/lib/luma/service";
 
 /** Endpoints that start or finish a passwordless sign-in; gated by the Luma guest list. */
 const OTP_GATED_PATHS = new Set(["/email-otp/send-verification-otp", "/sign-in/email-otp"]);
 
-function escapeHtml(value: string) {
-  return value.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+const SEND_OTP_PATH = "/email-otp/send-verification-otp";
+
+/** First hop of x-forwarded-for (set by Vercel's edge, not client-controlled there); null when absent. */
+function clientIp(headers: Headers | undefined): string | null {
+  const forwarded = headers?.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwarded || headers?.get("x-real-ip")?.trim() || null;
 }
 
-async function assertGuestListAccess(email: string) {
+async function assertGuestListAccess(email: string, notify?: { ip: string | null }) {
   const decision = await checkPortalSignIn(email);
   if (!decision.allowed) {
+    if (notify) {
+      // Tell the person how to get in (invite / status). Never throws, never changes the HTTP answer below.
+      await sendPortalAccessEmail(
+        { email, reason: decision.reason, ip: notify.ip },
+        {
+          sendEmail,
+          consume: (key, windowSeconds, max) =>
+            consumeThrottle(throttleKey(`invite:${key.kind}`, key.value), windowSeconds, max),
+          log: (message) => console.error(`[auth] ${message}`),
+        },
+      );
+    }
     throw new APIError("FORBIDDEN", { message: decision.message, code: decision.code });
   }
 }
@@ -62,11 +80,16 @@ const trustedOrigins = Array.from(
 
 export const auth = betterAuth({
   hooks: {
+    // better-auth swallows errors thrown while sending the OTP; surface them as an HTTP error instead.
+    after: otpSendFailureHook,
     before: createAuthMiddleware(async (ctx) => {
       if (OTP_GATED_PATHS.has(ctx.path)) {
         const email = typeof ctx.body?.email === "string" ? ctx.body.email : "";
         // Fail early (before any code is emailed) when the address is not on the guest list.
-        await assertGuestListAccess(email);
+        await assertGuestListAccess(
+          email,
+          ctx.path === SEND_OTP_PATH ? { ip: clientIp(ctx.request?.headers ?? ctx.headers) } : undefined,
+        );
         return;
       }
 
@@ -107,21 +130,10 @@ export const auth = betterAuth({
       expiresIn: 10 * 60,
       allowedAttempts: 5,
       storeOTP: "hashed",
-      async sendVerificationOTP({ email, otp, type }) {
-        if (type !== "sign-in") return;
-        const result = await sendEmail({
-          to: email,
-          subject: `${otp} is your ${EVENT.name} sign-in code`,
-          html:
-            `<p>Your sign-in code is <strong>${escapeHtml(otp)}</strong>. It expires in 10 minutes.</p>` +
-            `<p>If you did not try to sign in to the ${escapeHtml(EVENT.name)} portal, ignore this email.</p>`,
-        });
-        if (!result.ok) {
-          throw new APIError("INTERNAL_SERVER_ERROR", {
-            message: "We could not send the sign-in code. Please try again later or contact the organisers.",
-          });
-        }
-      },
+      sendVerificationOTP: createSendVerificationOTP({
+        sendEmail,
+        log: (message) => console.error(`[auth] ${message}`),
+      }),
     }),
     // Must stay last so Set-Cookie headers from other plugins reach Next.js.
     nextCookies(),

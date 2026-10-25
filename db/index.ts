@@ -10,6 +10,7 @@ import * as projectsSchema from "./schema/projects";
 import * as settingsSchema from "./schema/settings";
 import * as mentorSchema from "./schema/mentor";
 import * as lumaSchema from "./schema/luma";
+import * as emailThrottleSchema from "./schema/email-throttle";
 
 /**
  * postgres-js connects lazily, so a placeholder is fine at build time. On Vercel,
@@ -32,6 +33,7 @@ export const db = drizzle(client, {
     ...settingsSchema,
     ...mentorSchema,
     ...lumaSchema,
+    ...emailThrottleSchema,
     ...relationsSchema,
   },
 });
