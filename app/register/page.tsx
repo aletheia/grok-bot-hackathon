@@ -4,7 +4,13 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { OTP_SEND_FAILED_MESSAGE } from "@/lib/auth/otp-messages";
+import {
+  OTP_LATEST_ONLY_HINT,
+  OTP_RESEND_COOLDOWN_SECONDS,
+  OTP_SEND_FAILED_MESSAGE,
+  authErrorText,
+  sanitizeOtp,
+} from "@/lib/auth/otp-messages";
 import { EVENT } from "@/lib/event";
 import { Logo, NoiseOverlay } from "@/components/ui";
 import { RegistrationNotice } from "@/components/RegistrationNotice";
@@ -17,12 +23,6 @@ const LOADING_UI = (
 
 type Step = "email" | "code";
 
-function errorMessage(error: unknown, fallback: string) {
-  const err = error as { message?: string; status?: number } | null;
-  if (err?.status === 429) return "Too many attempts. Please wait a minute and try again.";
-  return err?.message?.trim() || fallback;
-}
-
 export default function LoginPage() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
@@ -32,6 +32,13 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lumaHint, setLumaHint] = useState<null | "register" | "status">(null);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setTimeout(() => setCooldown((value) => value - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     if (!isPending && session?.user) {
@@ -52,9 +59,11 @@ export default function LoginPage() {
       if (sendError) {
         const { status, code } = sendError as { status?: number; code?: string };
         if (status === 403) setLumaHint(code === "LUMA_NOT_APPROVED" ? "status" : "register");
-        setError(errorMessage(sendError, OTP_SEND_FAILED_MESSAGE));
+        setError(authErrorText(sendError, OTP_SEND_FAILED_MESSAGE));
         return;
       }
+      setCode("");
+      setCooldown(OTP_RESEND_COOLDOWN_SECONDS);
       setStep("code");
     } catch {
       setError("Cannot reach the sign-in service. Please try again.");
@@ -70,10 +79,10 @@ export default function LoginPage() {
     try {
       const { error: signInError } = await authClient.signIn.emailOtp({
         email: email.trim(),
-        otp: code.trim(),
+        otp: sanitizeOtp(code),
       });
       if (signInError) {
-        setError(errorMessage(signInError, "That code did not work. Check it or request a new one."));
+        setError(authErrorText(signInError, "That code did not work. Check it or request a new one."));
         return;
       }
       router.replace("/dashboard");
@@ -92,6 +101,17 @@ export default function LoginPage() {
       </>
     );
   }
+
+  const resendButton = (
+    <button
+      type="button"
+      onClick={() => void sendCode()}
+      disabled={busy || cooldown > 0}
+      className="text-[var(--text-muted)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {cooldown > 0 ? `Send a new code (${cooldown}s)` : "Send a new code"}
+    </button>
+  );
 
   const inputClass =
     "w-full rounded-xl border border-[var(--border-color)] bg-black/40 px-4 py-3 text-white placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] focus:outline-none";
@@ -123,6 +143,7 @@ export default function LoginPage() {
                 className="mb-6 w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-left text-sm text-red-200"
               >
                 <p>{error}</p>
+                {step === "code" ? <div className="mt-2 text-sm">{resendButton}</div> : null}
                 {lumaHint ? (
                   <a
                     href={EVENT.registration.url}
@@ -160,6 +181,7 @@ export default function LoginPage() {
                 <p className="text-sm text-[var(--text-secondary)]">
                   We sent a code to <strong className="text-white">{email.trim()}</strong>. It expires in 10 minutes.
                 </p>
+                <p className="text-sm text-[var(--text-muted)]">{OTP_LATEST_ONLY_HINT}</p>
                 <label className="block text-sm font-medium text-[var(--text-secondary)]" htmlFor="code">
                   6-digit code
                 </label>
@@ -171,7 +193,12 @@ export default function LoginPage() {
                   maxLength={6}
                   required
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => setCode(sanitizeOtp(e.target.value))}
+                  onPaste={(e) => {
+                    // maxLength would cut "123 456" to "123 45" before we can strip the space.
+                    e.preventDefault();
+                    setCode(sanitizeOtp(e.clipboardData.getData("text")));
+                  }}
                   placeholder="123456"
                   className={`${inputClass} tracking-[0.4em] text-center text-lg`}
                 />
@@ -190,14 +217,7 @@ export default function LoginPage() {
                   >
                     Use another email
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => void sendCode()}
-                    disabled={busy}
-                    className="text-[var(--text-muted)] hover:text-white"
-                  >
-                    Send a new code
-                  </button>
+                  {error ? <span /> : resendButton}
                 </div>
               </form>
             )}
