@@ -109,7 +109,6 @@ const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
   ctrlAltMuseum: null as AssetSrc,
   compvter: null as AssetSrc,
-  startupWeekend: null as AssetSrc,
 };
 
 export const EVENT = {
@@ -382,16 +381,6 @@ export const EVENT = {
     "Capacity capped at 100.",
     "Registration on Luma, by approval.",
   ],
-
-  followUp: {
-    name: "Startup Weekend Milano–Pavia",
-    startDate: "2026-11-06",
-    endDate: "2026-11-08",
-    /** Cancelled: no link. */
-    url: null as string | null,
-    cancelled: true,
-    text: "Startup Weekend Milano–Pavia (November 6 to 8) has been cancelled and will not take place after the hackathon.",
-  },
 
   /** Participant portal (team formation) rules. */
   portal: {

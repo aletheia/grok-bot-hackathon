@@ -103,10 +103,6 @@ export const translations = {
     gettingThere: "Getting there",
     overnightNote: "On Wednesday night the museum stays open to participants.",
 
-    afterTag: "Right after",
-    cancelledTag: "Cancelled",
-    followUpLink: "Startup Weekend page",
-
     hostsTag: "Hosts",
     hostsTitle: "The people behind it",
     partnersLabel: "With",

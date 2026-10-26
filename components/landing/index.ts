@@ -10,5 +10,4 @@ export { Jury } from './Jury';
 export { Sponsors } from './Sponsors';
 export { Practical } from './Practical';
 export { Venue } from './Venue';
-export { AfterEvent } from './AfterEvent';
 export { Hosts } from './Hosts';
