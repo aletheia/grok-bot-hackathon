@@ -109,7 +109,6 @@ const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
   ctrlAltMuseum: null as AssetSrc,
   compvter: null as AssetSrc,
-  startupWeekend: null as AssetSrc,
 };
 
 export const EVENT = {
@@ -382,15 +381,6 @@ export const EVENT = {
     "Capacity capped at 100.",
     "Registration on Luma, by approval.",
   ],
-
-  followUp: {
-    name: "Startup Weekend Milano–Pavia",
-    startDate: "2026-11-06",
-    endDate: "2026-11-08",
-    /** Link to be provided. `null` renders a placeholder. */
-    url: null as string | null,
-    text: "Startup Weekend Milano–Pavia starts the morning after the awards (November 6) and runs through November 8. You can do both.",
-  },
 
   /** Participant portal (team formation) rules. */
   portal: {
