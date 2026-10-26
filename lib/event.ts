@@ -170,7 +170,7 @@ export const EVENT = {
     operator: "comPVter",
     description: "A retro computing museum run by comPVter, a nonprofit.",
     address: {
-      streetAddress: "Via Riviera, 39",
+      streetAddress: "Via Gragnani, 18",
       postalCode: "27100",
       locality: "Pavia",
       region: "PV",
@@ -415,7 +415,7 @@ export const EVENT = {
 
 export type EventConfig = typeof EVENT;
 
-/** Single-line postal address, e.g. "Via Riviera, 39, 27100 Pavia PV, Italy". */
+/** Single-line postal address, e.g. "Via Gragnani, 18, 27100 Pavia PV, Italy". */
 export function formatAddress(): string {
   const a = EVENT.venue.address;
   return `${a.streetAddress}, ${a.postalCode} ${a.locality} ${a.region}, ${a.countryName}`;

@@ -69,8 +69,8 @@ describe("event config", () => {
   it("formats dates and address in English", () => {
     expect(formatDateRange()).toBe("4–5 November 2026");
     expect(formatDayLabel("2026-11-04")).toBe("Wednesday 4 November");
-    expect(formatAddress()).toBe("Via Riviera, 39, 27100 Pavia PV, Italy");
-    expect(getMapsUrl()).toContain("Via%20Riviera");
+    expect(formatAddress()).toBe("Via Gragnani, 18, 27100 Pavia PV, Italy");
+    expect(getMapsUrl()).toContain("Via%20Gragnani");
   });
 
   it("keeps placeholders explicit (null) instead of invented assets", () => {
