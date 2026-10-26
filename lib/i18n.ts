@@ -104,6 +104,7 @@ export const translations = {
     overnightNote: "On Wednesday night the museum stays open to participants.",
 
     afterTag: "Right after",
+    cancelledTag: "Cancelled",
     followUpLink: "Startup Weekend page",
 
     hostsTag: "Hosts",

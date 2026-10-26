@@ -387,9 +387,10 @@ export const EVENT = {
     name: "Startup Weekend Milano–Pavia",
     startDate: "2026-11-06",
     endDate: "2026-11-08",
-    /** Link to be provided. `null` renders a placeholder. */
+    /** Cancelled: no link. */
     url: null as string | null,
-    text: "Startup Weekend Milano–Pavia starts the morning after the awards (November 6) and runs through November 8. You can do both.",
+    cancelled: true,
+    text: "Startup Weekend Milano–Pavia (November 6 to 8) has been cancelled and will not take place after the hackathon.",
   },
 
   /** Participant portal (team formation) rules. */

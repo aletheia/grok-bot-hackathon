@@ -6,11 +6,14 @@ import { ExtLink } from './Venue';
 export function AfterEvent() {
   const { followUp, assets } = EVENT;
   return (
-    <Section id="startup-weekend" tag={t('landing', 'afterTag')} title={followUp.name} accent="teal">
+    <Section id="startup-weekend" tag={followUp.cancelled ? t('landing', 'cancelledTag') : t('landing', 'afterTag')} title={followUp.name} accent="teal">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-        <AssetSlot src={assets.logos.startupWeekend} kind="logo" label="Startup Weekend" width={120} height={72} />
+        {followUp.cancelled ? null : (
+          <AssetSlot src={assets.logos.startupWeekend} kind="logo" label="Startup Weekend" width={120} height={72} />
+        )}
         <div>
           <p className="max-w-3xl text-lg leading-relaxed text-[var(--text-secondary)] md:text-xl">{followUp.text}</p>
+          {followUp.cancelled ? null : (
           <div className="mt-6">
             {followUp.url ? (
               <ExtLink href={followUp.url}>{t('landing', 'followUpLink')}</ExtLink>
@@ -23,6 +26,7 @@ export function AfterEvent() {
               </span>
             )}
           </div>
+          )}
         </div>
       </div>
     </Section>
