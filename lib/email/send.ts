@@ -16,6 +16,8 @@ type SendEmailParams = {
   to: string;
   subject: string;
   html: string;
+  /** Plain-text alternative (multipart). */
+  text?: string;
   from?: string;
 };
 
@@ -49,6 +51,7 @@ export async function sendEmail(params: SendEmailParams): Promise<{ ok: boolean;
       to: [params.to],
       subject: params.subject,
       html: params.html,
+      ...(params.text ? { text: params.text } : {}),
     }),
   });
 

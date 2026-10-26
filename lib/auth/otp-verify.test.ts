@@ -45,7 +45,7 @@ const verify = (email: string, otp: string) =>
       body: JSON.stringify({ email, otp }),
     }),
   );
-const codes = () => state.sendEmail.mock.calls.map((c) => (c[0] as { subject: string }).subject.slice(0, 6));
+const codes = () => state.sendEmail.mock.calls.map((c) => /^(\d{6})$/m.exec((c[0] as { text: string }).text)![1]);
 const wrongCode = (real: string) => (real === "000000" ? "111111" : "000000");
 
 let counter = 0;

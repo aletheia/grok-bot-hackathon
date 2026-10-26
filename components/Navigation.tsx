@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { Logo } from '@/components/ui';
-import { LumaCta } from '@/components/landing/shared';
+import { SignInCta } from '@/components/landing/shared';
 import { t } from '@/lib/i18n';
 import { siteConfig } from '@/lib/site';
 
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { key: 'sponsors', href: '/#sponsors' },
 ] as const;
 
-/** Landing navigation. The primary CTA is the Luma page; the portal is reached via "Sign in" / "Dashboard". */
+/** Landing navigation. The primary CTA is "Create or Join a Team" (sign-in), or "Dashboard" once signed in. */
 export function Navigation() {
   const { data: session } = authClient.useSession();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,7 +42,10 @@ export function Navigation() {
   }, [open]);
 
   const linkClass = 'inline-flex min-h-[44px] items-center whitespace-nowrap px-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-white';
-  const portal = session?.user ? { href: '/dashboard', label: t('nav', 'dashboard') } : { href: '/register', label: t('nav', 'signIn') };
+  // Signed out: one orange button, "Create or Join a Team", that leads to sign-in. Signed in: the same button goes to the dashboard.
+  const portal = session?.user
+    ? { href: '/dashboard', label: t('nav', 'dashboard') }
+    : { href: '/register', label: t('landing', 'ctaSignIn') };
 
   return (
     <>
@@ -74,11 +77,8 @@ export function Navigation() {
           </ul>
 
           <div className="flex items-center gap-3">
-            <Link href={portal.href} className={`${linkClass} hidden sm:inline-flex`}>
-              {portal.label}
-            </Link>
-            <div className="hidden md:block">
-              <LumaCta size="md" className="whitespace-nowrap" />
+            <div className="hidden sm:block">
+              <SignInCta size="md" href={portal.href} label={portal.label} />
             </div>
             <button
               type="button"
@@ -103,14 +103,9 @@ export function Navigation() {
                   </a>
                 </li>
               ))}
-              <li>
-                <Link href={portal.href} className="flex min-h-[48px] items-center text-lg font-semibold text-white">
-                  {portal.label}
-                </Link>
-              </li>
             </ul>
             <div className="mt-4">
-              <LumaCta size="md" />
+              <SignInCta size="md" href={portal.href} label={portal.label} />
             </div>
           </div>
         )}

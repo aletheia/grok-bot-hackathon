@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
-import { ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { EVENT, type AssetSrc } from '@/lib/event';
 import { t } from '@/lib/i18n';
 
@@ -48,19 +49,67 @@ export function Section({
   );
 }
 
-/** Primary CTA: always points at the Luma page, labelled by registration status. */
-export function LumaCta({ className = '', size = 'lg' }: { className?: string; size?: 'md' | 'lg' }) {
+/**
+ * Primary CTA: goes to the sign-in page (/register, where the team is created or joined).
+ * `hint` is the small line under the button that says which email to sign in with.
+ */
+export function SignInCta({
+  className = '',
+  size = 'lg',
+  hint = false,
+  label,
+  href = '/register',
+}: {
+  className?: string;
+  size?: 'md' | 'lg';
+  hint?: boolean;
+  label?: string;
+  href?: string;
+}) {
+  const sizing = size === 'lg' ? 'min-h-[52px] px-6 text-base sm:text-lg' : 'min-h-[44px] px-4 text-sm';
+  const button = (
+    <Link
+      href={href}
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--blob-orange)] font-bold text-black transition-transform hover:-translate-y-0.5 hover:bg-[#ffa040] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transform-none ${sizing} ${hint ? '' : className}`}
+    >
+      {label ?? t('landing', 'ctaSignIn')}
+      <ArrowRight aria-hidden="true" className="h-4 w-4" />
+    </Link>
+  );
+  if (!hint) return button;
+  return (
+    <div className={`flex flex-col items-start gap-2 ${className}`}>
+      {button}
+      <p className="px-2 text-sm text-[var(--text-secondary)]">{t('landing', 'ctaSignInHint')}</p>
+    </div>
+  );
+}
+
+/** Luma registration link, labelled by registration status. Primary (orange) by default; `secondary` is an outline button. */
+export function LumaCta({
+  className = '',
+  size = 'lg',
+  variant = 'primary',
+}: {
+  className?: string;
+  size?: 'md' | 'lg';
+  variant?: 'primary' | 'secondary';
+}) {
   const status = EVENT.registration.status;
   const label =
     status === 'open' ? t('landing', 'ctaOpen') : status === 'waitlist' ? t('landing', 'ctaWaitlist') : t('landing', 'ctaClosed');
   const sizing = size === 'lg' ? 'min-h-[52px] px-6 text-base sm:text-lg' : 'min-h-[44px] px-4 text-sm';
+  const look =
+    variant === 'primary'
+      ? 'bg-[var(--blob-orange)] text-black hover:bg-[#ffa040]'
+      : 'border border-white/25 text-white hover:border-white/60';
 
   return (
     <a
       href={EVENT.registration.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-2 rounded-full bg-[var(--blob-orange)] font-bold text-black transition-transform hover:-translate-y-0.5 hover:bg-[#ffa040] motion-reduce:transform-none ${sizing} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-full font-bold transition-transform hover:-translate-y-0.5 motion-reduce:transform-none ${look} ${sizing} ${className}`}
     >
       {label}
       <ExternalLink aria-hidden="true" className="h-4 w-4" />

@@ -13,7 +13,6 @@ export const translations = {
     jury: "Jury",
     sponsors: "Sponsors",
     venue: "Venue",
-    signIn: "Sign in",
     dashboard: "Dashboard",
     menuOpen: "Open menu",
     menuClose: "Close menu",
@@ -23,6 +22,8 @@ export const translations = {
   },
 
   landing: {
+    ctaSignIn: "Create or Join a Team",
+    ctaSignInHint: "Sign in with the email you used on Luma",
     ctaOpen: "Register on Luma",
     ctaWaitlist: "Join the waitlist on Luma",
     ctaClosed: "See the event on Luma",
@@ -58,7 +59,6 @@ export const translations = {
 
     teamsTag: "Teams",
     teamsTitle: "Three ways to take part",
-    teamsCta: "Sign in to the portal",
     teamsRules: "Read the full rules",
 
     prizesTag: "Prizes",

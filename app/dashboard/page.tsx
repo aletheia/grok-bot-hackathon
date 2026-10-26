@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Clock,
   Compass,
+  Check,
   Copy,
   Crown,
   FolderGit2,
@@ -33,6 +34,7 @@ import { RegistrationNotice } from "@/components/RegistrationNotice";
 import { PartnerCreditsPanel } from "@/components/participant/PartnerCreditsPanel";
 import { Button, NoiseOverlay, SpotlightCard } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
+import { copyToClipboard } from "@/lib/copy-to-clipboard";
 
 const DASHBOARD_COPY = {
   en: {
@@ -84,7 +86,9 @@ const DASHBOARD_COPY = {
     joinTeamAction: "Join team",
     joiningTeamAction: "Joining...",
     copyCode: "Copy code",
+    copiedLabel: "Copied",
     copiedCode: "Code copied",
+    copyFailedHint: "Press ⌘/Ctrl+C",
     rotateCode: "Rotate code",
     rotatingCode: "Rotating...",
     leaveTeam: "Leave team",
@@ -242,6 +246,9 @@ export default function DashboardPage() {
   const [createName, setCreateName] = useState("");
   const [createDescription, setCreateDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const teamCodeRef = useRef<HTMLSpanElement | null>(null);
 
   type MentorRequestStatus = "pending" | "assigned" | "matched" | "completed" | "cancelled";
   type MentorRequestState = {
@@ -260,6 +267,12 @@ export default function DashboardPage() {
       router.replace("/register");
     }
   }, [isPending, router, session]);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetRef.current) clearTimeout(copyResetRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!teamActionNotice) return;
@@ -506,16 +519,26 @@ export default function DashboardPage() {
   }
 
   async function handleCopyInvite() {
-    if (!team?.invite?.code) {
+    const code = team?.invite?.code;
+    if (!code) {
       return;
     }
 
-    try {
-      await navigator.clipboard.writeText(team.invite.code);
-      setTeamActionNotice(copy.copiedCode);
-    } catch {
-      setTeamActionError(team.invite.code);
+    if (copyResetRef.current) clearTimeout(copyResetRef.current);
+    const result = await copyToClipboard(code);
+    if (result === "failed") {
+      // Select the code so the user can copy it by hand.
+      const node = teamCodeRef.current;
+      const selection = typeof window !== "undefined" ? window.getSelection() : null;
+      if (node && selection) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
     }
+    setCopyState(result);
+    copyResetRef.current = setTimeout(() => setCopyState("idle"), result === "copied" ? 2000 : 6000);
   }
 
   async function handleRequestMentor() {
@@ -891,21 +914,39 @@ export default function DashboardPage() {
                   <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
                     {copy.teamCodeLabel}
                   </p>
-                  <p className="mt-2 flex items-center gap-2 break-all font-mono text-lg font-semibold tracking-widest text-white">
-                    <span data-testid="team-code">{team.invite?.code ?? "—"}</span>
+                  <p className="mt-2 flex flex-wrap items-center gap-2 break-all font-mono text-lg font-semibold tracking-widest text-white">
+                    <span data-testid="team-code" ref={teamCodeRef}>{team.invite?.code ?? "—"}</span>
                     <Button
                       type="button"
                       variant="secondary"
                       size="sm"
-                      className="shrink-0 gap-1.5 px-3"
+                      className={`shrink-0 px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                        copyState === "copied" ? "border-emerald-400 text-emerald-100" : ""
+                      }`}
                       onClick={handleCopyInvite}
                       title={copy.copyCode}
                       aria-label={copy.copyCode}
                       disabled={!team.invite?.code}
                     >
-                      <Copy size={14} />
-                      <span className="font-sans text-xs tracking-normal">{copy.copyCode}</span>
+                      {/* Both labels share one grid cell, so the button keeps the width of the longer one: no layout shift. */}
+                      <span className="grid font-sans text-xs tracking-normal" aria-hidden="true">
+                        <span className={`col-start-1 row-start-1 inline-flex items-center justify-center gap-1.5 ${copyState === "copied" ? "invisible" : ""}`}>
+                          <Copy size={14} />
+                          {copy.copyCode}
+                        </span>
+                        <span className={`col-start-1 row-start-1 inline-flex items-center justify-center gap-1.5 ${copyState === "copied" ? "" : "invisible"}`}>
+                          <Check size={14} />
+                          {copy.copiedLabel}
+                        </span>
+                      </span>
                     </Button>
+                    <span
+                      role="status"
+                      aria-live="polite"
+                      className={copyState === "failed" ? "font-sans text-xs font-semibold tracking-normal text-amber-200" : "sr-only"}
+                    >
+                      {copyState === "copied" ? copy.copiedCode : copyState === "failed" ? copy.copyFailedHint : ""}
+                    </span>
                   </p>
                   <p className="mt-2 text-xs text-[var(--text-secondary)]">
                     {copy.inviteNote}
