@@ -50,7 +50,7 @@ export function Hero() {
           <footer className="mt-2 text-sm text-[var(--text-secondary)]">— {EVENT.intro.author}</footer>
         </blockquote>
 
-        <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+        <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-start">
           <SignInCta hint />
           <LumaCta variant="secondary" />
           <Link
