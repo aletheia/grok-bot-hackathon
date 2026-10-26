@@ -66,7 +66,13 @@ describe("send-verification-otp through better-auth", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ success: true });
     expect(sent()).toHaveLength(1);
-    expect(sent()[0].subject).toMatch(/^\d{6} is your /);
+    const mail = sent()[0] as { subject: string; html: string; text?: string };
+    expect(mail.subject).toBe("Grok Bot Hackathon Pavia");
+    // The code is in the body (not the subject), on its own line in the text version.
+    const code = /^(\d{6})$/m.exec(mail.text ?? "")?.[1];
+    expect(code).toBeDefined();
+    expect(mail.subject).not.toContain(code as string);
+    expect(mail.html).toContain(`>${code}</p>`);
     expect(sent()[0].to).toBe("ok@example.com");
   });
 

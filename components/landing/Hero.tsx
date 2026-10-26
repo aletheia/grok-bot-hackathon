@@ -4,7 +4,7 @@ import { EVENT, formatDateRange } from '@/lib/event';
 import { t } from '@/lib/i18n';
 import { Blob } from './Blob';
 import { RegistrationNotice } from '@/components/RegistrationNotice';
-import { LumaCta } from './shared';
+import { LumaCta, SignInCta } from './shared';
 
 export function Hero() {
   return (
@@ -50,8 +50,9 @@ export function Hero() {
           <footer className="mt-2 text-sm text-[var(--text-secondary)]">— {EVENT.intro.author}</footer>
         </blockquote>
 
-        <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-          <LumaCta />
+        <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-start">
+          <SignInCta hint />
+          <LumaCta variant="secondary" />
           <Link
             href="#schedule"
             className="inline-flex min-h-[52px] items-center rounded-full border border-white/25 px-6 text-base font-semibold text-white hover:border-white/60"

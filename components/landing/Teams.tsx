@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTeamPaths, getTeamRules } from '@/lib/teams/rules';
 import { t } from '@/lib/i18n';
-import { Section } from './shared';
+import { Section, SignInCta } from './shared';
 
 export function Teams() {
   const paths = getTeamPaths();
@@ -33,12 +33,7 @@ export function Teams() {
         ))}
       </ol>
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          href="/register"
-          className="inline-flex min-h-[44px] items-center rounded-full bg-white px-5 font-semibold text-black hover:bg-white/90"
-        >
-          {t('landing', 'teamsCta')}
-        </Link>
+        <SignInCta size="md" />
         <Link
           href="/rules"
           className="inline-flex min-h-[44px] items-center rounded-full border border-white/25 px-5 font-semibold text-white hover:border-white/60"

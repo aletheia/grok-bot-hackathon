@@ -7,7 +7,7 @@ import { redactError } from "@/lib/auth/portal-access-email";
 const SEND_OTP_PATH = "/email-otp/send-verification-otp";
 const VERIFY_OTP_PATH = "/sign-in/email-otp";
 
-type SendEmail = (params: { to: string; subject: string; html: string }) => Promise<{ ok: boolean; error?: string }>;
+type SendEmail = (params: { to: string; subject: string; html: string; text?: string }) => Promise<{ ok: boolean; error?: string }>;
 type Log = (message: string) => void;
 
 /**
@@ -26,6 +26,27 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 }
 
+/** Exact subject of the sign-in code email. Only this email uses it; the guest invite/status emails keep their own subjects. */
+export const OTP_EMAIL_SUBJECT = "Grok Bot Hackathon Pavia";
+
+/** The code sits on a line of its own (monospace in HTML) so it can be selected and copied with one tap. */
+export function buildSignInCodeEmail(otp: string): { subject: string; html: string; text: string } {
+  const name = escapeHtml(EVENT.name);
+  return {
+    subject: OTP_EMAIL_SUBJECT,
+    html:
+      `<p>Your sign-in code for the ${name} portal is:</p>` +
+      `<p style="margin:16px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Courier New',monospace;font-size:32px;font-weight:700;letter-spacing:6px;">${escapeHtml(otp)}</p>` +
+      `<p>It expires in 10 minutes.</p>` +
+      `<p>If you did not try to sign in to the ${name} portal, ignore this email.</p>`,
+    text:
+      `Your sign-in code for the ${EVENT.name} portal is:\n\n` +
+      `${otp}\n\n` +
+      `It expires in 10 minutes.\n\n` +
+      `If you did not try to sign in to the ${EVENT.name} portal, ignore this email.\n`,
+  };
+}
+
 export function createSendVerificationOTP(deps: { sendEmail: SendEmail; log: Log }) {
   return async function sendVerificationOTP(
     { email, otp, type }: { email: string; otp: string; type: string },
@@ -34,13 +55,7 @@ export function createSendVerificationOTP(deps: { sendEmail: SendEmail; log: Log
     if (type !== "sign-in") return;
     let failure: string | null = null;
     try {
-      const result = await deps.sendEmail({
-        to: email,
-        subject: `${otp} is your ${EVENT.name} sign-in code`,
-        html:
-          `<p>Your sign-in code is <strong>${escapeHtml(otp)}</strong>. It expires in 10 minutes.</p>` +
-          `<p>If you did not try to sign in to the ${escapeHtml(EVENT.name)} portal, ignore this email.</p>`,
-      });
+      const result = await deps.sendEmail({ to: email, ...buildSignInCodeEmail(otp) });
       if (!result.ok) failure = result.error ?? "provider refused the message";
     } catch (error) {
       // A rejected promise (network error, timeout) is a failed send too.
