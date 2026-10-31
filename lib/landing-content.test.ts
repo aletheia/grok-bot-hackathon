@@ -3,29 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EVENT } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
-import { getJsonLdSponsors, getJurySlots, getPodium, getSpecialPrizes, getSponsorContactHref, getSponsorItems } from "@/lib/landing-content";
-
-describe("prizes", () => {
-  it("always renders three podium slots, placeholders when nothing is announced", () => {
-    expect(getPodium([])).toEqual([
-      { place: 1, prize: null },
-      { place: 2, prize: null },
-      { place: 3, prize: null },
-    ]);
-  });
-
-  it("puts placed prizes on the podium and the rest in the special list", () => {
-    const prizes = [
-      { place: 2 as const, title: "Runner-up", reward: "R2" },
-      { title: "Track prize", reward: null, track: "T" },
-      { place: 1 as const, title: null, reward: null },
-    ];
-    const podium = getPodium(prizes);
-    expect(podium[0].prize).toBeNull();
-    expect(podium[1].prize?.title).toBe("Runner-up");
-    expect(getSpecialPrizes(prizes).map((p) => p.title)).toEqual(["Track prize"]);
-  });
-});
+import { getJsonLdSponsors, getJurySlots, getSponsorContactHref, getSponsorItems } from "@/lib/landing-content";
 
 describe("jury", () => {
   it("shows placeholder slots while no juror is named", () => {
@@ -101,5 +79,17 @@ describe("sponsors", () => {
     expect(ld.sponsor?.map((s) => s.name)).toEqual(names);
     expect(ld.sponsor?.every((s) => s["@type"] === "Organization" && !("url" in s))).toBe(true);
     expect(JSON.stringify(ld)).not.toContain('"url":""');
+  });
+});
+
+describe("prizes list is not shown", () => {
+  it("no prizes section on the landing and no #prizes link anywhere in the app", async () => {
+    const { readFileSync } = await import("node:fs");
+    const files = ["app/page.tsx", "components/Navigation.tsx", "components/landing/index.ts", "app/tracks/page.tsx", "app/rules/page.tsx"];
+    for (const f of files) {
+      const src = readFileSync(join(process.cwd(), f), "utf8");
+      expect(src, f).not.toMatch(/<Prizes\b|#prizes|'prizes'/);
+    }
+    expect(existsSync(join(process.cwd(), "components/landing/Prizes.tsx"))).toBe(false);
   });
 });

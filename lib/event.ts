@@ -63,7 +63,7 @@ export type Criterion = { title: string; description?: string; weight?: string }
 
 /**
  * A prize. `place` 1–3 puts it on the podium; leave `place` out for special or track prizes.
- * `title: null` (or a missing podium place) renders a "Prize to be announced" card.
+ * Not rendered on the site at the moment (see EVENT.prizes).
  */
 export type Prize = {
   place?: 1 | 2 | 3;
@@ -300,11 +300,10 @@ export const EVENT = {
   criteria: [] as Criterion[],
 
   /**
-   * PRIZES (landing #prizes). Add one entry per prize, e.g.
+   * PRIZES: not shown on the site (the landing #prizes section was removed at Luca's request, 31 Oct 2026).
+   * Kept as data only (nothing renders it); showing prizes again needs a landing section. Entry format, e.g.
    *   { place: 1, title: "Best overall", reward: "<as announced>", description: "…" }
    *   { title: "Best use of Grok Voice", reward: "<as announced>", track: "<track title>" }
-   * Podium places 1–3 without an entry show "Prize to be announced". Entries without
-   * `place` appear in the "Special and track prizes" list (hidden while there are none).
    */
   prizes: [] as Prize[],
 
