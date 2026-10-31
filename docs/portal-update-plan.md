@@ -16,7 +16,7 @@ Status: plan for PR #1 (branch `feat/grok-hackathon-pavia-landing`). Based on Lu
 
 ## 1. Content changes (landing + portal)
 
-1. **Asset placeholders** in `lib/event.ts` (`EVENT.assets`): logos (SpaceXAI, Ctrl+Alt Museum, comPVter), photos (Nick Miller, each host). Each is `null` until Luca provides it. Landing components render a labelled dashed placeholder ("Logo: SpaceXAI, coming soon") when the value is `null`, and the real image or link once set.
+1. **Asset placeholders** in `lib/event.ts` (`EVENT.assets`): logos (SpaceXAI, Ctrl+Alt Museum, comPVter), photos (Ralph Johnson, each host). Each is `null` until Luca provides it. Landing components render a labelled dashed placeholder ("Logo: SpaceXAI, coming soon") when the value is `null`, and the real image or link once set.
 2. **Announcement-driven sections**: `EVENT.tracks`, `EVENT.prizes`, `EVENT.jury` and `EVENT.criteria` are typed arrays, all empty for now. An empty array renders a "To be announced" card; a filled one renders the list. No invented content.
 3. **English only**: remove the language switcher, the Italian copy, the DE/ES page copy and the onboarding language toggle. `lib/i18n.ts` becomes plain English strings, and `Localized` values in `lib/event.ts` become plain strings.
 4. **Time zone**: the admin project deadline and every displayed time use `Europe/Rome`, DST-correct. Helpers live in `lib/time/rome.ts` (`romeLocalToUtc`, `utcToRomeLocal`, `formatRome`) and use `Intl` offsets, not a fixed +5/+1.
@@ -56,7 +56,7 @@ Status: plan for PR #1 (branch `feat/grok-hackathon-pavia-landing`). Based on Lu
 | One team per user | existing partial unique index on `team_member(user_id) where left_at is null` |
 | Leaving | anyone can leave. If the leaving member is the lead and others remain, the lead role goes automatically to the **earliest-joined remaining member** (`joined_at`, then id). The last member leaving archives the team (soft delete: hidden everywhere, code revoked, history kept) |
 | Available to join | new columns `user.available_for_team_at` (null = not available) and `user.available_note` (≤ 280 chars, written by the participant, e.g. skills and how to reach them). Listed to signed-in members of teams that are still open: name + note + since. **No email is exposed.** Cleared automatically on create/join |
-| Lock | `EVENT.portal.teamLockAt = "2026-10-31T23:59:00+01:00"` (Rome, CET after DST ends on 25 Oct). After it, create/join/leave/remove/available are rejected server-side (`TEAMS_LOCKED`, 409). Admin force-membership stays allowed for corrections. The UI shows a countdown |
+| Lock | `EVENT.portal.teamLockAt = "2026-11-02T23:59:00+01:00"` (Rome, CET after DST ends on 25 Oct). After it, create/join/leave/remove/available are rejected server-side (`TEAMS_LOCKED`, 409). Admin force-membership stays allowed for corrections. The UI shows a countdown |
 
 ## 4. Admission after lock (admin view, no emails)
 
@@ -69,7 +69,7 @@ Status: plan for PR #1 (branch `feat/grok-hackathon-pavia-landing`). Based on Lu
 
 ## 5. Rules
 
-- `/rules` page (public) "How teams work": sign in with the Luma email; create, join with code or mark yourself available; 4–6 members; auto-close at 6; leaving and lead hand-over; lock on 31 Oct 23:59 Rome time; guaranteed seats for teams of 4+; everyone else first-come, first-served.
+- `/rules` page (public) "How teams work": sign in with the Luma email; create, join with code or mark yourself available; 4–6 members; auto-close at 6; leaving and lead hand-over; lock on 2 Nov 23:59 Rome time; guaranteed seats for teams of 4+; everyone else first-come, first-served.
 - A short version on the landing (`#teams`) and inline help on the team screen.
 
 ## 6. Schema / migration

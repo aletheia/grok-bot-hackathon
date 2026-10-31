@@ -18,15 +18,34 @@ export function ExtLink({ href, children }: { href: string; children: React.Reac
   );
 }
 
+/**
+ * Rendered height of the venue logos, px, balanced by eye (both files are trimmed to the artwork):
+ * the museum's bold floppy + wordmark reads heavier, so it sits a little lower than comPVter's thin lockup.
+ */
+const VENUE_LOGO_HEIGHT = { ctrlAltMuseum: 36, compvter: 40 } as const;
+
 export function Venue() {
   const { venue, assets } = EVENT;
   return (
     <Section id="venue" tag={t('landing', 'venueTag')} title={t('landing', 'venueTitle')} accent="pink">
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <Card>
-          <div className="flex items-center gap-4">
-            <AssetSlot src={assets.logos.ctrlAltMuseum} kind="logo" label={venue.name} width={96} height={64} />
-            <AssetSlot src={assets.logos.compvter} kind="logo" label={venue.operator} width={96} height={64} />
+          {/* Both logos are white on transparent, balanced in height and centred on the same line. */}
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+            <AssetSlot
+              src={assets.logos.ctrlAltMuseum}
+              kind="logo"
+              label={venue.name}
+              {...assets.logoSizes.ctrlAltMuseum}
+              displayHeight={VENUE_LOGO_HEIGHT.ctrlAltMuseum}
+            />
+            <AssetSlot
+              src={assets.logos.compvter}
+              kind="logo"
+              label={venue.operator}
+              {...assets.logoSizes.compvter}
+              displayHeight={VENUE_LOGO_HEIGHT.compvter}
+            />
           </div>
           <h3 className="mt-6 font-display text-3xl font-bold text-white">{venue.name}</h3>
           <p className="mt-3 text-lg text-[var(--text-secondary)]">{venue.description}</p>

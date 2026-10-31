@@ -6,7 +6,7 @@ import { randomBytes } from "crypto";
 import { AppError } from "@/lib/api/http";
 import { TEAM_INVITE_ALPHABET, TEAM_LIMITS } from "@/lib/teams/constants";
 
-import { TEAM_LOCK_AT } from "@/lib/teams/rules";
+import { formatTeamLock, TEAM_LOCK_AT } from "@/lib/teams/rules";
 
 export { TEAM_LOCK_AT };
 
@@ -20,7 +20,7 @@ export function assertTeamsOpen(now: Date = new Date(), lockAt: Date = TEAM_LOCK
     throw new AppError(
       409,
       "TEAMS_LOCKED",
-      "Teams are locked: since 31 October 2026 at 23:59 (Rome time) teams can no longer be created, joined or left.",
+      `Teams are locked: since ${formatTeamLock()} teams can no longer be created, joined or left.`,
     );
   }
 }

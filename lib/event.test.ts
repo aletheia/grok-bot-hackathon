@@ -78,9 +78,9 @@ describe("event config", () => {
     expect(EVENT.hosts.every((h) => h.photo === null || typeof h.photo === "string")).toBe(true);
   });
 
-  it("portal settings: 4–6 per team, lock on 31 Oct 23:59 Rome", () => {
+  it("portal settings: 4–6 per team, lock on 2 Nov 23:59 Rome", () => {
     expect(EVENT.portal.team).toEqual({ minMembers: 4, maxMembers: 6 });
-    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-10-31T22:59:00.000Z");
+    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-11-02T22:59:00.000Z");
   });
 });
 

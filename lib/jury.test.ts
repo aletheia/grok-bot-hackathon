@@ -90,6 +90,8 @@ describe("getJurorBio (clamp / read more rule)", () => {
 });
 
 const render = (el: React.ReactElement) => renderToStaticMarkup(createElement("ul", null, el));
+/** Visible text of the role line at sm+ (tags stripped). */
+const roleText = (html: string) => (html.match(/<h3[^>]*>.*?<\/h3><p class="mt-1[^"]*">(.*?)<\/p>/)?.[1] ?? "").replace(/<[^>]+>/g, "");
 
 describe("juror card markup", () => {
   it("initials avatar: decorative, accent colour, no photo, no empty photo slot", () => {
@@ -99,7 +101,7 @@ describe("juror card markup", () => {
     expect(html).toContain(">LC<");
     expect(html).not.toContain("<img");
     expect(html).not.toMatch(/Photo placeholder|data-placeholder/);
-    expect(html).toContain("Role · Org");
+    expect(roleText(html)).toBe("Role · Org");
   });
   it("photo: square crop, alt 'Portrait of <name>', no initials", () => {
     const html = render(createElement(JurorCard, { juror: { name: "Lorenzo Cerri", photo: "/assets/jury/lorenzo-cerri.jpg" } }));
@@ -118,18 +120,41 @@ describe("juror card markup", () => {
     expect(without).not.toContain("<button");
     expect(without).not.toContain("<dialog");
   });
-  it("all cards share one structure and the same size classes, with or without content", () => {
+  it("cards fit their content: no min-heights, empty role/bio/footer not rendered", () => {
+    const bare = render(createElement(JurorCard, { juror: { name: "A B" } }));
+    expect(bare).not.toMatch(/min-h-\[(2\.5rem|3rem|56px)\]/);
+    expect(bare).not.toContain("<p");
+    expect(bare).not.toContain("mt-auto");
+    expect(render(createElement(JurorPlaceholder))).not.toContain("Short bio");
+  });
+  it("same card box, avatar box and name offset with or without role/org/bio/photo", () => {
     const strip = (h: string) => h.match(/<li class="([^"]*)"/)![1].replace(/border-white\/10 bg-white\/\[0\.04\]/, "").trim();
-    const a = strip(render(createElement(JurorCard, { juror: { name: "A B" } })));
-    const b = strip(render(createElement(JurorCard, { juror: { name: "C D", role: "R", org: "O", bio: "x".repeat(300), link: "https://x.test" } })));
-    expect(a).toBe(b);
-    const tags = (h: string) => [...h.matchAll(/<(h3|p|div|button|a)\b/g)].map((m) => m[1]).slice(0, 5);
-    expect(tags(render(createElement(JurorCard, { juror: { name: "A B" } })))).toEqual(tags(render(createElement(JurorCard, { juror: { name: "C D", role: "R", bio: "b" } }))));
+    const a = render(createElement(JurorCard, { juror: { name: "A B" } }));
+    const b = render(createElement(JurorCard, { juror: { name: "C D", role: "R", org: "O", bio: "x".repeat(300), link: "https://x.test" } }));
+    const c = render(createElement(JurorCard, { juror: { name: "Ralph Johnson", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" } }));
+    expect(strip(a)).toBe(strip(b));
+    expect(strip(a)).toBe(strip(c));
+    const size = "h-16 w-16 text-[23px] sm:h-[88px] sm:w-[88px] sm:text-[32px]";
+    for (const h of [a, b, c, render(createElement(JurorPlaceholder))]) {
+      expect(h).toContain(size);
+      expect(h.match(/<h3 class="([^"]*)"/)![1]).toBe("mt-3 text-base font-bold leading-snug text-white sm:mt-4 sm:text-lg");
+    }
+    expect(c).not.toMatch(/<img[^>]*style="[^"]*width:88px/);
   });
   it("profile link opens in a new tab with a screen-reader label", () => {
     const html = render(createElement(JurorCard, { juror: { name: "A B", link: "https://example.test/ab" } }));
     expect(html).toContain('href="https://example.test/ab"');
     expect(html).toContain('rel="noopener noreferrer"');
+  });
+  it("name only (no role, org or bio): initials and no separator or dash in the role line", () => {
+    const html = render(createElement(JurorCard, { juror: { name: "Federico Pellegrini" } }));
+    expect(html).toContain(">FP<");
+    expect(html).not.toMatch(/·|—|–|undefined|null/);
+  });
+  it("org without role: just the org, no leading separator", () => {
+    const html = render(createElement(JurorCard, { juror: { name: "Ralph Johnson", org: "SpaceXAI" } }));
+    expect(roleText(html)).toBe("SpaceXAI");
+    expect(html).not.toContain("·");
   });
   it("placeholder (no name) keeps the dashed style and shows no initials", () => {
     const html = render(createElement(JurorPlaceholder));
@@ -141,9 +166,15 @@ describe("juror card markup", () => {
 });
 
 describe("current jury config", () => {
-  it("five named jurors then a to-be-announced card, nothing invented", () => {
+  it("exactly the seven named jurors, no to-be-announced card, nothing invented", () => {
     const slots = getJurySlots(EVENT.jury, EVENT.juryPlaceholderSlots);
-    expect(slots.map((j) => j?.name ?? null)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", null]);
+    expect(slots.map((j) => j?.name ?? null)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", "Ralph Johnson", "Federico Pellegrini"]);
     expect(getInitials("Luca Bianchi")).toBe("LB");
+    expect(getInitials("Federico Pellegrini")).toBe("FP");
+    const ralph = EVENT.jury.find((j) => j.name === "Ralph Johnson")!;
+    const ralphHtml = render(createElement(JurorCard, { juror: ralph as typeof ralph & { name: string } }));
+    // Role only: the org would repeat "SpaceXAI" on a second line on mobile.
+    expect(roleText(ralphHtml)).toBe("SpaceXAI team");
+    expect(ralphHtml).not.toContain(" · ");
   });
 });

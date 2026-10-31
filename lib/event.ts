@@ -63,7 +63,7 @@ export type Criterion = { title: string; description?: string; weight?: string }
 
 /**
  * A prize. `place` 1–3 puts it on the podium; leave `place` out for special or track prizes.
- * `title: null` (or a missing podium place) renders a "Prize to be announced" card.
+ * Not rendered on the site at the moment (see EVENT.prizes).
  */
 export type Prize = {
   place?: 1 | 2 | 3;
@@ -107,9 +107,21 @@ export type Sponsor = {
 /** Logos Luca will provide. Put files in /public/assets/… and set the path, or use an absolute URL. `null` = labelled placeholder. */
 const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
-  ctrlAltMuseum: null as AssetSrc,
-  compvter: null as AssetSrc,
+  /** Horizontal white lockup from the museum's own site header (ctrlalt.museum, logo_museo_white_500.png), trimmed. */
+  ctrlAltMuseum: "/assets/sponsors/ctrl-alt-museum-horizontal.png" as AssetSrc,
+  /**
+   * comPVter footer logo from ctrlalt.museum (compvter_logo_footer.png), trimmed and turned all-white
+   * (green badge knocked out) so the venue row has one colour treatment on the dark card.
+   */
+  compvter: "/assets/sponsors/compvter-white.png" as AssetSrc,
 };
+
+/** Pixel size of the logo files above (keeps the aspect ratio when the venue row sets a common height). */
+const LOGO_SIZES = {
+  spacexai: { width: 391, height: 63 },
+  ctrlAltMuseum: { width: 408, height: 149 },
+  compvter: { width: 350, height: 149 },
+} satisfies Record<keyof typeof LOGOS, { width: number; height: number }>;
 
 export const EVENT = {
   name: "Grok Hackathon at the Museum",
@@ -123,7 +135,7 @@ export const EVENT = {
   },
 
   hosts: [
-    { name: "Luca Bianchi", photo: null as AssetSrc },
+    { name: "Luca Bianchi", photo: "/assets/jury/luca-bianchi.jpg" as AssetSrc },
     { name: "Federico Pellegrini", photo: null as AssetSrc },
     { name: "Marco D'Angelo", photo: null as AssetSrc },
   ],
@@ -148,11 +160,11 @@ export const EVENT = {
     /**
      * Team registration window (Europe/Rome, CET: DST ended 25 Oct). The banner on the landing, /rules,
      * /register and the dashboard derives "closes on / closed" from these instants (the opening date is not shown).
-     * Closes on October 31 at 23:59 (Rome time): the same moment as the team lock (portal.teamLockAt), so there is
+     * Closes on November 2 at 23:59 (Rome time; extended from October 31): the same moment as the team lock (portal.teamLockAt), so there is
      * a single deadline for registering and for team changes.
      */
     registrationOpens: "2026-10-26T00:00:00+01:00",
-    registrationCloses: "2026-10-31T23:59:00+01:00",
+    registrationCloses: "2026-11-02T23:59:00+01:00",
   },
 
   /**
@@ -161,6 +173,7 @@ export const EVENT = {
    */
   assets: {
     logos: LOGOS,
+    logoSizes: LOGO_SIZES,
   },
 
   venue: {
@@ -273,10 +286,11 @@ export const EVENT = {
     "Real access, not a demo behind a rope. Museum staff handle the hardware side and support builders.",
 
   speaker: {
-    name: "Nick Miller",
+    name: "Ralph Johnson",
     affiliation: "SpaceXAI",
     role: "SpaceXAI team",
-    photo: null as AssetSrc,
+    /** Official photo sent by Luca (200×200; the card draws it at 96 px so it stays sharp on 2x screens). */
+    photo: "/assets/speaker/ralph-johnson.jpg" as AssetSrc,
     bio: "Joins on Thursday: opens the day with a talk on the models and the API, then stays with builders at the tables.",
   },
 
@@ -286,11 +300,10 @@ export const EVENT = {
   criteria: [] as Criterion[],
 
   /**
-   * PRIZES (landing #prizes). Add one entry per prize, e.g.
+   * PRIZES: not shown on the site (the landing #prizes section was removed at Luca's request, 31 Oct 2026).
+   * Kept as data only (nothing renders it); showing prizes again needs a landing section. Entry format, e.g.
    *   { place: 1, title: "Best overall", reward: "<as announced>", description: "…" }
    *   { title: "Best use of Grok Voice", reward: "<as announced>", track: "<track title>" }
-   * Podium places 1–3 without an entry show "Prize to be announced". Entries without
-   * `place` appear in the "Special and track prizes" list (hidden while there are none).
    */
   prizes: [] as Prize[],
 
@@ -298,7 +311,8 @@ export const EVENT = {
    * JURY (landing #jury). One entry per juror, all fields except `name` optional:
    *   { name: "…", role: "…", org: "…", photo: "/assets/jury/<file>.jpg", bio: "…", bioShort: "…", link: "https://…" }
    * - No `photo`: the card shows a circular initials avatar (e.g. "LC") in an accent colour. With `photo`
-   *   (a square file Luca provides under /public/assets/jury/) it is cropped to a circle; alt "Portrait of <name>".
+   *   (a square file Luca provides under /public/assets/jury/, or the speaker's file under /public/assets/speaker/
+   *   when the juror is the speaker) it is cropped to a circle; alt "Portrait of <name>".
    * - Cards show name, "role · org" and `bioShort` (or `bio`) clamped to two lines. A "Read more" button appears
    *   only when `bio` is longer than `bioShort`.
    * - `{ name: null }` renders a dashed "To be announced" card. While the list is empty, `juryPlaceholderSlots`
@@ -308,12 +322,16 @@ export const EVENT = {
   // TODO(Luca): confirm the list and fill role / org / bio / bioShort / photo / link. Names only for now:
   // nothing else is invented.
   jury: [
-    { name: "Luca Bianchi" },
+    // Photo sent by Luca (200×200); same file as his EVENT.hosts entry.
+    { name: "Luca Bianchi", photo: "/assets/jury/luca-bianchi.jpg" },
     { name: "Lorenzo Cerri" },
     { name: "Alessandro Rano" },
     { name: "Alberto Giusti" },
     { name: "Claudio Peroni" },
-    { name: null },
+    // Same person and file as EVENT.speaker (one photo on disk, not duplicated under /assets/jury/).
+    { name: "Ralph Johnson", role: "SpaceXAI team", photo: "/assets/speaker/ralph-johnson.jpg" },
+    // Only the name is known: no role, org, bio or photo (initials "FP").
+    { name: "Federico Pellegrini" },
   ] as JuryMember[],
   juryPlaceholderSlots: 3,
 
@@ -366,10 +384,10 @@ export const EVENT = {
     {
       date: "2026-11-05",
       items: [
-        { time: "09:00", title: "Talk by Nick Miller (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
-        { time: "09:00", endTime: "16:00", title: "Build, with Nick at the tables" },
+        { time: "09:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
+        { time: "09:00", endTime: "16:00", title: "Build, with Ralph at the tables" },
         { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
-        { time: "21:00", title: "Awards ceremony" },
+        { time: "21:00", title: "Closing" },
       ],
     },
   ] satisfies ScheduleDay[],
@@ -389,7 +407,7 @@ export const EVENT = {
       maxMembers: 6,
     },
     /** Team lock: no create/join/leave after this instant (Europe/Rome, CET after DST ends 25 Oct). */
-    teamLockAt: "2026-10-31T23:59:00+01:00",
+    teamLockAt: "2026-11-02T23:59:00+01:00",
     /**
      * Luma `approval_status` values that MAY sign in (compared after normalising: trim,
      * lower-case, spaces/hyphens -> "_"). Only confirmed guests: Luma's API/CSV value is

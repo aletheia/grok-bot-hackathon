@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { key: 'hardware', href: '/#hardware' },
   { key: 'schedule', href: '/#schedule' },
   { key: 'teams', href: '/#teams' },
-  { key: 'prizes', href: '/#prizes' },
   { key: 'jury', href: '/#jury' },
   { key: 'venue', href: '/#venue' },
   { key: 'sponsors', href: '/#sponsors' },

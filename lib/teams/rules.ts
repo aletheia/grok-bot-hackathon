@@ -3,7 +3,7 @@ import { formatRome } from "@/lib/time/rome";
 
 export const TEAM_LOCK_AT = new Date(EVENT.portal.teamLockAt);
 
-/** "31 October 2026 at 23:59 (Rome time)" */
+/** "2 November 2026 at 23:59 (Rome time)" */
 export function formatTeamLock(): string {
   const date = formatRome(TEAM_LOCK_AT, { month: "long", hour: undefined, minute: undefined });
   const time = formatRome(TEAM_LOCK_AT, { day: undefined, month: undefined, year: undefined });

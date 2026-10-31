@@ -113,7 +113,7 @@ const DASHBOARD_COPY = {
     joinSuccess: "You joined the team successfully.",
     rotateSuccess: "A fresh invite code is now active.",
     leaveSuccess: "You left the team. If you were the lead, the earliest-joined member is now lead.",
-    bannerRegistration: "Registration and team changes are open until 31 October 2026 at 23:59 (Rome time).",
+    bannerRegistration: "Registration and team changes are open until 2 November 2026 at 23:59 (Rome time).",
     bannerScreeningActive: "Screening is active! Complete the tasks to confirm your team's participation.",
     bannerScreeningCompleted: "Screening is complete. Results are published below.",
     bannerGoToScreening: "Go to screening",

@@ -3,7 +3,7 @@ import { EVENT_TIME_ZONE } from "@/lib/time/rome";
 
 const LOCALE = "en-GB";
 
-/** "31 October" (calendar day in Rome) for the registration deadline in EVENT.registration. */
+/** "2 November" (calendar day in Rome) for the registration deadline in EVENT.registration. */
 export function formatDeadlineDay(closes: Date = new Date(EVENT.registration.registrationCloses)): string {
   return new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "long", timeZone: EVENT_TIME_ZONE }).format(closes);
 }
@@ -20,7 +20,7 @@ export function formatDeadlineTime(closes: Date = new Date(EVENT.registration.re
 
 /**
  * Deadline line of the event card on /register, driven by EVENT.registration.registrationCloses:
- * "Teams: register by 31 October, 23:59 (Rome time)." After the deadline: "Teams: registration closed on 31 October."
+ * "Teams: register by 2 November, 23:59 (Rome time)." After the deadline: "Teams: registration closed on 2 November."
  * Returned in two parts so the label can be bold.
  */
 export function getDeadlineLine(
