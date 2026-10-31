@@ -289,7 +289,8 @@ export const EVENT = {
     name: "Ralph Johnson",
     affiliation: "SpaceXAI",
     role: "SpaceXAI team",
-    photo: null as AssetSrc,
+    /** Official photo sent by Luca (200×200; the card draws it at 96 px so it stays sharp on 2x screens). */
+    photo: "/assets/speaker/ralph-johnson.jpg" as AssetSrc,
     bio: "Joins on Thursday: opens the day with a talk on the models and the API, then stays with builders at the tables.",
   },
 
