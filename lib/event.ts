@@ -135,7 +135,7 @@ export const EVENT = {
   },
 
   hosts: [
-    { name: "Luca Bianchi", photo: null as AssetSrc },
+    { name: "Luca Bianchi", photo: "/assets/jury/luca-bianchi.jpg" as AssetSrc },
     { name: "Federico Pellegrini", photo: null as AssetSrc },
     { name: "Marco D'Angelo", photo: null as AssetSrc },
   ],
@@ -322,7 +322,8 @@ export const EVENT = {
   // TODO(Luca): confirm the list and fill role / org / bio / bioShort / photo / link. Names only for now:
   // nothing else is invented.
   jury: [
-    { name: "Luca Bianchi" },
+    // Photo sent by Luca (200×200); same file as his EVENT.hosts entry.
+    { name: "Luca Bianchi", photo: "/assets/jury/luca-bianchi.jpg" },
     { name: "Lorenzo Cerri" },
     { name: "Alessandro Rano" },
     { name: "Alberto Giusti" },

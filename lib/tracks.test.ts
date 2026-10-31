@@ -45,6 +45,7 @@ describe("proposed tracks", () => {
     expect(EVENT.jury.map((j) => j.name)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", "Ralph Johnson", "Federico Pellegrini"]);
     for (const j of EVENT.jury) {
       if (j.name === "Ralph Johnson") expect(j).toEqual({ name: "Ralph Johnson", role: "SpaceXAI team", photo: "/assets/speaker/ralph-johnson.jpg" });
+      else if (j.name === "Luca Bianchi") expect(j).toEqual({ name: "Luca Bianchi", photo: "/assets/jury/luca-bianchi.jpg" });
       else expect(Object.keys(j)).toEqual(["name"]);
     }
   });
