@@ -64,7 +64,6 @@ export const translations = {
     juryTitle: "Who judges the projects",
     jurorName: "Juror name",
     jurorRole: "Role · Organization",
-    jurorBio: "Short bio to be announced.",
     jurorLink: "Profile",
     readMore: "Read more",
     close: "Close",

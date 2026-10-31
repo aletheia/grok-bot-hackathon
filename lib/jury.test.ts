@@ -118,13 +118,26 @@ describe("juror card markup", () => {
     expect(without).not.toContain("<button");
     expect(without).not.toContain("<dialog");
   });
-  it("all cards share one structure and the same size classes, with or without content", () => {
+  it("cards fit their content: no min-heights, empty role/bio/footer not rendered", () => {
+    const bare = render(createElement(JurorCard, { juror: { name: "A B" } }));
+    expect(bare).not.toMatch(/min-h-\[(2\.5rem|3rem|56px)\]/);
+    expect(bare).not.toContain("<p");
+    expect(bare).not.toContain("mt-auto");
+    expect(render(createElement(JurorPlaceholder))).not.toContain("Short bio");
+  });
+  it("same card box, avatar box and name offset with or without role/org/bio/photo", () => {
     const strip = (h: string) => h.match(/<li class="([^"]*)"/)![1].replace(/border-white\/10 bg-white\/\[0\.04\]/, "").trim();
-    const a = strip(render(createElement(JurorCard, { juror: { name: "A B" } })));
-    const b = strip(render(createElement(JurorCard, { juror: { name: "C D", role: "R", org: "O", bio: "x".repeat(300), link: "https://x.test" } })));
-    expect(a).toBe(b);
-    const tags = (h: string) => [...h.matchAll(/<(h3|p|div|button|a)\b/g)].map((m) => m[1]).slice(0, 5);
-    expect(tags(render(createElement(JurorCard, { juror: { name: "A B" } })))).toEqual(tags(render(createElement(JurorCard, { juror: { name: "C D", role: "R", bio: "b" } }))));
+    const a = render(createElement(JurorCard, { juror: { name: "A B" } }));
+    const b = render(createElement(JurorCard, { juror: { name: "C D", role: "R", org: "O", bio: "x".repeat(300), link: "https://x.test" } }));
+    const c = render(createElement(JurorCard, { juror: { name: "Ralph Johnson", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" } }));
+    expect(strip(a)).toBe(strip(b));
+    expect(strip(a)).toBe(strip(c));
+    const size = "h-16 w-16 text-[23px] sm:h-[88px] sm:w-[88px] sm:text-[32px]";
+    for (const h of [a, b, c, render(createElement(JurorPlaceholder))]) {
+      expect(h).toContain(size);
+      expect(h.match(/<h3 class="([^"]*)"/)![1]).toBe("mt-3 text-base font-bold leading-snug text-white sm:mt-4 sm:text-lg");
+    }
+    expect(c).not.toMatch(/<img[^>]*style="[^"]*width:88px/);
   });
   it("profile link opens in a new tab with a screen-reader label", () => {
     const html = render(createElement(JurorCard, { juror: { name: "A B", link: "https://example.test/ab" } }));

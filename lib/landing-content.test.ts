@@ -93,3 +93,12 @@ describe("prizes list is not shown", () => {
     expect(existsSync(join(process.cwd(), "components/landing/Prizes.tsx"))).toBe(false);
   });
 });
+
+describe("jury grid", () => {
+  it("2 columns on mobile, 3 on md, 4 on lg; rows not forced to equal height", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(join(process.cwd(), "components/landing/Jury.tsx"), "utf8");
+    expect(src).toContain("grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4");
+    expect(src).not.toContain("auto-rows-fr");
+  });
+});

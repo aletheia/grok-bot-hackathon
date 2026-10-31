@@ -11,7 +11,7 @@ export function Jury() {
   const slots = getJurySlots(JURY, EVENT.juryPlaceholderSlots);
   return (
     <Section id="jury" tag={t('landing', 'juryTag')} title={t('landing', 'juryTitle')} accent="teal">
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:auto-rows-fr">
+      <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {slots.map((juror, i) => (juror?.name ? <JurorCard key={juror.name} juror={juror as JuryMember & { name: string }} /> : <JurorPlaceholder key={`juror-${i}`} />))}
       </ul>
 
