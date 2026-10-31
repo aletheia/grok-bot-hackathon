@@ -16,7 +16,7 @@ Status: plan for PR #1 (branch `feat/grok-hackathon-pavia-landing`). Based on Lu
 
 ## 1. Content changes (landing + portal)
 
-1. **Asset placeholders** in `lib/event.ts` (`EVENT.assets`): logos (SpaceXAI, Ctrl+Alt Museum, comPVter), photos (Nick Miller, each host). Each is `null` until Luca provides it. Landing components render a labelled dashed placeholder ("Logo: SpaceXAI, coming soon") when the value is `null`, and the real image or link once set.
+1. **Asset placeholders** in `lib/event.ts` (`EVENT.assets`): logos (SpaceXAI, Ctrl+Alt Museum, comPVter), photos (Ralph Johnson, each host). Each is `null` until Luca provides it. Landing components render a labelled dashed placeholder ("Logo: SpaceXAI, coming soon") when the value is `null`, and the real image or link once set.
 2. **Announcement-driven sections**: `EVENT.tracks`, `EVENT.prizes`, `EVENT.jury` and `EVENT.criteria` are typed arrays, all empty for now. An empty array renders a "To be announced" card; a filled one renders the list. No invented content.
 3. **English only**: remove the language switcher, the Italian copy, the DE/ES page copy and the onboarding language toggle. `lib/i18n.ts` becomes plain English strings, and `Localized` values in `lib/event.ts` become plain strings.
 4. **Time zone**: the admin project deadline and every displayed time use `Europe/Rome`, DST-correct. Helpers live in `lib/time/rome.ts` (`romeLocalToUtc`, `utcToRomeLocal`, `formatRome`) and use `Intl` offsets, not a fixed +5/+1.

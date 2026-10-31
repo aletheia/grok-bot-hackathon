@@ -107,9 +107,21 @@ export type Sponsor = {
 /** Logos Luca will provide. Put files in /public/assets/… and set the path, or use an absolute URL. `null` = labelled placeholder. */
 const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
-  ctrlAltMuseum: null as AssetSrc,
-  compvter: null as AssetSrc,
+  /** Horizontal white lockup from the museum's own site header (ctrlalt.museum, logo_museo_white_500.png), trimmed. */
+  ctrlAltMuseum: "/assets/sponsors/ctrl-alt-museum-horizontal.png" as AssetSrc,
+  /**
+   * comPVter footer logo from ctrlalt.museum (compvter_logo_footer.png), trimmed and turned all-white
+   * (green badge knocked out) so the venue row has one colour treatment on the dark card.
+   */
+  compvter: "/assets/sponsors/compvter-white.png" as AssetSrc,
 };
+
+/** Pixel size of the logo files above (keeps the aspect ratio when the venue row sets a common height). */
+const LOGO_SIZES = {
+  spacexai: { width: 391, height: 63 },
+  ctrlAltMuseum: { width: 408, height: 149 },
+  compvter: { width: 350, height: 149 },
+} satisfies Record<keyof typeof LOGOS, { width: number; height: number }>;
 
 export const EVENT = {
   name: "Grok Hackathon at the Museum",
@@ -161,6 +173,7 @@ export const EVENT = {
    */
   assets: {
     logos: LOGOS,
+    logoSizes: LOGO_SIZES,
   },
 
   venue: {
@@ -273,7 +286,7 @@ export const EVENT = {
     "Real access, not a demo behind a rope. Museum staff handle the hardware side and support builders.",
 
   speaker: {
-    name: "Nick Miller",
+    name: "Ralph Johnson",
     affiliation: "SpaceXAI",
     role: "SpaceXAI team",
     photo: null as AssetSrc,
@@ -366,8 +379,8 @@ export const EVENT = {
     {
       date: "2026-11-05",
       items: [
-        { time: "09:00", title: "Talk by Nick Miller (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
-        { time: "09:00", endTime: "16:00", title: "Build, with Nick at the tables" },
+        { time: "09:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
+        { time: "09:00", endTime: "16:00", title: "Build, with Ralph at the tables" },
         { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
         { time: "21:00", title: "Awards ceremony" },
       ],

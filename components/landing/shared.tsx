@@ -127,6 +127,9 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
 /**
  * Logo or photo slot. With a src it renders the image; with `null` it renders a
  * clearly labelled placeholder so missing assets are obvious (set them in lib/event.ts).
+ *
+ * `displayHeight` (logos): `width`/`height` are then the file's pixel size and the logo is drawn
+ * `displayHeight` px tall with its own aspect ratio, so logos of different shapes line up at one height.
  */
 export function AssetSlot({
   src,
@@ -134,6 +137,7 @@ export function AssetSlot({
   label,
   width,
   height,
+  displayHeight,
   className = '',
 }: {
   src: AssetSrc;
@@ -141,9 +145,13 @@ export function AssetSlot({
   label: string;
   width: number;
   height: number;
+  displayHeight?: number;
   className?: string;
 }) {
   const alt = kind === 'logo' ? `${label} logo` : `Photo of ${label}`;
+  const box = displayHeight
+    ? { width: Math.round((width * displayHeight) / height), height: displayHeight }
+    : { width, height };
   if (src) {
     return (
       <Image
@@ -152,8 +160,8 @@ export function AssetSlot({
         width={width}
         height={height}
         unoptimized
-        className={`${kind === 'photo' ? 'rounded-full object-cover' : 'object-contain'} ${className}`}
-        style={{ width, height }}
+        className={`${kind === 'photo' ? 'rounded-full object-cover' : 'shrink-0 object-contain'} ${className}`}
+        style={box}
       />
     );
   }
@@ -164,7 +172,7 @@ export function AssetSlot({
       className={`flex shrink-0 items-center justify-center border-2 border-dashed border-white/25 bg-white/[0.03] p-1 text-center text-[11px] font-semibold uppercase leading-tight tracking-wide text-[var(--text-secondary)] ${
         kind === 'photo' ? 'rounded-full' : 'rounded-xl'
       } ${className}`}
-      style={{ width, height }}
+      style={box}
       data-placeholder={kind}
     >
       {kind === 'logo' ? `${label} logo` : 'Photo'}
