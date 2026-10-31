@@ -160,11 +160,11 @@ export const EVENT = {
     /**
      * Team registration window (Europe/Rome, CET: DST ended 25 Oct). The banner on the landing, /rules,
      * /register and the dashboard derives "closes on / closed" from these instants (the opening date is not shown).
-     * Closes on October 31 at 23:59 (Rome time): the same moment as the team lock (portal.teamLockAt), so there is
+     * Closes on November 2 at 23:59 (Rome time; extended from October 31): the same moment as the team lock (portal.teamLockAt), so there is
      * a single deadline for registering and for team changes.
      */
     registrationOpens: "2026-10-26T00:00:00+01:00",
-    registrationCloses: "2026-10-31T23:59:00+01:00",
+    registrationCloses: "2026-11-02T23:59:00+01:00",
   },
 
   /**
@@ -403,7 +403,7 @@ export const EVENT = {
       maxMembers: 6,
     },
     /** Team lock: no create/join/leave after this instant (Europe/Rome, CET after DST ends 25 Oct). */
-    teamLockAt: "2026-10-31T23:59:00+01:00",
+    teamLockAt: "2026-11-02T23:59:00+01:00",
     /**
      * Luma `approval_status` values that MAY sign in (compared after normalising: trim,
      * lower-case, spaces/hyphens -> "_"). Only confirmed guests: Luma's API/CSV value is

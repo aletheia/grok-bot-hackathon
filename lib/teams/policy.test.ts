@@ -99,27 +99,32 @@ describe("lead hand-over", () => {
 });
 
 describe("team lock", () => {
-  it("is 31 October 2026 23:59 Rome time (22:59 UTC, CET)", () => {
-    expect(TEAM_LOCK_AT.toISOString()).toBe("2026-10-31T22:59:00.000Z");
-    expect(formatTeamLock()).toBe("31 October 2026 at 23:59 (Rome time)");
+  it("is 2 November 2026 23:59 Rome time (22:59 UTC, CET)", () => {
+    expect(TEAM_LOCK_AT.toISOString()).toBe("2026-11-02T22:59:00.000Z");
+    expect(formatTeamLock()).toBe("2 November 2026 at 23:59 (Rome time)");
   });
 
   it("is open until the lock instant and locked after", () => {
-    expect(isTeamsLocked(new Date("2026-10-31T22:58:59Z"))).toBe(false);
-    expect(isTeamsLocked(new Date("2026-10-31T22:59:00Z"))).toBe(false);
-    expect(isTeamsLocked(new Date("2026-10-31T22:59:01Z"))).toBe(true);
-    // 23:30 Rome is still open, although it is already 1 Nov 03:30 in Tashkent (UTC+5).
-    expect(isTeamsLocked(new Date("2026-10-31T23:30:00+01:00"))).toBe(false);
-    expect(isTeamsLocked(new Date("2026-11-01T03:30:00+05:00"))).toBe(false);
-    // 23:30 UTC = 00:30 Rome on 1 Nov: locked.
-    expect(isTeamsLocked(new Date("2026-10-31T23:30:00+00:00"))).toBe(true);
-    expect(isTeamsLocked(new Date("2026-10-31T22:30:00Z"))).toBe(false);
+    expect(isTeamsLocked(new Date("2026-11-02T22:58:59Z"))).toBe(false);
+    expect(isTeamsLocked(new Date("2026-11-02T22:59:00Z"))).toBe(false);
+    expect(isTeamsLocked(new Date("2026-11-02T22:59:01Z"))).toBe(true);
+    // The old 31 October deadline no longer locks.
+    expect(isTeamsLocked(new Date("2026-11-01T00:00:00+01:00"))).toBe(false);
+    // 23:30 Rome is still open, although it is already 3 Nov 03:30 in Tashkent (UTC+5).
+    expect(isTeamsLocked(new Date("2026-11-02T23:30:00+01:00"))).toBe(false);
+    expect(isTeamsLocked(new Date("2026-11-03T03:30:00+05:00"))).toBe(false);
+    // 23:30 UTC = 00:30 Rome on 3 Nov: locked.
+    expect(isTeamsLocked(new Date("2026-11-02T23:30:00+00:00"))).toBe(true);
+    expect(isTeamsLocked(new Date("2026-11-02T22:30:00Z"))).toBe(false);
   });
 
   it("throws 409 TEAMS_LOCKED after the lock", () => {
-    expect(() => assertTeamsOpen(new Date("2026-11-01T00:00:00+01:00"))).toThrowError(/locked/i);
+    expect(() => assertTeamsOpen(new Date("2026-11-03T00:00:00+01:00"))).toThrowError(
+      "Teams are locked: since 2 November 2026 at 23:59 (Rome time) teams can no longer be created, joined or left.",
+    );
+    expect.assertions(4);
     try {
-      assertTeamsOpen(new Date("2026-11-02T00:00:00Z"));
+      assertTeamsOpen(new Date("2026-11-04T00:00:00Z"));
     } catch (error) {
       expect((error as AppError).code).toBe("TEAMS_LOCKED");
       expect((error as AppError).status).toBe(409);
@@ -176,7 +181,7 @@ describe("team code normalisation and lookup", () => {
 
 describe("join with a code", () => {
   const BEFORE_LOCK = new Date("2026-10-28T12:00:00+01:00");
-  const AFTER_LOCK = new Date("2026-11-01T00:00:00+01:00");
+  const AFTER_LOCK = new Date("2026-11-03T00:00:00+01:00");
   const code = "AB3K9XZQ";
   const invite = { code, revokedAt: null, expiresAt: null, maxUses: null, usedCount: 0 };
   const team = { status: "active", joinCode: code, memberCount: 3, maxMembers: 6 };
@@ -231,7 +236,7 @@ describe("join with a code", () => {
   });
 
   it("is still open at 23:59 on the lock day", () => {
-    expect(() => join({ now: new Date("2026-10-31T23:58:59+01:00") })).not.toThrow();
+    expect(() => join({ now: new Date("2026-11-02T23:58:59+01:00") })).not.toThrow();
   });
 });
 
