@@ -173,8 +173,8 @@ describe("current jury config", () => {
     expect(getInitials("Federico Pellegrini")).toBe("FP");
     const ralph = EVENT.jury.find((j) => j.name === "Ralph Johnson")!;
     const ralphHtml = render(createElement(JurorCard, { juror: ralph as typeof ralph & { name: string } }));
-    expect(roleText(ralphHtml)).toBe("SpaceXAI team · SpaceXAI");
-    // On mobile the separator is hidden and role / org stack as blocks.
-    expect(ralphHtml).toContain('<span aria-hidden="true" class="hidden sm:inline"> · </span><span class="block sm:inline">SpaceXAI</span>');
+    // Role only: the org would repeat "SpaceXAI" on a second line on mobile.
+    expect(roleText(ralphHtml)).toBe("SpaceXAI team");
+    expect(ralphHtml).not.toContain(" · ");
   });
 });

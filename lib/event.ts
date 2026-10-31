@@ -328,7 +328,7 @@ export const EVENT = {
     { name: "Alberto Giusti" },
     { name: "Claudio Peroni" },
     // Same person and file as EVENT.speaker (one photo on disk, not duplicated under /assets/jury/).
-    { name: "Ralph Johnson", role: "SpaceXAI team", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" },
+    { name: "Ralph Johnson", role: "SpaceXAI team", photo: "/assets/speaker/ralph-johnson.jpg" },
     // Only the name is known: no role, org, bio or photo (initials "FP").
     { name: "Federico Pellegrini" },
   ] as JuryMember[],
