@@ -312,7 +312,8 @@ export const EVENT = {
    * JURY (landing #jury). One entry per juror, all fields except `name` optional:
    *   { name: "…", role: "…", org: "…", photo: "/assets/jury/<file>.jpg", bio: "…", bioShort: "…", link: "https://…" }
    * - No `photo`: the card shows a circular initials avatar (e.g. "LC") in an accent colour. With `photo`
-   *   (a square file Luca provides under /public/assets/jury/) it is cropped to a circle; alt "Portrait of <name>".
+   *   (a square file Luca provides under /public/assets/jury/, or the speaker's file under /public/assets/speaker/
+   *   when the juror is the speaker) it is cropped to a circle; alt "Portrait of <name>".
    * - Cards show name, "role · org" and `bioShort` (or `bio`) clamped to two lines. A "Read more" button appears
    *   only when `bio` is longer than `bioShort`.
    * - `{ name: null }` renders a dashed "To be announced" card. While the list is empty, `juryPlaceholderSlots`
@@ -327,6 +328,10 @@ export const EVENT = {
     { name: "Alessandro Rano" },
     { name: "Alberto Giusti" },
     { name: "Claudio Peroni" },
+    // Same person and file as EVENT.speaker (one photo on disk, not duplicated under /assets/jury/).
+    { name: "Ralph Johnson", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" },
+    // Only the name is known: no role, org, bio or photo (initials "FP").
+    { name: "Federico Pellegrini" },
     { name: null },
   ] as JuryMember[],
   juryPlaceholderSlots: 3,

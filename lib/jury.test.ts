@@ -131,6 +131,16 @@ describe("juror card markup", () => {
     expect(html).toContain('href="https://example.test/ab"');
     expect(html).toContain('rel="noopener noreferrer"');
   });
+  it("name only (no role, org or bio): initials and no separator or dash in the role line", () => {
+    const html = render(createElement(JurorCard, { juror: { name: "Federico Pellegrini" } }));
+    expect(html).toContain(">FP<");
+    expect(html).not.toMatch(/·|—|–|undefined|null/);
+  });
+  it("org without role: just the org, no leading separator", () => {
+    const html = render(createElement(JurorCard, { juror: { name: "Ralph Johnson", org: "SpaceXAI" } }));
+    expect(html).toContain(">SpaceXAI<");
+    expect(html).not.toContain("·");
+  });
   it("placeholder (no name) keeps the dashed style and shows no initials", () => {
     const html = render(createElement(JurorPlaceholder));
     expect(html).toContain("border-dashed");
@@ -141,9 +151,10 @@ describe("juror card markup", () => {
 });
 
 describe("current jury config", () => {
-  it("five named jurors then a to-be-announced card, nothing invented", () => {
+  it("seven named jurors then a to-be-announced card, nothing invented", () => {
     const slots = getJurySlots(EVENT.jury, EVENT.juryPlaceholderSlots);
-    expect(slots.map((j) => j?.name ?? null)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", null]);
+    expect(slots.map((j) => j?.name ?? null)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", "Ralph Johnson", "Federico Pellegrini", null]);
     expect(getInitials("Luca Bianchi")).toBe("LB");
+    expect(getInitials("Federico Pellegrini")).toBe("FP");
   });
 });
