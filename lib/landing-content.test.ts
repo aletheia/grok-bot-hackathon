@@ -102,3 +102,11 @@ describe("jury grid", () => {
     expect(src).not.toContain("auto-rows-fr");
   });
 });
+
+describe("schedule", () => {
+  it("the 21:00 item on the last day is 'Closing' (no awards ceremony)", () => {
+    const last = EVENT.schedule[EVENT.schedule.length - 1];
+    expect(last.items.find((i) => i.time === "21:00")?.title).toBe("Closing");
+    expect(JSON.stringify(EVENT.schedule)).not.toMatch(/award/i);
+  });
+});

@@ -80,16 +80,15 @@ export default function TracksPage() {
           <p className="mt-2 text-sm text-[var(--text-secondary)]">{suggestionsNote}</p>
         </section>
 
-        <section aria-labelledby="announce-title" className="mt-16 rounded-3xl border border-dashed border-white/25 p-6">
-          <h2 id="announce-title" className="text-xl font-bold text-white">
-            Judging criteria and jury
+        <section aria-labelledby="jury-title" className="mt-16 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+          <h2 id="jury-title" className="text-xl font-bold text-white">
+            Jury
           </h2>
           <p className="mt-2 text-[var(--text-secondary)]">
-            To be announced. We will publish them on the{" "}
             <Link href="/#jury" className="font-semibold text-white underline underline-offset-4">
-              home page
-            </Link>{" "}
-            and on Luma.
+              Meet the jury on the home page
+            </Link>
+            .
           </p>
         </section>
 

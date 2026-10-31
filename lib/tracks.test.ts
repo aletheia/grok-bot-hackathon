@@ -40,11 +40,11 @@ describe("proposed tracks", () => {
   it("keeps criteria, prizes and jury as announcements", () => {
     expect(EVENT.criteria).toEqual([]);
     expect(EVENT.prizes).toEqual([]);
-    // Jury: names only until Luca confirms the rest (no invented roles/bios), plus one "to be announced" card.
-    // Ralph Johnson (the speaker) is the exception: affiliation SpaceXAI and his official photo, as Luca sent them.
-    expect(EVENT.jury.map((j) => j.name)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", "Ralph Johnson", "Federico Pellegrini", null]);
+    // Jury: names only until Luca confirms the rest (no invented roles/bios); no "to be announced" card.
+    // Ralph Johnson (the speaker) is the exception: role, affiliation and official photo as on his speaker card.
+    expect(EVENT.jury.map((j) => j.name)).toEqual(["Luca Bianchi", "Lorenzo Cerri", "Alessandro Rano", "Alberto Giusti", "Claudio Peroni", "Ralph Johnson", "Federico Pellegrini"]);
     for (const j of EVENT.jury) {
-      if (j.name === "Ralph Johnson") expect(j).toEqual({ name: "Ralph Johnson", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" });
+      if (j.name === "Ralph Johnson") expect(j).toEqual({ name: "Ralph Johnson", role: "SpaceXAI team", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" });
       else expect(Object.keys(j)).toEqual(["name"]);
     }
   });

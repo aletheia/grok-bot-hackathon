@@ -67,16 +67,24 @@ export function JurorPlaceholder() {
 }
 
 export function JurorCard({ juror }: { juror: JuryMember & { name: string } }) {
-  const roleLine = [juror.role, juror.org]
-    .map((s) => s?.trim())
-    .filter(Boolean)
-    .join(' · ');
+  const roleParts = [juror.role, juror.org].map((s) => s?.trim()).filter((s): s is string => Boolean(s));
+  const roleLine = roleParts.join(' · ');
   const { short, full } = getJurorBio(juror);
   return (
     <li className={`${CARD} border border-white/10 bg-white/[0.04] p-4 sm:p-[23px]`} data-juror={juror.name}>
       <JurorAvatar name={juror.name} photo={juror.photo ?? null} sizeClassName={GRID_AVATAR} />
       <h3 className={NAME}>{juror.name}</h3>
-      {roleLine && <p className={ROLE}>{roleLine}</p>}
+      {roleLine && (
+        <p className={ROLE}>
+          {/* Narrow 2-column mobile cards: role and org stack on two lines (no separator left dangling at a line end). */}
+          {roleParts.map((part, i) => (
+            <span key={part}>
+              {i > 0 && <span aria-hidden="true" className="hidden sm:inline"> · </span>}
+              <span className="block sm:inline">{part}</span>
+            </span>
+          ))}
+        </p>
+      )}
       {short && <p className={BIO}>{short}</p>}
       {(full || juror.link) && (
         <div className={FOOTER}>

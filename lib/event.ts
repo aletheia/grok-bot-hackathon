@@ -328,10 +328,9 @@ export const EVENT = {
     { name: "Alberto Giusti" },
     { name: "Claudio Peroni" },
     // Same person and file as EVENT.speaker (one photo on disk, not duplicated under /assets/jury/).
-    { name: "Ralph Johnson", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" },
+    { name: "Ralph Johnson", role: "SpaceXAI team", org: "SpaceXAI", photo: "/assets/speaker/ralph-johnson.jpg" },
     // Only the name is known: no role, org, bio or photo (initials "FP").
     { name: "Federico Pellegrini" },
-    { name: null },
   ] as JuryMember[],
   juryPlaceholderSlots: 3,
 
@@ -387,7 +386,7 @@ export const EVENT = {
         { time: "09:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
         { time: "09:00", endTime: "16:00", title: "Build, with Ralph at the tables" },
         { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
-        { time: "21:00", title: "Awards ceremony" },
+        { time: "21:00", title: "Closing" },
       ],
     },
   ] satisfies ScheduleDay[],
