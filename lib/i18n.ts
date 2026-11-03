@@ -40,8 +40,9 @@ export const translations = {
     tracksProposed: "Proposed",
     tracksViewBrief: "View the full brief",
     tracksViewTrack: "Full brief for",
-    trackQuestion: "Guiding question",
-    trackResult: "Main result",
+    trackQuestion: "In one sentence",
+    trackResult: "In short",
+    trackProposedBy: "Proposed by",
 
     hardwareTag: "Hardware",
     hardwareTitle: "What you get to hack on",
