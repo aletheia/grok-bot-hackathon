@@ -193,7 +193,7 @@ export const EVENT = {
       "200 m from Pavia train station.",
       "About 25 minutes by train from Milano Rogoredo.",
     ],
-    /** Museum stays open to participants through Wednesday night. */
+    /** Spaces stay open all night, from Wednesday until Thursday 21:00, with free entry and exit. */
     openOvernight: true,
   },
 
@@ -377,17 +377,23 @@ export const EVENT = {
       date: "2026-11-04",
       items: [
         { time: "09:00", title: "Kick-off", detail: "Hardware tour, find a team, start building." },
-        { time: "18:00", title: "Ctrl+Alt Ecosystem presentation", invitationOnly: true },
-        { title: "Hacking continues through the night", detail: "The museum stays open to participants." },
+        { time: "10:00", title: "Intro to cobots, dogs, drones and rovers" },
+        { time: "11:00", title: "Factory Academia" },
+        { time: "18:30", title: "Riso Scotti meets the Hackathon" },
+        {
+          title: "Hacking continues through the night",
+          detail: "The spaces stay open all night until Thursday at 21:00, with free entry and exit.",
+        },
       ],
     },
     {
       date: "2026-11-05",
       items: [
-        { time: "09:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
         { time: "09:00", endTime: "16:00", title: "Build, with Ralph at the tables" },
+        { time: "10:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
+        { time: "11:00", title: "Meet the MESetAs", detail: "Using Grok Bots for everything." },
         { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
-        { time: "21:00", title: "Closing" },
+        { time: "21:00", title: "Awards ceremony" },
       ],
     },
   ] satisfies ScheduleDay[],
