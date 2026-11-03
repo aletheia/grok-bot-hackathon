@@ -120,5 +120,9 @@ describe("schedule", () => {
       "18:30 Riso Scotti meets the Hackathon",
     ]);
     expect(talks(thu.items)).toEqual(["10:00 Talk by Ralph Johnson (SpaceXAI)", "11:00 Meet the MESetAs"]);
+    // Nothing implies Ralph speaks at 09:00.
+    expect(EVENT.speaker.bio).toContain("10:00");
+    expect(EVENT.speaker.bio).not.toMatch(/opens the day/i);
+    expect(thu.items.find((i) => i.time === "09:00")?.title).toBe("Build");
   });
 });
