@@ -13,11 +13,12 @@ describe("event config", () => {
     expect(new Date(EVENT.startDate).getTime()).toBeLessThan(new Date(EVENT.endDate).getTime());
   });
 
-  it("marks the Ctrl+Alt Ecosystem presentation as invitation only (and nothing else)", () => {
+  it("has no invitation-only items (the Ctrl+Alt Ecosystem presentation is off the agenda)", () => {
     const days: readonly ScheduleDay[] = EVENT.schedule;
     const items = days.flatMap((d) => d.items);
     const flagged = items.filter((i) => i.invitationOnly);
-    expect(flagged.map((i) => i.title)).toEqual(["Ctrl+Alt Ecosystem presentation"]);
+    expect(flagged).toEqual([]);
+    expect(JSON.stringify(EVENT.schedule)).not.toMatch(/ecosystem/i);
     expect(t("landing", "invitationOnly")).toBe("Invitation only");
   });
 

@@ -90,7 +90,7 @@ export const translations = {
     openMaps: "Open in Google Maps",
     museumSite: "Museum website",
     gettingThere: "Getting there",
-    overnightNote: "On Wednesday night the museum stays open to participants.",
+    overnightNote: "The spaces stay open all night until Thursday at 21:00, with free entry and exit.",
 
     hostsTag: "Hosts",
     hostsTitle: "The people behind it",

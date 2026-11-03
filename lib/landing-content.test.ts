@@ -104,9 +104,25 @@ describe("jury grid", () => {
 });
 
 describe("schedule", () => {
-  it("the 21:00 item on the last day is 'Closing' (no awards ceremony)", () => {
+  it("the 21:00 item on the last day is the awards ceremony", () => {
     const last = EVENT.schedule[EVENT.schedule.length - 1];
-    expect(last.items.find((i) => i.time === "21:00")?.title).toBe("Closing");
-    expect(JSON.stringify(EVENT.schedule)).not.toMatch(/award/i);
+    expect(last.items.find((i) => i.time === "21:00")?.title).toBe("Awards ceremony");
+    expect(JSON.stringify(EVENT.schedule)).not.toMatch(/closing/i);
+  });
+
+  it("follows Luca's talk outline (Wednesday 10:00, 11:00, 18:30; Thursday 10:00, 11:00)", () => {
+    const [wed, thu] = EVENT.schedule;
+    const talks = (items: readonly { time?: string; title: string }[]) =>
+      items.filter((i) => ["10:00", "11:00", "18:30"].includes(i.time ?? "")).map((i) => `${i.time} ${i.title}`);
+    expect(talks(wed.items)).toEqual([
+      "10:00 Intro to cobots, dogs, drones and rovers",
+      "11:00 Factory Academia",
+      "18:30 Riso Scotti meets the Hackathon",
+    ]);
+    expect(talks(thu.items)).toEqual(["10:00 Talk by Ralph Johnson (SpaceXAI)", "11:00 Meet the MESetAs"]);
+    // Nothing implies Ralph speaks at 09:00.
+    expect(EVENT.speaker.bio).toContain("10:00");
+    expect(EVENT.speaker.bio).not.toMatch(/opens the day/i);
+    expect(thu.items.find((i) => i.time === "09:00")?.title).toBe("Build");
   });
 });
