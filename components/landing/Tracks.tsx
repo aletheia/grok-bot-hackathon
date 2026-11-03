@@ -4,7 +4,7 @@ import { EVENT } from '@/lib/event';
 import { t } from '@/lib/i18n';
 import { Section } from './shared';
 
-/** Homepage recap of the proposed tracks: three cards linking to the full brief on /tracks. */
+/** Homepage recap of the proposed tracks: one card per track, linking to the full brief on /tracks. */
 export function Tracks() {
   const { items, vision, statusNote } = EVENT.tracks;
   return (
@@ -19,25 +19,27 @@ export function Tracks() {
         <p className="mt-4 text-[var(--text-secondary)]">{statusNote}</p>
       </div>
 
-      <ul className="mt-10 grid gap-4 lg:grid-cols-3">
+      <ul className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {items.map((track) => (
           <li key={track.id}>
             <article className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-6 md:p-8">
               <p className="font-mono text-sm font-bold text-[var(--blob-teal)]">{track.number}</p>
               <h3 className="mt-2 font-display text-2xl font-bold text-white">{track.title}</h3>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">{track.subtitle}</p>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                {t('landing', 'trackProposedBy')} {track.proposedBy}
+              </p>
               <dl className="mt-5 space-y-4">
                 <div>
                   <dt className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
                     {t('landing', 'trackQuestion')}
                   </dt>
-                  <dd className="mt-1 text-lg font-semibold leading-snug text-white">{track.guidingQuestion}</dd>
+                  <dd className="mt-1 text-lg font-semibold leading-snug text-white">{track.oneLiner}</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-secondary)]">
                     {t('landing', 'trackResult')}
                   </dt>
-                  <dd className="mt-1 text-white">{track.mainResult}</dd>
+                  <dd className="mt-1 text-white">{track.summary}</dd>
                 </div>
               </dl>
               <Link
@@ -61,9 +63,6 @@ export function Tracks() {
           {t('landing', 'tracksViewBrief')}
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {EVENT.tracks.principles.map((p) => p.title).join(' · ')}
-        </p>
       </div>
     </Section>
   );
