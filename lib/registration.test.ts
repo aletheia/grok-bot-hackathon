@@ -44,15 +44,19 @@ describe("registration window", () => {
 
   it("writes a deadline-only headline for each state and never advertises the opening date", () => {
     expect(getRegistrationNotice(at("2026-10-20T12:00:00+02:00")).headline).toBe(
-      "Registration closes on November 5 (16:00, Rome time).",
+      "Final Deadline for submission: November 5, 16:00 (Rome time).",
     );
     expect(getRegistrationNotice(at("2026-11-04T23:00:00+01:00")).headline).toBe(
-      "Registration closes on November 5 (16:00, Rome time).",
+      "Final Deadline for submission: November 5, 16:00 (Rome time).",
     );
     expect(getRegistrationNotice(at("2026-10-25T12:00:00+01:00")).state).toBe("before");
     const closed = getRegistrationNotice(at("2026-11-05T17:00:00+01:00"));
-    expect(closed.headline).toBe("Registration closed on November 5.");
-    expect(closed.body).toBe("");
+    expect(closed.headline).toBe("The Final Deadline for submission (November 5, 16:00, Rome time) has passed.");
+    expect(closed.body).toBe("Teams are locked and team data submissions are closed.");
+    for (const iso of ["2026-11-04T23:00:00+01:00", "2026-11-05T17:00:00+01:00"]) {
+      const n = getRegistrationNotice(at(iso));
+      expect(`${n.headline} ${n.body}`).not.toMatch(/registration clos/i);
+    }
   });
 
   it("never mentions the opening date or 'opens' in any state", () => {
@@ -72,9 +76,10 @@ describe("registration window", () => {
   it("explains the code-based flow, individuals and the team priority before and during", () => {
     for (const iso of ["2026-10-20T12:00:00+02:00", "2026-10-27T12:00:00+01:00"]) {
       const { body } = getRegistrationNotice(at(iso));
-      expect(body).toContain("Register a team and share its secret code");
+      expect(body).toContain("register a team and share its secret code");
       expect(body).toContain("join a team with a code");
-      expect(body).toContain("Register as looking for a team");
+      expect(body).toContain("register as looking for a team");
+      expect(body).toContain("Team creation and joining lock at the same moment.");
       expect(body).toContain("Registering a team gives priority for participation confirmation.");
       expect(body).not.toContain("naming the other participants");
     }

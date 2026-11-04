@@ -64,8 +64,8 @@ export function TeamLockNotice() {
       <p className="flex items-center gap-2 font-medium text-white">
         <Clock size={16} />
         {locked
-          ? `Teams are locked since ${formatTeamLock()}.`
-          : `Teams lock on ${formatTeamLock()}${now !== null ? ` — ${remaining(TEAM_LOCK_AT.getTime() - now)} left` : ""}.`}
+          ? `The Final Deadline for submission, ${formatTeamLock()}, has passed: teams are locked.`
+          : `Final Deadline for submission: ${formatTeamLock()}${now !== null ? ` — ${remaining(TEAM_LOCK_AT.getTime() - now)} left` : ""}. Teams lock at the same time.`}
       </p>
       <p className="mt-2 flex items-start gap-2">
         <Info size={16} className="mt-0.5 shrink-0" />

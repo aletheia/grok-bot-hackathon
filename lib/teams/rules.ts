@@ -53,8 +53,8 @@ export function getTeamRules(): TeamRule[] {
       body: "You can be in one team only. You can leave whenever you want before the lock. If the person who created the team leaves, the earliest-joined member takes over; a team with nobody left is removed.",
     },
     {
-      title: `Teams lock on ${formatTeamLock()}`,
-      body: "This is also the end of registration. After that moment nobody can register, join or leave a team. Sort out your team before then.",
+      title: `Final Deadline for submission: ${formatTeamLock()}`,
+      body: "Teams lock at this moment: after it nobody can register, join or leave a team, and the Team data submission (public GitHub repo, video link) becomes read-only. Sort out your team and submit before then.",
     },
     {
       title: `Guaranteed seats for teams of ${minMembers}+`,

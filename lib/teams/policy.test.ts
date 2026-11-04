@@ -120,7 +120,7 @@ describe("team lock", () => {
 
   it("throws 409 TEAMS_LOCKED after the lock", () => {
     expect(() => assertTeamsOpen(new Date("2026-11-05T16:00:01+01:00"))).toThrowError(
-      "Teams are locked: since 5 November 2026 at 16:00 (Rome time) teams can no longer be created, joined or left.",
+      "Teams are locked: the Final Deadline for submission was 5 November 2026 at 16:00 (Rome time), so teams can no longer be created, joined or left.",
     );
     expect.assertions(4);
     try {

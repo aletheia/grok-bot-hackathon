@@ -4,7 +4,6 @@ import { Footer } from "@/components/Footer";
 import { RegistrationNotice } from "@/components/RegistrationNotice";
 import { Navigation } from "@/components/Navigation";
 import { EVENT } from "@/lib/event";
-import { formatRegistrationDay, REGISTRATION_CLOSES_AT } from "@/lib/registration";
 import { formatTeamLock, getTeamPaths, getTeamRules } from "@/lib/teams/rules";
 
 export const metadata: Metadata = {
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
 const FAQ: { q: string; a: string }[] = [
   {
     q: "When can I register, and as what?",
-    a: `Registration closes on ${formatRegistrationDay(REGISTRATION_CLOSES_AT)} (${formatTeamLock()}). That is also the team lock: one deadline for registering and for changing teams. You can register a team (you get a secret code to share), join a team with a code, or register as an individual looking for a team. Registering a team gives priority for participation confirmation.`,
+    a: `Any time until the Final Deadline for submission: ${formatTeamLock()}. Team creation, joining and leaving lock at that same moment, and team data submissions become read-only. You can register a team (you get a secret code to share), join a team with a code, or register as an individual looking for a team. Registering a team gives priority for participation confirmation.`,
   },
   {
     q: "Which email do I sign in with?",
@@ -36,7 +35,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "What happens at the lock?",
-    a: `On ${formatTeamLock()} the teams are frozen. Teams with ${EVENT.portal.team.minMembers} or more members are formed and all their members get guaranteed seats. The remaining seats (out of ${EVENT.registration.capacity}) go first-come, first-served by Luma registration time to everyone else on the guest list, including people in smaller teams and people without a team.`,
+    a: `At the Final Deadline for submission, ${formatTeamLock()}, the teams are frozen. Teams with ${EVENT.portal.team.minMembers} or more members are formed and all their members get guaranteed seats. The remaining seats (out of ${EVENT.registration.capacity}) go first-come, first-served by Luma registration time to everyone else on the guest list, including people in smaller teams and people without a team.`,
   },
   {
     q: "Will I get an email about my seat?",
