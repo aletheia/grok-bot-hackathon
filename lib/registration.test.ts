@@ -12,9 +12,9 @@ import { formatRome } from "@/lib/time/rome";
 const at = (iso: string) => new Date(iso);
 
 describe("registration window", () => {
-  it("is configured in Rome time: opens 26 Oct 00:00, closes 2 Nov 23:59", () => {
+  it("is configured in Rome time: opens 26 Oct 00:00, closes 5 Nov 16:00 (reopened)", () => {
     expect(EVENT.registration.registrationOpens.startsWith("2026-10-26T00:00")).toBe(true);
-    expect(EVENT.registration.registrationCloses.startsWith("2026-11-02T23:59")).toBe(true);
+    expect(EVENT.registration.registrationCloses.startsWith("2026-11-05T16:00")).toBe(true);
     expect(formatRome(REGISTRATION_OPENS_AT, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })).toContain("26");
     expect(REGISTRATION_OPENS_AT.getTime()).toBeLessThan(REGISTRATION_CLOSES_AT.getTime());
   });
@@ -31,9 +31,11 @@ describe("registration window", () => {
     expect(getRegistrationState(at("2026-10-31T00:00:00+01:00"))).toBe("open");
     expect(getRegistrationState(at("2026-10-31T23:59:00+01:00"))).toBe("open");
     expect(getRegistrationState(at("2026-11-01T12:00:00+01:00"))).toBe("open");
-    expect(getRegistrationState(at("2026-11-02T23:59:00+01:00"))).toBe("open");
-    expect(getRegistrationState(at("2026-11-02T23:59:01+01:00"))).toBe("closed");
-    expect(getRegistrationState(at("2026-11-03T00:00:00+01:00"))).toBe("closed");
+    expect(getRegistrationState(at("2026-11-02T23:59:01+01:00"))).toBe("open");
+    expect(getRegistrationState(at("2026-11-04T23:30:00+01:00"))).toBe("open");
+    expect(getRegistrationState(at("2026-11-05T16:00:00+01:00"))).toBe("open");
+    expect(getRegistrationState(at("2026-11-05T16:00:01+01:00"))).toBe("closed");
+    expect(getRegistrationState(at("2026-11-06T00:00:00+01:00"))).toBe("closed");
   });
 
   it("accepts epoch milliseconds", () => {
@@ -42,14 +44,14 @@ describe("registration window", () => {
 
   it("writes a deadline-only headline for each state and never advertises the opening date", () => {
     expect(getRegistrationNotice(at("2026-10-20T12:00:00+02:00")).headline).toBe(
-      "Registration closes on November 2 (23:59, Rome time).",
+      "Registration closes on November 5 (16:00, Rome time).",
     );
-    expect(getRegistrationNotice(at("2026-10-27T12:00:00+01:00")).headline).toBe(
-      "Registration closes on November 2 (23:59, Rome time).",
+    expect(getRegistrationNotice(at("2026-11-04T23:00:00+01:00")).headline).toBe(
+      "Registration closes on November 5 (16:00, Rome time).",
     );
     expect(getRegistrationNotice(at("2026-10-25T12:00:00+01:00")).state).toBe("before");
-    const closed = getRegistrationNotice(at("2026-11-03T12:00:00+01:00"));
-    expect(closed.headline).toBe("Registration closed on November 2.");
+    const closed = getRegistrationNotice(at("2026-11-05T17:00:00+01:00"));
+    expect(closed.headline).toBe("Registration closed on November 5.");
     expect(closed.body).toBe("");
   });
 

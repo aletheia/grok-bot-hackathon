@@ -24,6 +24,16 @@ export function formatRegistrationDay(date: Date): string {
   return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: EVENT_TIME_ZONE }).format(date);
 }
 
+/** "16:00" (24h, Rome time). */
+export function formatRegistrationTime(date: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: EVENT_TIME_ZONE,
+  }).format(date);
+}
+
 export type RegistrationNotice = {
   state: RegistrationState;
   headline: string;
@@ -44,7 +54,7 @@ export function getRegistrationNotice(
   // Deadline only: the opening date is deliberately not advertised, so the pre-opening and open
   // states show the same line. The "before" state still exists as a gate in getRegistrationState.
   if (state === "before" || state === "open") {
-    return { state, headline: `Registration closes on ${close} (23:59, Rome time).`, body: BODY };
+    return { state, headline: `Registration closes on ${close} (${formatRegistrationTime(closes)}, Rome time).`, body: BODY };
   }
   return { state, headline: `Registration closed on ${close}.`, body: "" };
 }
