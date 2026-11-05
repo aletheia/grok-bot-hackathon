@@ -156,9 +156,9 @@ describe("schedule", () => {
     expect(EVENT.speaker.bio).not.toMatch(/opens the day/i);
     const build = thu.items.find((i) => i.time === "09:00");
     expect(build?.title).toBe("Build");
-    expect(build?.endTime).toBe("16:30");
+    expect(build?.endTime).toBe("17:00");
     expect(build?.detail).toBe("Ralph joins the tables after his 12:00 talk.");
     const evaluation = thu.items.find((i) => i.title === "Project evaluation and pitches");
-    expect(evaluation).toEqual({ time: "16:30", endTime: "18:30", title: "Project evaluation and pitches" });
+    expect(evaluation).toEqual({ time: "17:00", endTime: "18:30", title: "Project evaluation and pitches" });
   });
 });

@@ -380,6 +380,8 @@ export const EVENT = {
     },
   },
 
+  // `satisfies` checks the literals. The `as ScheduleDay[]` keeps `endTime` on the public
+  // item type: without it, inferred `.find()` drops the members that have `endTime`.
   schedule: [
     {
       date: "2026-11-04",
@@ -397,13 +399,13 @@ export const EVENT = {
     {
       date: "2026-11-05",
       items: [
-        { time: "09:00", endTime: "16:30", title: "Build", detail: "Ralph joins the tables after his 12:00 talk." },
+        { time: "09:00", endTime: "17:00", title: "Build", detail: "Ralph joins the tables after his 12:00 talk." },
         { time: "12:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
-        { time: "16:30", endTime: "18:30", title: "Project evaluation and pitches" },
+        { time: "17:00", endTime: "18:30", title: "Project evaluation and pitches" },
         { time: "18:30", title: "Awards ceremony" },
       ],
     },
-  ] satisfies ScheduleDay[],
+  ] satisfies ScheduleDay[] as ScheduleDay[],
 
   practical: [
     "Teams of 4 to 6 (see how teams work below).",
