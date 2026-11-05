@@ -397,7 +397,6 @@ export const EVENT = {
       date: "2026-11-05",
       items: [
         { time: "09:00", endTime: "16:00", title: "Build", detail: "Ralph joins the tables after his 11:30 talk." },
-        { time: "11:00", title: "Meet the MESetAs", detail: "Using Grok Bots for everything." },
         { time: "11:30", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
         { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
         { time: "21:00", title: "Awards ceremony" },
