@@ -110,7 +110,7 @@ describe("schedule", () => {
     expect(JSON.stringify(EVENT.schedule)).not.toMatch(/closing/i);
   });
 
-  it("follows the agenda outline (Wednesday 10:00, 11:00, 18:30; Thursday 11:00 MESetAs, 11:30 Ralph)", () => {
+  it("follows the agenda outline (Wednesday 10:00, 11:00, 18:30; Thursday 11:30 Ralph, no MESetAs)", () => {
     const [wed, thu] = EVENT.schedule;
     const talks = (items: readonly { time?: string; title: string }[], times: string[]) =>
       items.filter((i) => times.includes(i.time ?? "")).map((i) => `${i.time} ${i.title}`);
@@ -120,9 +120,9 @@ describe("schedule", () => {
       "18:30 Riso Scotti meets the Hackathon",
     ]);
     expect(talks(thu.items, ["10:00", "10:30", "11:00", "11:30"])).toEqual([
-      "11:00 Meet the MESetAs",
       "11:30 Talk by Ralph Johnson (SpaceXAI)",
     ]);
+    expect(JSON.stringify(EVENT.schedule)).not.toMatch(/MESetAs|Mesetas/i);
     // Nothing implies Ralph speaks at 09:00 or 10:00.
     expect(EVENT.speaker.bio).toContain("11:30");
     expect(EVENT.speaker.bio).not.toContain("10:00");
