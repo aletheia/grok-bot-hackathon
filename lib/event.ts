@@ -291,7 +291,7 @@ export const EVENT = {
     role: "SpaceXAI team",
     /** Official photo sent by Luca (200×200; the card draws it at 96 px so it stays sharp on 2x screens). */
     photo: "/assets/speaker/ralph-johnson.jpg" as AssetSrc,
-    bio: "Joins on Thursday: talk at 10:00 on the models and the API, then stays with builders at the tables.",
+    bio: "Joins on Thursday: talk at 11:30 on the models and the API, then stays with builders at the tables.",
   },
 
   /** To be published. Empty arrays render a "To be announced" state. */
@@ -389,9 +389,9 @@ export const EVENT = {
     {
       date: "2026-11-05",
       items: [
-        { time: "09:00", endTime: "16:00", title: "Build", detail: "Ralph joins the tables after his 10:00 talk." },
-        { time: "10:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
+        { time: "09:00", endTime: "16:00", title: "Build", detail: "Ralph joins the tables after his 11:30 talk." },
         { time: "11:00", title: "Meet the MESetAs", detail: "Using Grok Bots for everything." },
+        { time: "11:30", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
         { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
         { time: "21:00", title: "Awards ceremony" },
       ],
