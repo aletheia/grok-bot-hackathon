@@ -21,7 +21,7 @@ export const translations = {
   },
 
   landing: {
-    ctaSignIn: "Create or Join a Team",
+    ctaSignIn: "Login into Team Portal",
     ctaSignInHint: "Sign in with the email you used on Luma",
     ctaOpen: "Register on Luma",
     ctaWaitlist: "Join the waitlist on Luma",

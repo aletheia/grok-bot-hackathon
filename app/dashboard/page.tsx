@@ -28,7 +28,8 @@ import {
 import Link from "next/link";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { ProjectSection } from "@/components/dashboard/ProjectSection";
+import { TeamSubmissionBox } from "@/components/dashboard/TeamSubmissionBox";
+import { formatTeamLock } from "@/lib/teams/rules";
 import { AvailabilityCard, AvailablePeople, TeamLockNotice, useTeamsLocked } from "@/components/dashboard/TeamExtras";
 import { RegistrationNotice } from "@/components/RegistrationNotice";
 import { PartnerCreditsPanel } from "@/components/participant/PartnerCreditsPanel";
@@ -113,7 +114,7 @@ const DASHBOARD_COPY = {
     joinSuccess: "You joined the team successfully.",
     rotateSuccess: "A fresh invite code is now active.",
     leaveSuccess: "You left the team. If you were the lead, the earliest-joined member is now lead.",
-    bannerRegistration: "Registration and team changes are open until 2 November 2026 at 23:59 (Rome time).",
+    bannerRegistration: `Final Deadline for submission: ${formatTeamLock()}. Until then you can register, join or change teams.`,
     bannerScreeningActive: "Screening is active! Complete the tasks to confirm your team's participation.",
     bannerScreeningCompleted: "Screening is complete. Results are published below.",
     bannerGoToScreening: "Go to screening",
@@ -700,6 +701,9 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Team data submission: first thing on the team page */}
+        {team ? <TeamSubmissionBox reloadKey={`${team.id}:${team.memberCount}`} /> : null}
+
         {/* Screening phase banner */}
         {(() => {
           const isActive = screeningPhase === "screening_active";
@@ -1214,13 +1218,6 @@ export default function DashboardPage() {
             }}
           />
         </section>
-
-        {team && (
-          <ProjectSection
-            isTeamLead={team.currentUserMembership?.role === "lead"}
-            teamApproved={team.screeningStatus === "approved"}
-          />
-        )}
 
         {/* Account */}
         <section id="account" className="mt-10 scroll-mt-28 pb-12">

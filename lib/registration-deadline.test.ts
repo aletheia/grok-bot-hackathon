@@ -3,16 +3,16 @@ import { EVENT } from "@/lib/event";
 import { formatDeadlineDay, formatDeadlineTime, getDeadlineLine } from "@/lib/registration-deadline";
 
 describe("event card deadline line", () => {
-  it("is derived from EVENT.registration.registrationCloses (2 Nov 23:59 Rome)", () => {
-    expect(EVENT.registration.registrationCloses.startsWith("2026-11-02T23:59")).toBe(true);
-    expect(formatDeadlineDay()).toBe("2 November");
-    expect(formatDeadlineTime()).toBe("23:59");
+  it("is derived from EVENT.registration.registrationCloses (5 Nov 16:00 Rome)", () => {
+    expect(EVENT.registration.registrationCloses.startsWith("2026-11-05T16:00")).toBe(true);
+    expect(formatDeadlineDay()).toBe("5 November");
+    expect(formatDeadlineTime()).toBe("16:00");
   });
 
-  it("reads 'Teams: register by 2 November, 23:59 (Rome time).' before and during the window", () => {
-    for (const iso of ["2026-10-25T10:00:00+01:00", "2026-10-28T12:00:00+01:00", "2026-10-31T23:59:00+01:00", "2026-11-02T23:59:00+01:00"]) {
+  it("reads 'Final Deadline for submission: 5 November, 16:00 (Rome time).' before and during the window", () => {
+    for (const iso of ["2026-10-25T10:00:00+01:00", "2026-11-03T12:00:00+01:00", "2026-11-04T23:30:00+01:00", "2026-11-05T16:00:00+01:00"]) {
       const line = getDeadlineLine(new Date(iso));
-      expect(`${line.label} ${line.text}`).toBe("Teams: register by 2 November, 23:59 (Rome time).");
+      expect(`${line.label} ${line.text}`).toBe("Final Deadline for submission: 5 November, 16:00 (Rome time).");
     }
   });
 
@@ -21,14 +21,15 @@ describe("event card deadline line", () => {
     expect(`${line.label} ${line.text}`).not.toMatch(/opens|26 Oct/i);
   });
 
-  it("says closed after the deadline", () => {
-    const line = getDeadlineLine(new Date("2026-11-03T00:00:00+01:00"));
-    expect(`${line.label} ${line.text}`).toBe("Teams: registration closed on 2 November.");
+  it("says the deadline has passed after it, never 'registration closes'", () => {
+    const line = getDeadlineLine(new Date("2026-11-05T16:00:01+01:00"));
+    expect(`${line.label} ${line.text}`).toBe("Final Deadline for submission: passed on 5 November, 16:00 (Rome time).");
+    expect(`${line.label} ${line.text}`).not.toMatch(/registration clos/i);
   });
 
   it("follows a different closing instant (not hard-coded)", () => {
     const closes = new Date("2026-11-02T21:30:00+01:00");
     const line = getDeadlineLine(new Date("2026-11-01T10:00:00+01:00"), closes);
-    expect(line.text).toBe("register by 2 November, 21:30 (Rome time).");
+    expect(line.text).toBe("2 November, 21:30 (Rome time).");
   });
 });

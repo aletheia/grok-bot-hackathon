@@ -1,7 +1,7 @@
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { EVENT, formatAddress, formatDateRange, formatDayLabel, getMapsUrl, type ScheduleDay } from "@/lib/event";
+import { EVENT, formatAddress, formatDateRange, formatDayLabel, getMapsUrl, type ScheduleDay, PORTAL_DEADLINE } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
 import { t, translations } from "@/lib/i18n";
 
@@ -79,9 +79,12 @@ describe("event config", () => {
     expect(EVENT.hosts.every((h) => h.photo === null || typeof h.photo === "string")).toBe(true);
   });
 
-  it("portal settings: 4–6 per team, lock on 2 Nov 23:59 Rome", () => {
+  it("portal settings: 4–6 per team, lock and submission deadline on 5 Nov 16:00 Rome (one constant)", () => {
     expect(EVENT.portal.team).toEqual({ minMembers: 4, maxMembers: 6 });
-    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-11-02T22:59:00.000Z");
+    expect(PORTAL_DEADLINE).toBe("2026-11-05T16:00:00+01:00");
+    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-11-05T15:00:00.000Z");
+    expect(EVENT.portal.submissionDeadline).toBe(PORTAL_DEADLINE);
+    expect(EVENT.registration.registrationCloses).toBe(PORTAL_DEADLINE);
   });
 });
 
