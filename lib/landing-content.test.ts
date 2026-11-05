@@ -1,8 +1,12 @@
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { Jury } from "@/components/landing/Jury";
 import { EVENT } from "@/lib/event";
 import { buildEventJsonLd } from "@/lib/event-jsonld";
+import { t } from "@/lib/i18n";
 import { getJsonLdSponsors, getJurySlots, getSponsorContactHref, getSponsorItems } from "@/lib/landing-content";
 
 describe("jury", () => {
@@ -83,8 +87,7 @@ describe("sponsors", () => {
 });
 
 describe("prizes list is not shown", () => {
-  it("no prizes section on the landing and no #prizes link anywhere in the app", async () => {
-    const { readFileSync } = await import("node:fs");
+  it("no prizes section on the landing and no #prizes link anywhere in the app", () => {
     const files = ["app/page.tsx", "components/Navigation.tsx", "components/landing/index.ts", "app/tracks/page.tsx", "app/rules/page.tsx"];
     for (const f of files) {
       const src = readFileSync(join(process.cwd(), f), "utf8");
@@ -95,18 +98,41 @@ describe("prizes list is not shown", () => {
 });
 
 describe("jury grid", () => {
-  it("2 columns on mobile, 3 on md, 4 on lg; rows not forced to equal height", async () => {
-    const { readFileSync } = await import("node:fs");
+  it("2 columns on mobile, 3 on md, 4 on lg; rows not forced to equal height", () => {
     const src = readFileSync(join(process.cwd(), "components/landing/Jury.tsx"), "utf8");
     expect(src).toContain("grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4");
     expect(src).not.toContain("auto-rows-fr");
   });
 });
 
+describe("evaluation criteria are not published", () => {
+  it("keeps the list empty and does not render a criteria card or announcement", () => {
+    expect(EVENT.criteria).toEqual([]);
+    const html = renderToStaticMarkup(createElement(Jury));
+    expect(html).toContain(t("landing", "juryTitle"));
+    expect(html).not.toContain(t("landing", "criteriaTitle"));
+    expect(html).not.toContain(t("landing", "tbaNote"));
+    expect(html).not.toMatch(/innovation|scalability|real use cases|deliverable/i);
+  });
+});
+
+describe("brief", () => {
+  it("asks builders to show something by today at 16:30", () => {
+    expect(EVENT.brief).toBe(
+      "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by today at 16:30 show something that didn't work when you started.",
+    );
+    expect(EVENT.brief).not.toMatch(/Thursday afternoon/i);
+  });
+});
+
 describe("schedule", () => {
-  it("the 21:00 item on the last day is the awards ceremony", () => {
-    const last = EVENT.schedule[EVENT.schedule.length - 1];
-    expect(last.items.find((i) => i.time === "21:00")?.title).toBe("Awards ceremony");
+  it("the 18:30 item on the last day is the awards ceremony", () => {
+    const [wed, last] = EVENT.schedule;
+    expect(last.items.find((i) => i.time === "18:30")?.title).toBe("Awards ceremony");
+    expect(last.items.find((i) => i.time === "21:00")).toBeUndefined();
+    expect(wed.items.find((i) => i.time === "18:30")?.title).toBe("Riso Scotti meets the Hackathon");
+    expect(wed.items.find((i) => !i.time)?.detail).toContain("until Thursday at 21:00");
+    expect(t("landing", "overnightNote")).toContain("until Thursday at 21:00");
     expect(JSON.stringify(EVENT.schedule)).not.toMatch(/closing/i);
   });
 
@@ -130,6 +156,9 @@ describe("schedule", () => {
     expect(EVENT.speaker.bio).not.toMatch(/opens the day/i);
     const build = thu.items.find((i) => i.time === "09:00");
     expect(build?.title).toBe("Build");
+    expect(build?.endTime).toBe("16:30");
     expect(build?.detail).toBe("Ralph joins the tables after his 12:00 talk.");
+    const evaluation = thu.items.find((i) => i.title === "Project evaluation and pitches");
+    expect(evaluation).toEqual({ time: "16:30", endTime: "18:30", title: "Project evaluation and pitches" });
   });
 });

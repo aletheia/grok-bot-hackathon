@@ -24,7 +24,7 @@ export function formatRegistrationDay(date: Date): string {
   return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: EVENT_TIME_ZONE }).format(date);
 }
 
-/** "16:00" (24h, Rome time). */
+/** "16:30" (24h, Rome time). */
 export function formatRegistrationTime(date: Date): string {
   return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
