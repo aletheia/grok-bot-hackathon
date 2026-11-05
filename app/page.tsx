@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { Brief, Hardware, Hero, Hosts, Jury, Practical, Schedule, Speaker, Sponsors, Teams, Tracks, Venue } from "@/components/landing";
+import { Brief, Hardware, Hero, Hosts, Jury, Practical, Projects, Schedule, Speaker, Sponsors, Teams, Tracks, Venue } from "@/components/landing";
 import { formatDateRange } from "@/lib/event";
+import { listShowcaseProjects } from "@/lib/showcase/projects";
 import { getSiteUrl, siteConfig } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}, ${formatDateRange()}` },
@@ -17,7 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const projects = await listShowcaseProjects();
   return (
     <>
       <StructuredData />
@@ -26,6 +30,7 @@ export default function Home() {
         <Hero />
         <Brief />
         <Tracks />
+        <Projects projects={projects} />
         <Hardware />
         <Schedule />
         <Speaker />

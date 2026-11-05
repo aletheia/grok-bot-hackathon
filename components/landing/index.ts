@@ -1,6 +1,7 @@
 export { Hero } from './Hero';
 export { Brief } from './Brief';
 export { Tracks } from './Tracks';
+export { Projects } from './Projects';
 export { Hardware } from './Hardware';
 export { Schedule } from './Schedule';
 export { Speaker } from './Speaker';
