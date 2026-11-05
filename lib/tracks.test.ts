@@ -55,6 +55,9 @@ describe("proposed tracks", () => {
 
   it("publishes the rules for all tracks", () => {
     expect(TRACKS_CONTENT.rules).toHaveLength(5);
+    expect(TRACKS_CONTENT.rules.join("\n")).toContain("by 17:00");
+    expect(TRACKS_CONTENT.rules.join("\n")).not.toContain("by 16:30");
+    expect(TRACKS_CONTENT.rules.join("\n")).not.toContain("by 16:00");
   });
 
   it("marks unconfirmed items with the TBC marker, never with raw Italian notes", () => {

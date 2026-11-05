@@ -110,7 +110,7 @@ export type Sponsor = {
  * (no create/join/leave) and the team data submission (repo + video) becomes read-only at this instant.
  * Change it here only: registration, team lock and submission all read it.
  */
-export const PORTAL_DEADLINE = "2026-11-05T16:00:00+01:00";
+export const PORTAL_DEADLINE = "2026-11-05T17:00:00+01:00";
 
 const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
@@ -210,7 +210,7 @@ export const EVENT = {
   },
 
   brief:
-    "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by Thursday afternoon show something that didn't work when you started.",
+    "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by today at 17:00 show something that didn't work when you started.",
 
   /**
    * What participants can use, from the official docs (docs.x.ai, x.ai/news, cursor.com/docs).
@@ -298,7 +298,7 @@ export const EVENT = {
     role: "SpaceXAI team",
     /** Official photo sent by Luca (200×200; the card draws it at 96 px so it stays sharp on 2x screens). */
     photo: "/assets/speaker/ralph-johnson.jpg" as AssetSrc,
-    bio: "Joins on Thursday: talk at 11:30 on the models and the API, then stays with builders at the tables.",
+    bio: "Joins on Thursday: talk at 12:00 on the models and the API, then stays with builders at the tables.",
   },
 
   /** To be published. Empty arrays render a "To be announced" state. */
@@ -324,7 +324,8 @@ export const EVENT = {
    *   only when `bio` is longer than `bioShort`.
    * - `{ name: null }` renders a dashed "To be announced" card. While the list is empty, `juryPlaceholderSlots`
    *   of them are shown.
-   * The evaluation criteria card (EVENT.criteria above) sits next to the jury.
+   * Evaluation criteria are not published: the landing does not render a criteria card or a
+   * "to be announced" promise. Leave EVENT.criteria empty.
    */
   // TODO(Luca): confirm the list and fill role / org / bio / bioShort / photo / link. Names only for now:
   // nothing else is invented.
@@ -396,10 +397,10 @@ export const EVENT = {
     {
       date: "2026-11-05",
       items: [
-        { time: "09:00", endTime: "16:00", title: "Build", detail: "Ralph joins the tables after his 11:30 talk." },
-        { time: "11:30", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
-        { time: "16:00", endTime: "19:00", title: "Project evaluation and pitches" },
-        { time: "21:00", title: "Awards ceremony" },
+        { time: "09:00", endTime: "16:30", title: "Build", detail: "Ralph joins the tables after his 12:00 talk." },
+        { time: "12:00", title: "Talk by Ralph Johnson (SpaceXAI)", detail: "Grok models, API, Grok Voice, Grok Bots." },
+        { time: "16:30", endTime: "18:30", title: "Project evaluation and pitches" },
+        { time: "18:30", title: "Awards ceremony" },
       ],
     },
   ] satisfies ScheduleDay[],

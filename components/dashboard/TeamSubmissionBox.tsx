@@ -98,7 +98,7 @@ export function TeamSubmissionBox({ reloadKey }: { reloadKey?: string | number }
   const deadline = view ? new Date(view.deadline) : null;
   const closed = Boolean(view?.closed) || (now !== null && deadline !== null && now > deadline.getTime());
   const status: SubmissionStatus = closed ? "closed" : view?.submission ? "submitted" : "draft";
-  const deadlineTime = deadline ? formatSubmissionDeadlineTime(deadline) : "16:00";
+  const deadlineTime = deadline ? formatSubmissionDeadlineTime(deadline) : formatSubmissionDeadlineTime();
 
   async function validateRepo(value: string): Promise<boolean> {
     const ref = parseGithubRepoUrl(value);
@@ -193,7 +193,7 @@ export function TeamSubmissionBox({ reloadKey }: { reloadKey?: string | number }
         <p className="flex items-center gap-2 text-sm text-[var(--text-secondary)]" aria-live="off">
           <Clock size={16} className="shrink-0 text-[var(--blob-teal)]" />
           <span>
-            <span className="font-medium text-white">Final Deadline for submission: {deadline ? formatSubmissionDeadlineShort(deadline) : "16:00, 5 Nov"}</span>{" "}
+            <span className="font-medium text-white">Final Deadline for submission: {deadline ? formatSubmissionDeadlineShort(deadline) : formatSubmissionDeadlineShort()}</span>{" "}
             (Rome time)
             {!closed && now !== null && deadline ? (
               <span className="ml-1 font-mono tabular-nums text-teal-100" data-testid="submission-countdown">

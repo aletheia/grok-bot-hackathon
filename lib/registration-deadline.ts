@@ -8,7 +8,7 @@ export function formatDeadlineDay(closes: Date = new Date(EVENT.registration.reg
   return new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "long", timeZone: EVENT_TIME_ZONE }).format(closes);
 }
 
-/** "16:00" (24h, Rome time) for the registration deadline. */
+/** "17:00" (24h, Rome time) for the registration deadline. */
 export function formatDeadlineTime(closes: Date = new Date(EVENT.registration.registrationCloses)): string {
   return new Intl.DateTimeFormat(LOCALE, {
     hour: "2-digit",
@@ -20,8 +20,8 @@ export function formatDeadlineTime(closes: Date = new Date(EVENT.registration.re
 
 /**
  * Deadline line of the event card on /register, driven by EVENT.registration.registrationCloses:
- * "Final Deadline for submission: 5 November, 16:00 (Rome time)."
- * After the deadline: "Final Deadline for submission: passed on 5 November, 16:00 (Rome time)."
+ * "Final Deadline for submission: 5 November, 17:00 (Rome time)."
+ * After the deadline: "Final Deadline for submission: passed on 5 November, 17:00 (Rome time)."
  * Returned in two parts so the label can be bold.
  */
 export function getDeadlineLine(

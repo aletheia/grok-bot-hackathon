@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { TEAM_LOCK_AT } from "@/lib/teams/rules";
 import { REGISTRATION_CLOSES_AT } from "@/lib/registration";
@@ -14,23 +16,35 @@ import {
 } from "@/lib/submissions/rules";
 
 describe("submission deadline", () => {
-  it("is 5 Nov 2026 16:00 Rome (15:00 UTC), the same instant as the team lock and registration close", () => {
-    expect(SUBMISSION_DEADLINE_AT.toISOString()).toBe("2026-11-05T15:00:00.000Z");
+  it("is 5 Nov 2026 17:00 Rome (16:00 UTC), the same instant as the team lock and registration close", () => {
+    expect(SUBMISSION_DEADLINE_AT.toISOString()).toBe("2026-11-05T16:00:00.000Z");
     expect(SUBMISSION_DEADLINE_AT.getTime()).toBe(TEAM_LOCK_AT.getTime());
     expect(SUBMISSION_DEADLINE_AT.getTime()).toBe(REGISTRATION_CLOSES_AT.getTime());
-    expect(formatSubmissionDeadlineTime()).toBe("16:00");
-    expect(formatSubmissionDeadlineShort()).toBe("16:00, 5 Nov");
+    expect(formatSubmissionDeadlineTime()).toBe("17:00");
+    expect(formatSubmissionDeadlineShort()).toBe("17:00, 5 Nov");
   });
 
-  it("is open up to 16:00:00 Rome inclusive and closed after", () => {
-    expect(isSubmissionClosed(new Date("2026-11-05T15:59:59+01:00"))).toBe(false);
-    expect(isSubmissionClosed(new Date("2026-11-05T16:00:00+01:00"))).toBe(false);
-    expect(isSubmissionClosed(new Date("2026-11-05T16:00:01+01:00"))).toBe(true);
+  it("is open up to 17:00:00 Rome inclusive and closed after", () => {
+    expect(isSubmissionClosed(new Date("2026-11-05T16:30:01+01:00"))).toBe(false);
+    expect(isSubmissionClosed(new Date("2026-11-05T16:59:59+01:00"))).toBe(false);
+    expect(isSubmissionClosed(new Date("2026-11-05T17:00:00+01:00"))).toBe(false);
+    expect(isSubmissionClosed(new Date("2026-11-05T17:00:01+01:00"))).toBe(true);
+  });
+
+  it("team submission box fallbacks use the shared formatter, not a hardcoded 16:00", () => {
+    const src = readFileSync(join(process.cwd(), "components/dashboard/TeamSubmissionBox.tsx"), "utf8");
+    expect(src).not.toContain('"16:00"');
+    expect(src).not.toContain('"16:30"');
+    expect(src).not.toContain('"17:00"');
+    expect(src).not.toContain('"16:00, 5 Nov"');
+    expect(src).not.toContain('"17:00, 5 Nov"');
+    expect(src).toContain("formatSubmissionDeadlineTime()");
+    expect(src).toContain("formatSubmissionDeadlineShort()");
   });
 
   it("derives Draft / Submitted / Closed", () => {
     const before = new Date("2026-11-05T10:00:00+01:00");
-    const after = new Date("2026-11-05T17:00:00+01:00");
+    const after = new Date("2026-11-05T17:00:01+01:00");
     expect(getSubmissionStatus(false, before)).toBe("draft");
     expect(getSubmissionStatus(true, before)).toBe("submitted");
     expect(getSubmissionStatus(true, after)).toBe("closed");

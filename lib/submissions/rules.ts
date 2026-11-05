@@ -13,12 +13,12 @@ export function isSubmissionClosed(now: Date | number = Date.now(), deadline: Da
   return t > deadline.getTime();
 }
 
-/** "16:00" (Rome time). */
+/** "17:00" (Rome time). */
 export function formatSubmissionDeadlineTime(deadline: Date = SUBMISSION_DEADLINE_AT): string {
   return formatRome(deadline, { day: undefined, month: undefined, year: undefined });
 }
 
-/** "16:00, 5 Nov" (Rome time), as in the box header. */
+/** "17:00, 5 Nov" (Rome time), as in the box header. */
 export function formatSubmissionDeadlineShort(deadline: Date = SUBMISSION_DEADLINE_AT): string {
   const day = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: EVENT.timezone }).format(deadline);
   return `${formatSubmissionDeadlineTime(deadline)}, ${day}`;

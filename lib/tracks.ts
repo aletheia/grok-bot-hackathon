@@ -53,7 +53,7 @@ export type TrackContent = {
   inputs: string;
   /** Where Grok is essential. */
   grok: string;
-  /** What must work on Thursday at 16:00 to be in the running. */
+  /** What must work on Thursday at 17:00 to be in the running. */
   demo: TrackDemo;
   /** What takes the solution further, if there is time left. */
   stretch: string[];
@@ -466,7 +466,7 @@ export const TRACKS_CONTENT: TracksContent = {
   ],
   rules: [
     "Grok (the API, Grok Voice or the Bot) must be essential to how the solution works, not decorative.",
-    "The minimum demo must be shown on Thursday by 16:00, on a new case chosen by the jury.",
+    "The minimum demo must be shown on Thursday by 17:00, on a new case chosen by the jury.",
     "You deliver a repository with a README, the data used, at least one result measured against a baseline, and the known limitations.",
     "The arms and the dog are used in 30-minute slots, always with staff alongside; outside the slots, you work in simulation or on video. The arms have no gripper: they carry a printed tool with a fork, a pusher and a tip, and only lift objects placed on slotted trays.",
     "Only public data, synthetic data or data provided by the companies for the event.",
