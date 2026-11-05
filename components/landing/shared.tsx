@@ -18,6 +18,7 @@ export function Section({
   id,
   tag,
   title,
+  lede,
   accent = 'orange',
   children,
   className = '',
@@ -25,6 +26,8 @@ export function Section({
   id: string;
   tag: string;
   title?: string;
+  /** Intro under the title, before the section body. */
+  lede?: string;
   accent?: Accent;
   children: ReactNode;
   className?: string;
@@ -43,6 +46,7 @@ export function Section({
             {tag}
           </h2>
         )}
+        {lede ? <p className="mt-6 max-w-3xl text-xl font-medium leading-[1.55] text-white">{lede}</p> : null}
         <div className="mt-10">{children}</div>
       </div>
     </section>
