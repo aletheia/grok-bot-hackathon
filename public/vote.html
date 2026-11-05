@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<title>Jury scoring — Grok Hackathon</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap');
+:root{
+  --bg:#0A0A0A; --teal:#14B8A6; --teal-dim:rgba(20,184,166,.16);
+  --muted:#9CA3AF; --body:#D1D5DB; --line:rgba(255,255,255,.14);
+  --card:#141414; --danger:#F43F5E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:#fff;font-family:I,Inter,system-ui,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:48px 48px}
+.glow{position:fixed;width:70vw;height:70vw;right:-22vw;top:-28vw;border-radius:50%;
+  background:radial-gradient(circle,rgba(20,184,166,.32),rgba(20,184,166,0) 66%);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;max-width:34rem;margin:0 auto;min-height:100dvh;padding:1.4rem 1.25rem 2rem;display:flex;flex-direction:column}
+.eyebrow{font-weight:600;letter-spacing:.18em;font-size:.72rem;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:.55em}
+.dot{width:.45em;height:.45em;border-radius:2px;background:var(--teal);flex-shrink:0}
+h1{font-family:U,Unbounded,sans-serif;font-weight:700;letter-spacing:-.03em;line-height:1.08;font-size:clamp(1.7rem,6.4vw,2.35rem);margin-top:.7rem}
+h1 .teal{color:var(--teal)}
+.lede{margin-top:.85rem;color:var(--body);font-size:1.02rem;line-height:1.45;font-weight:500}
+label{display:block;margin-top:1.4rem;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+input[type=text], textarea{
+  width:100%;margin-top:.5rem;background:#111;border:1px solid var(--line);color:#fff;
+  border-radius:14px;padding:.95rem 1rem;font:inherit;font-size:1.05rem;outline:none
+}
+input[type=text]:focus, textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim)}
+textarea{min-height:12rem;resize:vertical;line-height:1.45;font-size:.98rem}
+.hint{margin-top:.55rem;color:var(--muted);font-size:.86rem;line-height:1.4}
+.row-actions{display:flex;gap:.7rem;margin-top:1.5rem}
+button{
+  font-family:inherit;cursor:pointer;border:0;border-radius:14px;
+  font-weight:650;font-size:1rem;padding:.95rem 1.1rem
+}
+.btn{background:var(--teal);color:#042f2e;flex:1}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:transparent;color:#fff;border:1px solid var(--line);flex:1}
+.btn-ghost:hover{border-color:rgba(255,255,255,.32)}
+.linkish{background:none;border:0;color:var(--teal);font:inherit;font-weight:600;padding:0;margin-top:1rem;align-self:flex-start}
+.progress{margin:1.15rem 0 1.3rem}
+.progress .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.86rem;font-weight:600;margin-bottom:.4rem}
+.bar{height:4px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--teal);width:0;border-radius:99px}
+.project-name{font-family:U,Unbounded,sans-serif;font-weight:700;letter-spacing:-.03em;font-size:clamp(1.45rem,5.6vw,2rem);line-height:1.12}
+.repo{display:block;margin-top:.65rem;color:var(--teal);font-weight:600;font-size:.95rem;word-break:break-all;text-decoration:none}
+.criterion{margin-top:1.35rem;padding:1rem 1rem 1.1rem;background:var(--card);border:1px solid var(--line);border-radius:18px}
+.criterion h2{font-size:1.02rem;font-weight:650}
+.scores{display:grid;grid-template-columns:repeat(5,1fr);gap:.45rem;margin-top:.75rem}
+.score{
+  appearance:none;background:#0E0E0E;border:1px solid var(--line);color:#fff;
+  border-radius:12px;height:3.15rem;font-family:U,Unbounded,sans-serif;font-weight:600;font-size:1.15rem;padding:0
+}
+.score.on{background:var(--teal);color:#042f2e;border-color:var(--teal)}
+.nav{display:flex;gap:.7rem;margin-top:1.6rem;position:sticky;bottom:0;padding:0.85rem 0 0.2rem;background:linear-gradient(transparent, var(--bg) 28%)}
+.list{margin-top:1.1rem;display:flex;flex-direction:column;gap:.65rem}
+.item{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem 1.05rem;color:#fff}
+.item:hover{border-color:rgba(255,255,255,.28)}
+.item .n{font-weight:700;font-size:1.02rem}
+.item .s{display:flex;flex-wrap:wrap;gap:.45rem .8rem;margin-top:.4rem;color:var(--body);font-size:.86rem}
+.item .s b{color:#fff;font-weight:650}
+.item .missing{color:var(--danger);font-weight:600}
+.totals{margin-top:1.2rem;padding:1rem 1.05rem;border:1px solid var(--line);border-radius:16px;color:var(--body);font-size:.95rem;line-height:1.55}
+.totals b{color:#fff}
+.err{color:var(--danger);margin-top:.7rem;font-size:.9rem;font-weight:600;display:none}
+.foot-note{margin-top:auto;padding-top:2rem;color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="glow"></div>
+<div class="app" id="app"></div>
+<script>
+const CRITERIA = [
+  {key:'innovation', label:'Innovation'},
+  {key:'scalability', label:'Scalability'},
+  {key:'marketReadiness', label:'Market readiness'}
+];
+const KS = {projects:'gh-jury-projects', ballots:'gh-jury-ballots'};
+
+// 17:28 Europe/Rome export. Used only when GET /api/vote/projects fails.
+const SEED_PROJECTS = [
+  'aidea | https://github.com/aidea-team/grokbot-hackathon | https://drive.google.com/file/d/1O07pps3oms5QT0K9nCZ4UABmgjicWS7l/view?usp=sharing',
+  'B.M.O. | https://github.com/matteospinelli1234-lang/BMO-Grokbot-hackathon',
+  'Big AI | https://github.com/AlanDD13/Big_AI_hackathon | https://drive.google.com/file/d/1gJwyfIjNC-4sSGFg-MfBZ1ksEAQf9fUp/view?usp=sharing',
+  'Coding bananas | https://github.com/leopierini/grok-hackathon-pavia | https://youtu.be/ojegjFnB07k',
+  'I Cavalli | https://github.com/sirwinstontea/MOTIQ',
+  'Kakashi Venture Accelerator | https://github.com/kakashi-ventures/gergoAI | https://gergoai.vercel.app/',
+  'Mesappers | https://github.com/mesagroup/MESA-AgentFailureLab | https://github.com/mesagroup/MESA-AgentFailureLab/tree/main/docs/demo',
+  'Meteora | https://github.com/arn9ve/Meteora',
+  'Overclocked | https://github.com/eddii1/seek | https://www.youtube.com/playlist?list=PLQpA8yFqTZl4',
+  'PvPv | https://github.com/13032585789-spec/grokarm-ur3e | https://youtu.be/TyZypTvbEfQ',
+  'Secrecy | https://github.com/Aman-AI-Guy/CTRL-ARM | https://youtu.be/C35_iI6ZAuc',
+  'Snap2Run | https://github.com/lunakicks/Archgrid | https://drive.google.com/drive/folders/1tldp2vTATbGZ2ClTxsLD7Bzd7b6MtZ_m?usp=sharing',
+  'Vivido x ICIB | https://github.com/italianscodeitbetter-com/GrokPatrol | https://youtu.be/7Xauh8pclvI',
+  'XXX | https://github.com/flavio-bernoni07/B.R.C-x-Grok | https://youtu.be/FowjabD3ibc'
+].join('\n');
+
+const uid = () => Math.random().toString(36).slice(2,9);
+const loadProjects = () => { try { return JSON.parse(localStorage.getItem(KS.projects)||'[]'); } catch { return []; } };
+const saveProjects = (p) => localStorage.setItem(KS.projects, JSON.stringify(p));
+const loadBallots = () => { try { return JSON.parse(localStorage.getItem(KS.ballots)||'{}'); } catch { return {}; } };
+const saveBallots = (b) => localStorage.setItem(KS.ballots, JSON.stringify(b));
+
+function parseProjectLines(text){
+  return text.split(/\n+/).map(l => l.trim()).filter(Boolean).map(line => {
+    const parts = line.split('|').map(s => s.trim());
+    const name = parts[0] || '';
+    const repo = parts[1] || '';
+    const video = parts.slice(2).filter(Boolean).join(' | ');
+    return {id: uid(), name, repo, video};
+  }).filter(p => p.name);
+}
+function projectsToText(projects){
+  return projects.map(p => {
+    if (p.video) return `${p.name} | ${p.repo || ''} | ${p.video}`;
+    return p.repo ? `${p.name} | ${p.repo}` : p.name;
+  }).join('\n');
+}
+function fromApiProject(row){
+  return {
+    id: String(row.id),
+    name: String(row.name || ''),
+    repo: String(row.githubUrl || ''),
+    video: String(row.videoUrl || '')
+  };
+}
+
+const state = {
+  view: 'loading',
+  juror: '',
+  index: 0,
+  projects: [],
+  ballots: {},
+  setupText: '',
+  saveError: '',
+  busy: false
+};
+
+function ballot(){
+  if (!state.ballots[state.juror]) state.ballots[state.juror] = {};
+  return state.ballots[state.juror];
+}
+function scoreOf(id){
+  return ballot()[id] || {};
+}
+function setScore(id, key, value){
+  const b = ballot();
+  b[id] = {...(b[id]||{}), [key]: value};
+  saveBallots(state.ballots);
+  state.saveError = '';
+  render();
+  if (complete(id)) void persistScore(id);
+}
+function isCompleteScore(s){
+  return !!s && CRITERIA.every(c => s[c.key] >= 1 && s[c.key] <= 5);
+}
+function complete(id){
+  return isCompleteScore(scoreOf(id));
+}
+function total(s){
+  return CRITERIA.reduce((n,c) => n + (Number(s[c.key])||0), 0);
+}
+function teamIdOf(projectId){
+  return /^\d+$/.test(String(projectId)) ? Number(projectId) : null;
+}
+
+async function fetchSubmittedProjects(){
+  const res = await fetch('/api/vote/projects', {cache:'no-store'});
+  if (!res.ok) throw new Error('projects');
+  const json = await res.json();
+  const rows = json && json.data && json.data.projects;
+  if (!Array.isArray(rows)) throw new Error('projects');
+  return rows.filter(row => row && row.name).map(fromApiProject);
+}
+
+async function loadProjectList(){
+  try {
+    const remote = await fetchSubmittedProjects();
+    saveProjects(remote);
+    return remote;
+  } catch { /* device cache, then the seeded 14 */ }
+  const cached = loadProjects();
+  if (cached.length) return cached;
+  const seeded = parseProjectLines(SEED_PROJECTS);
+  saveProjects(seeded);
+  return seeded;
+}
+
+async function persistScore(projectId){
+  const teamId = teamIdOf(projectId);
+  if (!teamId || !state.juror || !complete(projectId)) return true;
+  const s = scoreOf(projectId);
+  try {
+    const res = await fetch('/api/vote', {
+      method: 'PUT',
+      headers: {'content-type': 'application/json'},
+      body: JSON.stringify({
+        jurorName: state.juror,
+        scores: [{
+          teamId,
+          innovation: s.innovation,
+          scalability: s.scalability,
+          marketReadiness: s.marketReadiness
+        }]
+      })
+    });
+    if (!res.ok) throw new Error('save');
+    if (state.saveError) {
+      state.saveError = '';
+      render();
+    }
+    return true;
+  } catch {
+    state.saveError = 'Could not save this score. Check your connection and try again.';
+    render();
+    return false;
+  }
+}
+
+async function hydrateJuror(name){
+  const folded = name.toLowerCase();
+  const local = {};
+  for (const key of Object.keys(state.ballots)) {
+    if (key.toLowerCase() !== folded) continue;
+    Object.assign(local, state.ballots[key]);
+    if (key !== name) delete state.ballots[key];
+  }
+  let serverScores = null;
+  try {
+    const res = await fetch('/api/vote?juror=' + encodeURIComponent(name), {cache:'no-store'});
+    if (res.ok) {
+      const json = await res.json();
+      const scores = json && json.data && json.data.scores;
+      if (json && json.success && Array.isArray(scores)) serverScores = scores;
+    }
+  } catch { /* keep the on-device cache */ }
+  const next = {};
+  if (serverScores) {
+    for (const row of serverScores) {
+      if (!row || row.teamId == null) continue;
+      next[String(row.teamId)] = {
+        innovation: row.innovation,
+        scalability: row.scalability,
+        marketReadiness: row.marketReadiness
+      };
+    }
+  }
+  const pending = [];
+  for (const [id, score] of Object.entries(local)) {
+    if (next[id]) continue;
+    if (serverScores && isCompleteScore(score)) {
+      next[id] = score;
+      pending.push(id);
+    } else if (!serverScores) {
+      next[id] = score;
+    }
+  }
+  state.ballots[name] = next;
+  saveBallots(state.ballots);
+  for (const id of pending) await persistScore(id);
+}
+
+async function boot(){
+  const shot = new URLSearchParams(location.search).get('shot');
+  state.ballots = loadBallots();
+  if (shot) {
+    state.projects = [
+      {id:'p1', name:'Team Atlas', repo:'https://github.com/example/atlas', video:''},
+      {id:'p2', name:'Waveform', repo:'', video:''},
+      {id:'p3', name:'Harbor', repo:'https://github.com/example/harbor', video:''}
+    ];
+    state.juror = 'Ada Lovelace';
+    state.ballots['Ada Lovelace'] = {
+      p1: {innovation:4, scalability:5, marketReadiness:3},
+      p2: {innovation:5, scalability:4, marketReadiness:4}
+    };
+    state.index = 0;
+    state.view = shot;
+    render();
+    return;
+  }
+  state.view = 'loading';
+  render();
+  state.projects = await loadProjectList();
+  state.setupText = projectsToText(state.projects);
+  state.view = state.projects.length ? 'name' : 'setup';
+  render();
+}
+
+function h(html){ return html; }
+
+function viewLoading(){
+  return h(`
+    <div class="eyebrow"><span class="dot"></span>Grok Hackathon · Pavia</div>
+    <h1>Jury <span class="teal">scoring</span></h1>
+    <p class="lede">Loading projects…</p>
+  `);
+}
+
+function viewSetup(){
+  return h(`
+    <div class="eyebrow"><span class="dot"></span>Grok Hackathon · Pavia</div>
+    <h1>Set up the <span class="teal">projects</span></h1>
+    <p class="lede">Paste one project per line. You can add a repository after a pipe, and a demo link after a second pipe.</p>
+    <label for="plist">Project list</label>
+    <textarea id="plist" placeholder="Team Atlas&#10;Waveform | https://github.com/org/waveform | https://youtu.be/demo">${escapeAttr(state.setupText)}</textarea>
+    <p class="hint">Example: Name | https://github.com/org/repo | https://youtu.be/demo</p>
+    <p class="err" id="err">Add at least one project to continue.</p>
+    <div class="row-actions">
+      <button class="btn" id="save-projects">Save and continue</button>
+    </div>
+    <p class="foot-note">The list stays on this device. Scores are saved for your name so they are still there on another phone.</p>
+  `);
+}
+
+function viewName(){
+  return h(`
+    <div class="eyebrow"><span class="dot"></span>Grok Hackathon · Pavia</div>
+    <h1>Jury <span class="teal">scoring</span></h1>
+    <p class="lede">Enter your name, then score each project from 1 to 5 on innovation, scalability, and market readiness.</p>
+    <label for="juror">Your name</label>
+    <input id="juror" type="text" autocomplete="name" placeholder="e.g. Ada Lovelace" value="${escapeAttr(state.juror)}">
+    <p class="err" id="err">Please enter your name.</p>
+    <div class="row-actions">
+      <button class="btn" id="start">Start scoring</button>
+    </div>
+    <button class="linkish" id="edit-projects">Edit project list (${state.projects.length})</button>
+  `);
+}
+
+function linkHtml(url){
+  const href = safeHttpUrl(url);
+  if (!href) return '';
+  return `<a class="repo" href="${escapeAttr(href)}" target="_blank" rel="noopener">${escapeHtml(href)}</a>`;
+}
+function safeHttpUrl(url){
+  try {
+    const u = new URL(String(url || ''));
+    if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+  } catch { /* not a link */ }
+  return '';
+}
+
+function viewScore(){
+  const p = state.projects[state.index];
+  const s = scoreOf(p.id);
+  const n = state.projects.length;
+  const i = state.index + 1;
+  const last = state.index === n - 1;
+  const ready = complete(p.id);
+  const pct = (i / n) * 100;
+  return h(`
+    <div class="eyebrow"><span class="dot"></span>Grok Hackathon · Pavia</div>
+    <div class="progress">
+      <div class="meta"><span>Project ${i} of ${n}</span><span>${escapeHtml(state.juror)}</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+    </div>
+    <p class="project-name">${escapeHtml(p.name)}</p>
+    ${linkHtml(p.repo)}
+    ${linkHtml(p.video)}
+    ${CRITERIA.map(c => `
+      <div class="criterion">
+        <h2>${c.label}</h2>
+        <div class="scores" data-key="${c.key}">
+          ${[1,2,3,4,5].map(n => `<button class="score${s[c.key]===n?' on':''}" data-val="${n}" type="button">${n}</button>`).join('')}
+        </div>
+      </div>
+    `).join('')}
+    <p class="err" id="save-err" style="${state.saveError ? 'display:block' : ''}">${escapeHtml(state.saveError || '')}</p>
+    <div class="nav">
+      <button class="btn-ghost" id="back" ${state.index===0?'disabled':''}>Back</button>
+      <button class="btn" id="next" ${ready?'':'disabled'}>${last ? 'Review scores' : 'Next project'}</button>
+    </div>
+  `);
+}
+
+function viewReview(){
+  const b = ballot();
+  const rows = state.projects.map(p => {
+    const s = b[p.id] || {};
+    const done = complete(p.id);
+    return {p, s, done, tot: total(s)};
+  });
+  const doneN = rows.filter(r => r.done).length;
+  const synced = state.projects.some(p => teamIdOf(p.id));
+  const note = synced
+    ? 'Scores are saved for your name, so opening this page on another device brings them back. Export a file if you want a copy.'
+    : 'Scores are saved on this device. Export a file if you want a copy, or to combine votes from several jurors later.';
+  return h(`
+    <div class="eyebrow"><span class="dot"></span>Grok Hackathon · Pavia</div>
+    <h1>Your <span class="teal">scores</span></h1>
+    <p class="lede">${escapeHtml(state.juror)} · ${doneN} of ${rows.length} projects scored</p>
+    <div class="list">
+      ${rows.map((r, idx) => `
+        <button class="item" data-jump="${idx}" type="button">
+          <div class="n">${escapeHtml(r.p.name)}</div>
+          <div class="s">${r.done
+            ? CRITERIA.map(c => `<span>${c.label} <b>${r.s[c.key]}</b></span>`).join('') + `<span>Total <b>${r.tot}</b></span>`
+            : `<span class="missing">Not scored yet</span>`}</div>
+        </button>
+      `).join('')}
+    </div>
+    <div class="totals">${note}</div>
+    <div class="row-actions">
+      <button class="btn" id="csv">Download CSV</button>
+      <button class="btn-ghost" id="json">Download JSON</button>
+    </div>
+    <button class="linkish" id="other">Score as another juror</button>
+  `);
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+function render(){
+  const app = document.getElementById('app');
+  if (state.view === 'loading') app.innerHTML = viewLoading();
+  else if (state.view === 'setup') app.innerHTML = viewSetup();
+  else if (state.view === 'name') app.innerHTML = viewName();
+  else if (state.view === 'score') app.innerHTML = viewScore();
+  else app.innerHTML = viewReview();
+  bind();
+}
+
+function bind(){
+  if (state.view === 'loading') return;
+  if (state.view === 'setup') {
+    const ta = document.getElementById('plist');
+    ta.addEventListener('input', () => state.setupText = ta.value);
+    document.getElementById('save-projects').addEventListener('click', () => {
+      const parsed = parseProjectLines(ta.value);
+      const err = document.getElementById('err');
+      if (!parsed.length) { err.style.display = 'block'; return; }
+      const prev = loadProjects();
+      const used = new Set();
+      const next = parsed.map(p => {
+        const match = prev.find(old => !used.has(old.id) && old.name === p.name && old.repo === p.repo);
+        if (match) { used.add(match.id); return {...match, video: p.video || ''}; }
+        return p;
+      });
+      state.projects = next;
+      saveProjects(next);
+      state.view = 'name';
+      render();
+    });
+  }
+  if (state.view === 'name') {
+    const input = document.getElementById('juror');
+    input.focus();
+    const go = async () => {
+      if (state.busy) return;
+      const name = input.value.trim();
+      const err = document.getElementById('err');
+      if (!name) { err.style.display = 'block'; input.focus(); return; }
+      state.busy = true;
+      state.juror = name;
+      try {
+        await hydrateJuror(name);
+      } finally {
+        state.busy = false;
+      }
+      state.index = 0;
+      state.saveError = '';
+      state.view = 'score';
+      render();
+    };
+    document.getElementById('start').addEventListener('click', () => { void go(); });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') void go(); });
+    document.getElementById('edit-projects').addEventListener('click', () => {
+      state.setupText = projectsToText(state.projects);
+      state.view = 'setup';
+      render();
+    });
+  }
+  if (state.view === 'score') {
+    const p = state.projects[state.index];
+    document.querySelectorAll('.scores').forEach(group => {
+      group.querySelectorAll('.score').forEach(btn => {
+        btn.addEventListener('click', () => setScore(p.id, group.dataset.key, Number(btn.dataset.val)));
+      });
+    });
+    document.getElementById('back').addEventListener('click', () => {
+      if (state.index > 0) { state.index--; render(); }
+    });
+    document.getElementById('next').addEventListener('click', () => {
+      if (!complete(p.id) || state.busy) return;
+      state.busy = true;
+      void (async () => {
+        const ok = await persistScore(p.id);
+        state.busy = false;
+        if (!ok) return;
+        if (state.index < state.projects.length - 1) { state.index++; render(); }
+        else { state.view = 'review'; render(); }
+      })();
+    });
+  }
+  if (state.view === 'review') {
+    document.querySelectorAll('[data-jump]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.index = Number(btn.dataset.jump);
+        state.view = 'score';
+        render();
+      });
+    });
+    document.getElementById('csv').addEventListener('click', () => download('jury-scores.csv', toCSV(), 'text/csv'));
+    document.getElementById('json').addEventListener('click', () => download('jury-scores.json', JSON.stringify(exportData(), null, 2), 'application/json'));
+    document.getElementById('other').addEventListener('click', () => {
+      state.juror = '';
+      state.view = 'name';
+      render();
+    });
+  }
+}
+
+function exportData(){
+  return {
+    event: 'Grok Hackathon at the Museum',
+    criteria: CRITERIA.map(c => c.key),
+    projects: state.projects,
+    ballots: state.ballots
+  };
+}
+function toCSV(){
+  const header = ['Juror','Project','Repository','Demo','Innovation','Scalability','Market readiness','Total'];
+  const lines = [header.join(',')];
+  for (const [juror, scores] of Object.entries(state.ballots)) {
+    for (const p of state.projects) {
+      const s = scores[p.id] || {};
+      const vals = CRITERIA.map(c => s[c.key] ?? '');
+      const tot = vals.every(v => v !== '') ? vals.reduce((a,b)=>a+Number(b),0) : '';
+      lines.push([juror, p.name, p.repo || '', p.video || '', ...vals, tot].map(csvCell).join(','));
+    }
+  }
+  return lines.join('\n');
+}
+function csvCell(v){
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function download(name, text, type){
+  const blob = new Blob([text], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+boot();
+</script>
+</body>
+</html>
