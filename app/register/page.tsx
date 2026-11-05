@@ -451,7 +451,7 @@ export default function LoginPage() {
                               Signing you in…
                             </>
                           ) : (
-                            "Sign in"
+                            "Login into Team Portal"
                           )}
                         </button>
                       ) : null}

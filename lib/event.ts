@@ -105,6 +105,13 @@ export type Sponsor = {
 };
 
 /** Logos Luca will provide. Put files in /public/assets/… and set the path, or use an absolute URL. `null` = labelled placeholder. */
+/**
+ * THE portal deadline (Europe/Rome, ISO 8601 with the CET offset): team registration closes, teams lock
+ * (no create/join/leave) and the team data submission (repo + video) becomes read-only at this instant.
+ * Change it here only: registration, team lock and submission all read it.
+ */
+export const PORTAL_DEADLINE = "2026-11-05T16:00:00+01:00";
+
 const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
   /** Horizontal white lockup from the museum's own site header (ctrlalt.museum, logo_museo_white_500.png), trimmed. */
@@ -160,11 +167,11 @@ export const EVENT = {
     /**
      * Team registration window (Europe/Rome, CET: DST ended 25 Oct). The banner on the landing, /rules,
      * /register and the dashboard derives "closes on / closed" from these instants (the opening date is not shown).
-     * Closes on November 2 at 23:59 (Rome time; extended from October 31): the same moment as the team lock (portal.teamLockAt), so there is
-     * a single deadline for registering and for team changes.
+     * Closes at PORTAL_DEADLINE (reopened on 4 Nov; previously 2 Nov 23:59): the same moment as the team lock
+     * (portal.teamLockAt) and the project submission deadline, so there is a single deadline for everything.
      */
     registrationOpens: "2026-10-26T00:00:00+01:00",
-    registrationCloses: "2026-11-02T23:59:00+01:00",
+    registrationCloses: PORTAL_DEADLINE,
   },
 
   /**
@@ -413,7 +420,12 @@ export const EVENT = {
       maxMembers: 6,
     },
     /** Team lock: no create/join/leave after this instant (Europe/Rome, CET after DST ends 25 Oct). */
-    teamLockAt: "2026-11-02T23:59:00+01:00",
+    teamLockAt: PORTAL_DEADLINE,
+    /**
+     * Team data submission (public GitHub repo + optional video): any team member can save and edit
+     * until this instant; after it the box is read-only ("Submissions closed").
+     */
+    submissionDeadline: PORTAL_DEADLINE,
     /**
      * Luma `approval_status` values that MAY sign in (compared after normalising: trim,
      * lower-case, spaces/hyphens -> "_"). Only confirmed guests: Luma's API/CSV value is

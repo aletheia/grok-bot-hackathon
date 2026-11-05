@@ -1,9 +1,11 @@
 "use client";
 
-import { formatRome, romeLocalToUtc, utcToRomeLocal } from "@/lib/time/rome";
+import { formatRome } from "@/lib/time/rome";
+import { SUBMISSION_DEADLINE_AT } from "@/lib/submissions/rules";
 import { useCallback, useEffect, useState } from "react";
 import {
   Calendar,
+  Download,
   ExternalLink,
   FolderGit2,
   Search,
@@ -39,11 +41,6 @@ export default function AdminProjectsPage() {
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const [deadline, setDeadline] = useState<string>("");
-  const [deadlineLoading, setDeadlineLoading] = useState(true);
-  const [deadlineSaving, setDeadlineSaving] = useState(false);
-  const [deadlineNotice, setDeadlineNotice] = useState<string | null>(null);
-
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -69,92 +66,9 @@ export default function AdminProjectsPage() {
     }
   }, [search]);
 
-  const fetchDeadline = useCallback(async () => {
-    setDeadlineLoading(true);
-    try {
-      const res = await fetch("/api/admin/settings/project-deadline", {
-        credentials: "include",
-      });
-      const json = await res.json();
-      if (json.success && json.data?.deadline) {
-        setDeadline(toDatetimeLocal(json.data.deadline));
-      }
-    } catch {
-      // ignore
-    } finally {
-      setDeadlineLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     void fetchProjects();
   }, [fetchProjects]);
-
-  useEffect(() => {
-    void fetchDeadline();
-  }, [fetchDeadline]);
-
-  useEffect(() => {
-    if (!deadlineNotice) return;
-    const t = setTimeout(() => setDeadlineNotice(null), 4000);
-    return () => clearTimeout(t);
-  }, [deadlineNotice]);
-
-  // datetime-local values are Europe/Rome wall-clock time (DST-correct), see lib/time/rome.ts.
-  function toDatetimeLocal(iso: string) {
-    return utcToRomeLocal(iso);
-  }
-
-  function fromRomeToISO(datetimeLocal: string): string {
-    return romeLocalToUtc(datetimeLocal).toISOString();
-  }
-
-  async function handleSaveDeadline() {
-    setDeadlineSaving(true);
-    try {
-      const value = deadline ? fromRomeToISO(deadline) : null;
-      const res = await fetch("/api/admin/settings/project-deadline", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ deadline: value }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error?.message ?? "Failed to save");
-      if (json.data?.deadline) {
-        setDeadline(toDatetimeLocal(json.data.deadline));
-      } else {
-        setDeadline("");
-      }
-      setDeadlineNotice("Deadline saved.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save deadline");
-    } finally {
-      setDeadlineSaving(false);
-    }
-  }
-
-  async function handleClearDeadline() {
-    setDeadline("");
-    setDeadlineSaving(true);
-    try {
-      const res = await fetch("/api/admin/settings/project-deadline", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ deadline: null }),
-      });
-      if (!res.ok) {
-        const json = await res.json().catch(() => ({}));
-        throw new Error(json?.error?.message ?? "Failed to clear");
-      }
-      setDeadlineNotice("Deadline removed.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to clear deadline");
-    } finally {
-      setDeadlineSaving(false);
-    }
-  }
 
   async function handleDelete(projectId: string, name: string) {
     if (!window.confirm(`Delete project "${name}"? This cannot be undone.`)) return;
@@ -185,54 +99,28 @@ export default function AdminProjectsPage() {
       <div>
         <h1 className="text-2xl font-bold text-white">Projects</h1>
         <p className="mt-1 text-[var(--text-secondary)]">
-          View and manage hackathon project submissions. Set a deadline for submissions.
+          View the project submissions of each team (repository and video links).
         </p>
       </div>
 
-      {/* Deadline setting */}
-      <div className="rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <Calendar className="h-5 w-5 text-[var(--accent-blue)]" />
-          <h2 className="text-lg font-semibold text-white">Submission Deadline</h2>
+      {/* Team data submission: fixed deadline + export */}
+      <div className="rounded-xl border border-[var(--blob-teal)]/60 bg-[var(--card-bg)] p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-[var(--blob-teal)]" />
+          <h2 className="text-lg font-semibold text-white">Team data submission</h2>
         </div>
-        {deadlineLoading ? (
-          <div className="h-11 w-64 animate-pulse rounded-lg bg-white/10" />
-        ) : (
-          <div className="flex flex-wrap items-end gap-3">
-            <div>
-              <label className="mb-1 block text-sm text-[var(--text-secondary)]">
-                Deadline (Rome time, Europe/Rome)
-              </label>
-              <input
-                type="datetime-local"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="h-11 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 text-white outline-none focus:border-[var(--accent-blue)]"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleSaveDeadline}
-              disabled={deadlineSaving}
-              className="h-11 rounded-lg border border-[var(--border-color)] bg-[var(--accent-blue)]/20 px-4 text-sm font-medium text-[var(--accent-blue)] hover:bg-[var(--accent-blue)]/30 disabled:opacity-50"
-            >
-              {deadlineSaving ? "Saving…" : "Save"}
-            </button>
-            {deadline && (
-              <button
-                type="button"
-                onClick={handleClearDeadline}
-                disabled={deadlineSaving}
-                className="h-11 rounded-lg border border-red-500/30 px-4 text-sm font-medium text-red-300 hover:bg-red-500/10 disabled:opacity-50"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        )}
-        {deadlineNotice && (
-          <p className="mt-2 text-sm text-emerald-300">{deadlineNotice}</p>
-        )}
+        <p className="text-sm text-[var(--text-secondary)]">
+          Any team member saves the public GitHub repository and an optional video link from their team page until{" "}
+          <span className="font-medium text-white">{formatRome(SUBMISSION_DEADLINE_AT)} (Rome time)</span>; after that the
+          box is read-only. The deadline is fixed in code (PORTAL_DEADLINE in lib/event.ts), the same instant as the team lock.
+        </p>
+        <a
+          href="/api/admin/submissions?format=csv"
+          className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--blob-teal)]/15 px-4 text-sm font-medium text-white hover:bg-[var(--blob-teal)]/25"
+        >
+          <Download className="h-4 w-4" />
+          Download CSV: all teams, members, repo and video links
+        </a>
       </div>
 
       {error && (

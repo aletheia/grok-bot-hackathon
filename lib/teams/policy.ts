@@ -20,7 +20,7 @@ export function assertTeamsOpen(now: Date = new Date(), lockAt: Date = TEAM_LOCK
     throw new AppError(
       409,
       "TEAMS_LOCKED",
-      `Teams are locked: since ${formatTeamLock()} teams can no longer be created, joined or left.`,
+      `Teams are locked: the Final Deadline for submission was ${formatTeamLock()}, so teams can no longer be created, joined or left.`,
     );
   }
 }

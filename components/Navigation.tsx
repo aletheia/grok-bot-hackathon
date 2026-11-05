@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { key: 'sponsors', href: '/#sponsors' },
 ] as const;
 
-/** Landing navigation. The primary CTA is "Create or Join a Team" (sign-in), or "Dashboard" once signed in. */
+/** Landing navigation. The primary CTA is "Login into Team Portal" (sign-in), or "Dashboard" once signed in. */
 export function Navigation() {
   const { data: session } = authClient.useSession();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,7 +41,7 @@ export function Navigation() {
   }, [open]);
 
   const linkClass = 'inline-flex min-h-[44px] items-center whitespace-nowrap px-2 text-sm font-semibold text-[var(--text-secondary)] hover:text-white';
-  // Signed out: one orange button, "Create or Join a Team", that leads to sign-in. Signed in: the same button goes to the dashboard.
+  // Signed out: one orange button, "Login into Team Portal", that leads to sign-in. Signed in: the same button goes to the dashboard.
   const portal = session?.user
     ? { href: '/dashboard', label: t('nav', 'dashboard') }
     : { href: '/register', label: t('landing', 'ctaSignIn') };
