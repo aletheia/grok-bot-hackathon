@@ -1,5 +1,5 @@
 import { t } from '@/lib/i18n';
-import { isHttpUrl, visibleUrl, type ShowcaseProject } from '@/lib/showcase/projects';
+import { isHttpUrl, showcaseLinkKind, visibleUrl, type ShowcaseProject } from '@/lib/showcase/projects';
 import { Section } from './shared';
 
 type LinkKind = 'repository' | 'video' | 'demo';
@@ -53,15 +53,16 @@ function LinkIcon({ kind }: { kind: LinkKind }) {
   }
 }
 
-function projectLinks(project: ShowcaseProject): { kind: LinkKind; href: string }[] {
-  const candidates: { kind: LinkKind; href: string | null }[] = [
-    { kind: 'repository', href: project.githubUrl },
-    { kind: 'video', href: project.videoUrl },
-    { kind: 'demo', href: project.demoUrl },
-  ];
-  const links: { kind: LinkKind; href: string }[] = [];
-  for (const candidate of candidates) {
-    if (candidate.href && isHttpUrl(candidate.href)) links.push({ kind: candidate.kind, href: candidate.href });
+function projectLinks(project: ShowcaseProject): { id: string; kind: LinkKind; href: string }[] {
+  const links: { id: string; kind: LinkKind; href: string }[] = [];
+  if (isHttpUrl(project.githubUrl)) {
+    links.push({ id: 'repository', kind: 'repository', href: project.githubUrl });
+  }
+  if (project.videoUrl && isHttpUrl(project.videoUrl)) {
+    links.push({ id: 'video', kind: showcaseLinkKind('video', project.videoUrl), href: project.videoUrl });
+  }
+  if (project.demoUrl && isHttpUrl(project.demoUrl)) {
+    links.push({ id: 'demo', kind: showcaseLinkKind('demo', project.demoUrl), href: project.demoUrl });
   }
   return links;
 }
@@ -72,7 +73,7 @@ function ProjectLink({ kind, href }: { kind: LinkKind; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex min-h-11 items-start gap-[0.7rem] py-1.5 font-semibold text-[var(--blob-teal)]"
+      className="group flex min-h-11 min-w-0 items-start gap-[0.7rem] py-1.5 font-semibold text-[var(--blob-teal)]"
     >
       <LinkIcon kind={kind} />
       <span className="flex min-w-0 flex-col gap-[0.15rem]">
@@ -80,7 +81,12 @@ function ProjectLink({ kind, href }: { kind: LinkKind; href: string }) {
           {t('landing', LINK_LABEL[kind])}
           <span className="sr-only">{t('landing', 'opensInNewTab')}</span>
         </span>
-        <span className="break-all text-[0.82rem] font-medium leading-[1.35] text-[var(--text-secondary)]">{visibleUrl(href)}</span>
+        <span
+          title={href}
+          className="link-url block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[0.82rem] font-medium leading-[1.35] text-[var(--text-secondary)]"
+        >
+          {visibleUrl(href)}
+        </span>
       </span>
     </a>
   );
@@ -101,7 +107,7 @@ function ProjectCard({ project }: { project: ShowcaseProject }) {
         {links.length > 0 ? (
           <div className="mt-auto flex flex-col gap-[0.15rem] pt-6">
             {links.map((link) => (
-              <ProjectLink key={link.kind} kind={link.kind} href={link.href} />
+              <ProjectLink key={link.id} kind={link.kind} href={link.href} />
             ))}
           </div>
         ) : null}

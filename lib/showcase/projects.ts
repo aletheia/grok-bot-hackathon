@@ -35,6 +35,26 @@ export function isHttpUrl(url: string): boolean {
   }
 }
 
+/** Hosts teams used for the submitted video. Drive folders count; other Google hosts do not. */
+const VIDEO_HOSTS = ["youtube.com", "youtu.be", "vimeo.com", "loom.com", "drive.google.com"];
+
+export function isVideoHost(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host.startsWith("www.")) host = host.slice(4);
+  return VIDEO_HOSTS.some((videoHost) => host === videoHost || host.endsWith(`.${videoHost}`));
+}
+
+/** `demo_url` is always Demo. `video_url` is Video only on a known video host. */
+export function showcaseLinkKind(source: "video" | "demo", url: string): "video" | "demo" {
+  if (source === "demo") return "demo";
+  return isVideoHost(url) ? "video" : "demo";
+}
+
 function presentUrl(value: string | null | undefined): string | null {
   const trimmed = value?.trim() ?? "";
   return trimmed || null;

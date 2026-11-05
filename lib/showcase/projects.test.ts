@@ -23,7 +23,7 @@ vi.mock("@/db", () => ({
 }));
 
 import { Projects } from "@/components/landing/Projects";
-import { listShowcaseProjects, showcaseProjectName, visibleUrl } from "@/lib/showcase/projects";
+import { isVideoHost, listShowcaseProjects, showcaseLinkKind, showcaseProjectName, visibleUrl } from "@/lib/showcase/projects";
 
 const harbor = {
   teamId: 1,
@@ -180,6 +180,92 @@ describe("submitted projects section", () => {
     expect(html).not.toContain("Video");
     expect(html).toContain("Demo");
     expect(html).toContain('href="https://demo.example.com/ok"');
+  });
+
+  it("keeps the full href and ellipsizes the visible URL on one line", () => {
+    const drive = "https://drive.google.com/file/d/1gJwyfIjNC-4sSGFg-MfBZ1ksEAQf9fUp/view?usp=sharing";
+    const html = renderToStaticMarkup(
+      createElement(Projects, {
+        projects: [{ ...nightShift, videoUrl: drive }],
+      }),
+    );
+    expect(html).toContain(`href="${drive}"`);
+    expect(html).toContain(`title="${drive}"`);
+    expect(html).toContain("whitespace-nowrap");
+    expect(html).toContain("overflow-hidden");
+    expect(html).toContain("text-ellipsis");
+    expect(html).not.toContain("break-all");
+    expect(html).toContain("drive.google.com/file/d/1gJwyfIjNC-4sSGFg-MfBZ1ksEAQf9fUp/view?usp=sharing");
+  });
+
+  it("labels video hosts as Video and other video_url values as Demo", () => {
+    const html = renderToStaticMarkup(
+      createElement(Projects, {
+        projects: [
+          { ...harbor, teamId: 11, videoUrl: "https://drive.google.com/file/d/abc/view", demoUrl: null },
+          { ...harbor, teamId: 12, videoUrl: "https://gergoai.vercel.app/", demoUrl: null },
+          {
+            ...harbor,
+            teamId: 13,
+            videoUrl: "https://github.com/mesagroup/MESA-AgentFailureLab/tree/main/docs/demo",
+            demoUrl: null,
+          },
+          { ...harbor, teamId: 14, videoUrl: null, demoUrl: "https://youtu.be/from-demo" },
+        ],
+      }),
+    );
+    const [drive, vercel, githubTree, demoColumn] = cards(html);
+
+    expect(drive).toContain("Video");
+    expect(drive).not.toContain("Demo");
+
+    expect(vercel).toContain("Demo");
+    expect(vercel).not.toContain("Video");
+    expect(vercel).toContain('href="https://gergoai.vercel.app/"');
+
+    expect(githubTree).toContain("Demo");
+    expect(githubTree).not.toContain("Video");
+    expect(githubTree).toContain('href="https://github.com/mesagroup/MESA-AgentFailureLab/tree/main/docs/demo"');
+
+    expect(demoColumn).toContain("Demo");
+    expect(demoColumn).not.toContain("Video");
+    expect(demoColumn).toContain('href="https://youtu.be/from-demo"');
+
+    const component = readFileSync(join(process.cwd(), "components/landing/Projects.tsx"), "utf8");
+    expect(component).not.toMatch(/Kakashi|Mesappers|gergoai/);
+  });
+});
+
+describe("video versus demo label", () => {
+  it("treats the listed video hosts, including www and subdomains, as Video", () => {
+    for (const url of [
+      "https://youtube.com/watch?v=1",
+      "https://www.youtube.com/watch?v=1",
+      "https://m.youtube.com/watch?v=1",
+      "https://youtu.be/1",
+      "https://vimeo.com/1",
+      "https://player.vimeo.com/video/1",
+      "https://www.loom.com/share/1",
+      "https://drive.google.com/file/d/1/view",
+      "https://drive.google.com/drive/folders/1",
+    ]) {
+      expect(isVideoHost(url), url).toBe(true);
+      expect(showcaseLinkKind("video", url), url).toBe("video");
+    }
+  });
+
+  it("labels other video_url hosts as Demo and always labels demo_url as Demo", () => {
+    for (const url of [
+      "https://gergoai.vercel.app/",
+      "https://github.com/mesagroup/MESA-AgentFailureLab/tree/main/docs/demo",
+      "https://docs.google.com/document/d/1",
+      "https://example.com/demo",
+    ]) {
+      expect(isVideoHost(url), url).toBe(false);
+      expect(showcaseLinkKind("video", url), url).toBe("demo");
+    }
+    expect(showcaseLinkKind("demo", "https://www.youtube.com/watch?v=1")).toBe("demo");
+    expect(showcaseLinkKind("demo", "https://demo.example.com/pulse")).toBe("demo");
   });
 });
 
