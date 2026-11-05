@@ -18,8 +18,8 @@ async function failure(p: Promise<unknown>) {
 }
 
 describe("saveMyTeamSubmission validation (before touching the database)", () => {
-  it("refuses after 16:30 Rome", async () => {
-    const e = await failure(saveMyTeamSubmission(actor, { githubUrl: "https://github.com/a/b" }, { now: new Date("2026-11-05T16:30:01+01:00") }));
+  it("refuses after 17:00 Rome", async () => {
+    const e = await failure(saveMyTeamSubmission(actor, { githubUrl: "https://github.com/a/b" }, { now: new Date("2026-11-05T17:00:01+01:00") }));
     expect([e.status, e.code]).toEqual([403, "SUBMISSIONS_CLOSED"]);
   });
   it("requires a github.com repository URL", async () => {

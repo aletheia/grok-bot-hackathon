@@ -117,9 +117,9 @@ describe("evaluation criteria are not published", () => {
 });
 
 describe("brief", () => {
-  it("asks builders to show something by today at 16:30", () => {
+  it("asks builders to show something by today at 17:00", () => {
     expect(EVENT.brief).toBe(
-      "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by today at 16:30 show something that didn't work when you started.",
+      "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by today at 17:00 show something that didn't work when you started.",
     );
     expect(EVENT.brief).not.toMatch(/Thursday afternoon/i);
   });

@@ -110,7 +110,7 @@ export type Sponsor = {
  * (no create/join/leave) and the team data submission (repo + video) becomes read-only at this instant.
  * Change it here only: registration, team lock and submission all read it.
  */
-export const PORTAL_DEADLINE = "2026-11-05T16:30:00+01:00";
+export const PORTAL_DEADLINE = "2026-11-05T17:00:00+01:00";
 
 const LOGOS = {
   spacexai: "/assets/sponsors/spacexai.png" as AssetSrc,
@@ -210,7 +210,7 @@ export const EVENT = {
   },
 
   brief:
-    "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by today at 16:30 show something that didn't work when you started.",
+    "Pick a piece of hardware, an API, connect it to Grok (the API, Grok Voice, or the bot framework), and by today at 17:00 show something that didn't work when you started.",
 
   /**
    * What participants can use, from the official docs (docs.x.ai, x.ai/news, cursor.com/docs).

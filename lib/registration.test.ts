@@ -12,9 +12,9 @@ import { formatRome } from "@/lib/time/rome";
 const at = (iso: string) => new Date(iso);
 
 describe("registration window", () => {
-  it("is configured in Rome time: opens 26 Oct 00:00, closes 5 Nov 16:30 (reopened)", () => {
+  it("is configured in Rome time: opens 26 Oct 00:00, closes 5 Nov 17:00 (reopened)", () => {
     expect(EVENT.registration.registrationOpens.startsWith("2026-10-26T00:00")).toBe(true);
-    expect(EVENT.registration.registrationCloses.startsWith("2026-11-05T16:30")).toBe(true);
+    expect(EVENT.registration.registrationCloses.startsWith("2026-11-05T17:00")).toBe(true);
     expect(formatRome(REGISTRATION_OPENS_AT, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })).toContain("26");
     expect(REGISTRATION_OPENS_AT.getTime()).toBeLessThan(REGISTRATION_CLOSES_AT.getTime());
   });
@@ -36,7 +36,9 @@ describe("registration window", () => {
     expect(getRegistrationState(at("2026-11-05T16:00:00+01:00"))).toBe("open");
     expect(getRegistrationState(at("2026-11-05T16:00:01+01:00"))).toBe("open");
     expect(getRegistrationState(at("2026-11-05T16:30:00+01:00"))).toBe("open");
-    expect(getRegistrationState(at("2026-11-05T16:30:01+01:00"))).toBe("closed");
+    expect(getRegistrationState(at("2026-11-05T16:30:01+01:00"))).toBe("open");
+    expect(getRegistrationState(at("2026-11-05T17:00:00+01:00"))).toBe("open");
+    expect(getRegistrationState(at("2026-11-05T17:00:01+01:00"))).toBe("closed");
     expect(getRegistrationState(at("2026-11-06T00:00:00+01:00"))).toBe("closed");
   });
 
@@ -46,16 +48,16 @@ describe("registration window", () => {
 
   it("writes a deadline-only headline for each state and never advertises the opening date", () => {
     expect(getRegistrationNotice(at("2026-10-20T12:00:00+02:00")).headline).toBe(
-      "Final Deadline for submission: November 5, 16:30 (Rome time).",
+      "Final Deadline for submission: November 5, 17:00 (Rome time).",
     );
     expect(getRegistrationNotice(at("2026-11-04T23:00:00+01:00")).headline).toBe(
-      "Final Deadline for submission: November 5, 16:30 (Rome time).",
+      "Final Deadline for submission: November 5, 17:00 (Rome time).",
     );
     expect(getRegistrationNotice(at("2026-10-25T12:00:00+01:00")).state).toBe("before");
-    const closed = getRegistrationNotice(at("2026-11-05T17:00:00+01:00"));
-    expect(closed.headline).toBe("The Final Deadline for submission (November 5, 16:30, Rome time) has passed.");
+    const closed = getRegistrationNotice(at("2026-11-05T17:00:01+01:00"));
+    expect(closed.headline).toBe("The Final Deadline for submission (November 5, 17:00, Rome time) has passed.");
     expect(closed.body).toBe("Teams are locked and team data submissions are closed.");
-    for (const iso of ["2026-11-04T23:00:00+01:00", "2026-11-05T17:00:00+01:00"]) {
+    for (const iso of ["2026-11-04T23:00:00+01:00", "2026-11-05T17:00:01+01:00"]) {
       const n = getRegistrationNotice(at(iso));
       expect(`${n.headline} ${n.body}`).not.toMatch(/registration clos/i);
     }

@@ -79,10 +79,10 @@ describe("event config", () => {
     expect(EVENT.hosts.every((h) => h.photo === null || typeof h.photo === "string")).toBe(true);
   });
 
-  it("portal settings: 4–6 per team, lock and submission deadline on 5 Nov 16:30 Rome (one constant)", () => {
+  it("portal settings: 4–6 per team, lock and submission deadline on 5 Nov 17:00 Rome (one constant)", () => {
     expect(EVENT.portal.team).toEqual({ minMembers: 4, maxMembers: 6 });
-    expect(PORTAL_DEADLINE).toBe("2026-11-05T16:30:00+01:00");
-    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-11-05T15:30:00.000Z");
+    expect(PORTAL_DEADLINE).toBe("2026-11-05T17:00:00+01:00");
+    expect(new Date(EVENT.portal.teamLockAt).toISOString()).toBe("2026-11-05T16:00:00.000Z");
     expect(EVENT.portal.submissionDeadline).toBe(PORTAL_DEADLINE);
     expect(EVENT.registration.registrationCloses).toBe(PORTAL_DEADLINE);
   });
