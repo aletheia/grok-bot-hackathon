@@ -12,6 +12,7 @@ import {
 import { teamInvite, teamMember } from "./teams";
 import { screeningAnswer, screeningQuestion } from "./screening";
 import { judgeScore } from "./scoring";
+import { juryVote } from "./jury-vote";
 import { project } from "./projects";
 import { mentorRequest } from "./mentor";
 
@@ -49,6 +50,7 @@ export const teamRelations = relations(team, ({ one, many }) => ({
   memberships: many(teamMember),
   invites: many(teamInvite),
   judgeScores: many(judgeScore),
+  juryVotes: many(juryVote),
   project: one(project, {
     fields: [team.id],
     references: [project.teamId],
@@ -148,6 +150,13 @@ export const judgeScoreRelations = relations(judgeScore, ({ one }) => ({
   judge: one(user, {
     fields: [judgeScore.judgeUserId],
     references: [user.id],
+  }),
+}));
+
+export const juryVoteRelations = relations(juryVote, ({ one }) => ({
+  team: one(team, {
+    fields: [juryVote.teamId],
+    references: [team.id],
   }),
 }));
 
