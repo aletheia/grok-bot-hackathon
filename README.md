@@ -205,3 +205,4 @@ This codebase has been **run in production using [Dokploy](https://dokploy.com)*
 - [Next.js](https://nextjs.org/docs)
 - [Better Auth](https://www.better-auth.com/)
 - [Drizzle ORM](https://orm.drizzle.team/)
+- [Hackathon Platform PRD v0.1](docs/prd/README.md) — planning docs only (features and ADRs). Not implemented.
